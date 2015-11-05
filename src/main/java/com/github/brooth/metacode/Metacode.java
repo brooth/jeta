@@ -7,46 +7,17 @@ public interface Metacode<M> {
 	Class<M> getMasterClass(); 
 }
 
-public interface Servant {	
-	Criteria criteria();
-	void prepare(List<Metacode> metacodes);
-}
-
-/**
- * needs a master to apply to and handles one type of metacode
- */
-public abstract class MasterServant<M, C> {
-	protected M master;
-	protected List<C> metacodes;
-
-	protected MasterServant(M master) {
-		this.master = master;
-	}
-
-	void prepare(List<Metacode> metacodes) {
-		this.metacodes = (List<C>) metacodes;
-	}
-}
-
-/**
- * ready to apply servant. no needs for args or return result
- * like logger, injector, findviws and more
- */
-public abstract class SolidServant<M, C> extends MasterServant<M, C> {
-	void abstract apply();
-}
-
 public class Metacode {	
 
-	public void setup(Env env);
+	public Metacode(Env env);
 
-	protected void prepare(Servant servant) {
-		List<Metacode> metacods = repository.search(inst.criteria());
-		inst.prepare(metacodes);
+	protected void prepare(Servant servant, Class master) {
+		List<Metacode> metacods = repository.search(servant.criteria(master));
+		servant.prepare(metacodes);
 	}
 
 	public Servant get(Class<? extends Servant> servant) {
-		Servant inst = servant.newInstance();	
+		Servant nst = servant.newInstance();	
 		prepare(inst);
 		return inst;
 	}
@@ -65,22 +36,37 @@ public class Metacode {
 	public static class Env {
 		private String metaPackage;
 		private Metasitory metasitory;
-		private List<Servant> servants;
+		private List<Class<? extends Servant>> servants;
 
 		public static class Builder {
-			private Env config;
+			private Env env;
 
 			public Builder() {
-				this.config = new Env();
+				env = new Env();
+				env.servants = new ArrayList<>();
+				// todo: all base servants here
 	 		}
+
+			public Env build() {
+				// todo: validate
+				return env;
+			}
 
 			public Builder metaPackage(String value){
 				config.metaPackage = value;
 			}			
 			
-			public Builder repository(Metasitory value) {
+			public Builder metasitory(Metasitory value) {
 				config.metasitory = value;
 	 		}
+			
+			public Builder addServant(Class<? extends Servant> value) {
+				servants.add(value);
+			}
+			
+			public Builder setServants(List<Class<? extends Servant> value) {
+				servants = value;
+			}
 		}
 	}
 }
