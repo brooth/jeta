@@ -20,11 +20,29 @@ public final class Record {
 	private final String[] annotations;
 }
 
+public final class Criteria {
+	@Nullable
+	private Class masterEq;
+	@Nullable
+	private Class masterEqDeep;
+	@Nullable
+	private Class masterInstanceOf;
+	@Nullable
+	private Class<? extends Annotation> uses;
+	@Nullable
+	private Class<? extends Annotation>[] usesAny;
+	@Nullable
+	private Class<? extends Annotation>[] usesAll;
+	private maxSize = -1;
+}
+
 public interface Metasitory {
 	void open();
-	List<Record> search(@Nullable host, @Nullable metacode, @Nullable annotation);
+	List<Record> search(MetaFinder finder);
 	void close();
 }
 
-public class HashMapMetasitory implements Metasitory {}
+public class HashMapMetasitory implements Metasitory {
+	// HashMap implementation
+}
 
