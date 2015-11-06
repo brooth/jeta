@@ -1,6 +1,3 @@
-//-----------------------------------------------
-//                  Main
-//-----------------------------------------------
 package com.github.brooth.metacode;
 
 public interface Metacode<M> {
