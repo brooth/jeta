@@ -1,27 +1,18 @@
 package com.github.brooth.metacode;
 
-public interface Metacode<M> {
-	Class<M> getMasterClass(); 
-}
-
 public class Metacode {	
 
 	public Metacode(Env env);
 
-	protected void prepare(Servant servant, Class master) {
-		List<Metacode> metacods = repository.search(servant.criteria(master));
-		servant.prepare(metacodes);
-	}
-
 	public Servant get(Class<? extends Servant> servant) {
-		Servant nst = servant.newInstance();	
-		prepare(inst);
+		Servant inst = servant.newInstance();	
+		inst.prepare(env.getMetasitory());
 		return inst;
 	}
 
 	public MasterServant<M, C> get(Class<? extends MasterServant> servant, Object master) {
 		MasterServant inst = servant.newInstance(master); //you know...
-		prepare(inst);
+		inst.prepare(env.getMetasitory());
 		return inst;
 	}
 
@@ -33,7 +24,7 @@ public class Metacode {
 	public static class Env {
 		private String metaPackage;
 		private Metasitory metasitory;
-		private List<Class<? extends Servant>> servants;
+		private Map<Class<? extends Servant>, Provider<Servant>> servants;
 
 		public static class Builder {
 			private Env env;
@@ -61,7 +52,7 @@ public class Metacode {
 				servants.add(value);
 			}
 			
-			public Builder setServants(List<Class<? extends Servant> value) {
+			public Builder setServants(...) {
 				servants = value;
 			}
 		}

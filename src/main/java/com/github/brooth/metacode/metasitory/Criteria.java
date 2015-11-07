@@ -16,5 +16,8 @@ public final class Criteria {
 	private Class<? extends Annotation>[] usesAny;
 	@Nullable
 	private Class<? extends Annotation>[] usesAll;
+
+  	// todo: builder and getters
 }
+
 
