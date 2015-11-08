@@ -1,5 +1,5 @@
 package com.github.brooth.metacode;
 
-public interface IMetacode<M> {
+public interface MasterMetacode<M> {
 	Class<M> getMasterClass(); 
 }

@@ -1,5 +1,8 @@
 package com.github.brooth.metacode;
 
+/*
+ * todo move to samples
+ */
 public class Metacode {	
 
 	private Metasitory metasitory;
@@ -12,8 +15,8 @@ public class Metacode {
 		new LogServant(metasitory, master).apply();
 	}
 
-	public <M> InstanceServant<M>(M master) {
-		return new InstanceServant(metasitory, master);
+	public <M> ImplementationServant<M>(M master) {
+		return new ImplementationServant(metasitory, master);
 	}
 
 	// others

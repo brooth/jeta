@@ -12,22 +12,22 @@ public interface Processor {
 	 * Ensure type elements (masters elements) associated with @param element
 	 * For those elements metacode will be generated.
 	 */
-	Collection<TypeElement> applicableMasters(ProcessingEnvironment env, Element element); 
+	Collection<TypeElement> applicableMastersElements(ProcessingEnvironment env, Element element); 
 
 	/*
 	 * Java code of iterfaces, master's metacode should implement. 
 	 */
 	@Nullable
-	String[] metacodeInterfaces(MetacodeContext ctx);
+	String[] metacodeInterfacesCodes(MetacodeContext ctx);
 
 	/*
 	 * No mater if master's source code hasn't been changed since its meta code generated,
-	 * return true to rebuild it again
+	 * return true to rebuild it 
 	 */
-	public boolean forceOverrideMetacode();
+	public boolean regenerateMetacode();
 
-	/**
-	 * @return true if need next round
+	/*
+	 * @return true if next round is needed
 	 */
 	boolean process(ProcessorContext ctx, JavaWriver out, int round);
 

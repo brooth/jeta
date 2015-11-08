@@ -1,13 +1,11 @@
 package com.github.brooth.metacode;
 
-/*
- * needs a master to apply to and handles one type of metacode
- * todo: BaseMasterServant with masterEqDeep criteria. also for solid
- */
-public abstract class MasterServant<M> implements Servant<M> {
+public abstract class MasterServant<M, C> extends MasterClassServant<M, C> { 
 	protected M master;
 
-	protected MasterServant(M master) {
+	protected MasterServant(Metasitory metasitory, M master) {
+		super(metasitory, master.getClass());
 		this.master = master;
 	}
 }
+
