@@ -1,6 +1,6 @@
 package com.github.brooth.metacode.metasitory;
 
 public interface Metasitory {
-	List<Record> search(Criteria criteria);
+	List<MasterMetacode<?>> search(Criteria criteria);
 }
 
