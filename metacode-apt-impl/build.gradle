@@ -1,0 +1,14 @@
+group = 'com.github.brooth.metacode'
+version = '0.1-SNAPSHOT'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+dependencies {
+    compile project(':metacode-apt-api')
+    compile project(':metacode-impl')
+}

@@ -27,8 +27,8 @@ public interface MetacodeContext {
 	public String getSourceCanonicalName();
 
 	// package livel, in MetacodeContextImpl;
-	JavaWriter writer();
+	// JavaWriter writer();
 
 	// package livel, in MetacodeContextImpl;
-	Map<BaseProcessor, ProcessorContext> processors();
+	//Map<BaseProcessor, ProcessorContext> processors();
 }   

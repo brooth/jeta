@@ -1,0 +1,13 @@
+group = 'com.github.brooth.metacode'
+
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+dependencies {
+    compile project(':metacode-api')
+}

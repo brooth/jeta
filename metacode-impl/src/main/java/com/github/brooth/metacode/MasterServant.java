@@ -1,10 +1,12 @@
 package com.github.brooth.metacode;
 
-public abstract class MasterServant<M, C> extends MasterClassServant<M, C> { 
+import com.github.brooth.metacode.metasitory.Metasitory;
+
+public abstract class MasterServant<M, C> extends MasterClassServant<M, C> {
 	protected M master;
 
 	protected MasterServant(Metasitory metasitory, M master) {
-		super(metasitory, master.getClass());
+		super(metasitory, (Class<? extends M>) master.getClass());
 		this.master = master;
 	}
 }

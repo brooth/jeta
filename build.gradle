@@ -1,0 +1,21 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+subprojects {
+    apply plugin: 'java'
+
+    repositories{
+        mavenLocal()
+        mavenCentral()
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}

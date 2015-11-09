@@ -1,38 +1,45 @@
 package com.github.brooth.metacode.apt;
 
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Collections;
+
 public abstract class SimpleProcessor implements Processor {
-	
-	protected Class<? extends Annotation> annotation;
-	@Nullable
-	protected Class metacodeInterface;
 
-	public SimpleProcessor(Class<? extends Annotation> annotation) {
-		this.annotation = annotation;	
-	}
+    protected Class<? extends Annotation> annotation;
+    //@Nullable
+    protected Class metacodeInterface;
 
-	public SimpleProcessor(Class<? extends Annotation> annotation, Class metacodeInterface) {
-		this.annotation = annotation;	
-		this.metacodeInterface = metacodeInterface;
-	}
+    public SimpleProcessor(Class<? extends Annotation> annotation) {
+        this.annotation = annotation;
+    }
 
-	public Class<? extends Annotation>[] collectElementWithAnnotations() {
-		return new Class<? extends Annotation>[] {annotation};
-	}
+    public SimpleProcessor(Class<? extends Annotation> annotation, Class metacodeInterface) {
+        this.annotation = annotation;
+        this.metacodeInterface = metacodeInterface;
+    }
 
-	@Override
-	public Collection<TypeElement> applicableMasters(ProcessingEnvironment env, Element element); 
-		return Collections.singletonList(element.getKind().isClass() || element.getKind().isInterface() 
-			? element : element.getEnclosingElement());
-	}
+    public Class<? extends Annotation>[] collectElementWithAnnotations() {
+        return new Class[]{annotation};
+    }
 
-	@Nullable
-	@Override
-	public String[] metacodeInterfaces(MetacodeContext ctx) {
-		return metacodeInterface == null ? null : new String[] {metacodeInterface.getCanonicalName()};
-	}
+    @Override
+    public Collection<TypeElement> applicableMastersElements(ProcessingEnvironment env, Element element) {
+        return Collections.singletonList(element.getKind().isClass() || element.getKind().isInterface()
+                ? (TypeElement) element : (TypeElement) element.getEnclosingElement());
+    }
 
-	@Override
-	public boolean forceOverrideMetacode() {
-		return false;
-	}
+    //@Nullable
+    @Override
+    public String[] metacodeInterfacesCodes(MetacodeContext ctx) {
+        return metacodeInterface == null ? null : new String[]{metacodeInterface.getCanonicalName()};
+    }
+
+    @Override
+    public boolean forceOverrideMetacode() {
+        return false;
+    }
 }

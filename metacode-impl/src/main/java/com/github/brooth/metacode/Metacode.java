@@ -1,23 +1,28 @@
 package com.github.brooth.metacode;
 
+import com.github.brooth.metacode.metasitory.HashMapMetasitory;
+import com.github.brooth.metacode.metasitory.Metasitory;
+import com.github.brooth.metacode.servants.ImplementationServant;
+import com.github.brooth.metacode.servants.LogServant;
+
 /*
  * todo move to samples
  */
-public class Metacode {	
+public class Metacode {
 
-	private Metasitory metasitory;
+    private Metasitory metasitory;
 
-	public Metacode(String metapackage) {
-		metasitory = new HashMapMetasitory(metapackage);
-	}
+    public Metacode(String metaPackage) {
+        metasitory = HashMapMetasitory.getInstance(metaPackage);
+    }
 
-	public void applyLogs(Object master) {
-		new LogServant(metasitory, master).apply();
-	}
+    public void applyLogs(Object master) {
+        new LogServant(metasitory, master).apply();
+    }
 
-	public <M> ImplementationServant<M>(M master) {
-		return new ImplementationServant(metasitory, master);
-	}
+    public <M> ImplementationServant<M> getImpl(Class<? extends M> master) {
+        return new ImplementationServant<>(metasitory, master);
+    }
 
-	// others
+    // others
 }

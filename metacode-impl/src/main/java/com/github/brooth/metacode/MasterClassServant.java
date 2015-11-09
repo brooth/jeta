@@ -1,16 +1,27 @@
 package com.github.brooth.metacode;
 
-public abstract class MasterClassServant<M, C> { 
-	protected Class<? extends M> masterClass;
-	protected List<C> metacodes;
+import com.github.brooth.metacode.metasitory.Criteria;
+import com.github.brooth.metacode.metasitory.Metasitory;
 
-	protected MasterServant(Metasitory metasitory, Class<? extends M> masterClass) {
-		this.masterClass<? extends M> = masterClass;
-		this.metacodes = (List<C>) metasitory.search(criteria());
-	}
+import java.util.List;
 
-	protected Criteria criteria() {
-		return new Criteria.Builder().masterEqDeep(masterClass).build();
-	}
+/**
+ *
+ * @param <M>
+ * @param <C>
+ */
+public abstract class MasterClassServant<M, C> {
+    protected Class<? extends M> masterClass;
+    protected List<C> metacodes;
+
+    @SuppressWarnings("unchecked")
+    protected MasterClassServant(Metasitory metasitory, Class<? extends M> masterClass) {
+        this.masterClass = masterClass;
+        this.metacodes = (List<C>) metasitory.search(criteria());
+    }
+
+    protected Criteria criteria() {
+        return new Criteria.Builder().masterEqDeep(masterClass).build();
+    }
 }
 

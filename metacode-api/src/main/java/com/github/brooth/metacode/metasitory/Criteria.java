@@ -1,7 +1,11 @@
 package com.github.brooth.metacode.metasitory;
 
-/*
- * read-only
+import java.lang.annotation.Annotation;
+
+import javax.annotation.Nullable;
+
+/**
+ *
  */
 public final class Criteria {
 	@Nullable
@@ -17,7 +21,39 @@ public final class Criteria {
 	@Nullable
 	private Class<? extends Annotation>[] usesAll;
 
-  	// todo: builder and getters
+	public static class Builder {
+		public Criteria build() {
+			return null;
+		}
+
+		public Builder masterEqDeep(Class value) {
+			return this;
+		}
+	}
+
+	public Class getMasterEq() {
+		return masterEq;
+	}
+
+	public Class getMasterEqDeep() {
+		return masterEqDeep;
+	}
+
+	public Class getMasterInstanceOf() {
+		return masterInstanceOf;
+	}
+
+	public Class<? extends Annotation> getUsesAnnotation() {
+		return usesAnnotation;
+	}
+
+	public Class<? extends Annotation>[] getUsesAny() {
+		return usesAny;
+	}
+
+	public Class<? extends Annotation>[] getUsesAll() {
+		return usesAll;
+	}
 }
 
 

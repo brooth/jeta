@@ -1,0 +1,13 @@
+group = 'com.github.brooth.metacode'
+version = '0.1-SNAPSHOT'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+dependencies {
+    compile 'com.google.code.findbugs:jsr305:3.0.0'
+}
