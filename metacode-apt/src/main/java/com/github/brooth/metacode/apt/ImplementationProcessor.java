@@ -2,7 +2,7 @@ package com.github.brooth.metacode.apt;
 
 import com.github.brooth.metacode.servants.ImplementationServant;
 import com.github.brooth.metacode.util.Implementation;
-import com.squareup.javawriter.JavaWriter;
+import com.squareup.javapoet.TypeSpec;
 
 /**
  *
@@ -14,7 +14,7 @@ public class ImplementationProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(ProcessorContext ctx, JavaWriter out, int round) {
+    public boolean process(ProcessorContext ctx, TypeSpec masterType, int round) {
         return false;
     }
 }

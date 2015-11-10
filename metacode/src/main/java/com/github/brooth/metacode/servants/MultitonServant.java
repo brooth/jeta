@@ -3,8 +3,10 @@ package com.github.brooth.metacode.servants;
 import com.github.brooth.metacode.MasterClassServant;
 import com.github.brooth.metacode.MasterMetacode;
 import com.github.brooth.metacode.metasitory.ClassForNameMetasitory;
+import com.github.brooth.metacode.metasitory.Criteria;
 import com.github.brooth.metacode.metasitory.HashMapMetasitory;
 import com.github.brooth.metacode.metasitory.Metasitory;
+import com.github.brooth.metacode.util.Multiton;
 import com.google.common.collect.Iterables;
 
 /**
@@ -20,8 +22,13 @@ public class MultitonServant<M, K> extends MasterClassServant<M, MultitonServant
     }
 
     public MultitonServant(Metasitory metasitory, Class<? extends M> masterClass, Class<K> keyClass) {
-        super(metasitory, masterClass);
+        super(metasitory, masterClass, Multiton.class);
         this.keyClass = keyClass;
+    }
+
+    @Override
+    protected Criteria criteria() {
+        return new Criteria.Builder().masterEq(masterClass).usesAny(Multiton.class).build();
     }
 
     public M getInstance(K key) {

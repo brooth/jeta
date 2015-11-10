@@ -3,5 +3,5 @@ version = '0.1-SNAPSHOT'
 
 dependencies {
     compile project(':metacode-api')
-    compile 'com.squareup:javawriter:2.5.1'
+    compile 'com.squareup:javapoet:1.3.0'
 }

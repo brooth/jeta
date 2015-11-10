@@ -1,6 +1,6 @@
 package com.github.brooth.metacode.apt;
 
-import com.squareup.javawriter.JavaWriter;
+import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -40,7 +40,7 @@ public interface Processor {
 	/*
 	 * @return true if next round is needed
 	 */
-	boolean process(ProcessorContext ctx, JavaWriter out, int round);
+	boolean process(ProcessorContext ctx, TypeSpec masterType, int round);
 
 	public static class ProcessorContext {
 		public List<Element> elements;

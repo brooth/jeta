@@ -23,8 +23,12 @@ public class Metacode {
         new LogServant(metasitory, master).apply(provider);
     }
 
-    public <I> ImplementationServant<I> getImplementation(Class<? extends I> master) {
-        return new ImplementationServant<>(metasitory, master);
+    public <I> ImplementationServant<I> getImplementationServant(Class<I> of) {
+        return new ImplementationServant<>(metasitory, of);
+    }
+
+    public <I> I getImplementation(Class<I> of) {
+        return getImplementationServant(of).getImplementation(of);
     }
 
     // others

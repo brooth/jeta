@@ -18,10 +18,9 @@ public abstract class MasterClassServant<M, C extends MasterMetacode> {
     @Nullable
     protected Class<? extends Annotation> annotationClass;
 
-    @SuppressWarnings("unchecked")
     protected MasterClassServant(Metasitory metasitory, Class<? extends M> masterClass) {
         this.masterClass = masterClass;
-        this.metacodes = (List<C>) metasitory.search(criteria());
+        searchMetacodes(metasitory);
     }
 
     public MasterClassServant(Metasitory metasitory, Class<? extends M> masterClass, @Nullable Class<? extends Annotation> annotationClass) {
@@ -29,10 +28,15 @@ public abstract class MasterClassServant<M, C extends MasterMetacode> {
         this.annotationClass = annotationClass;
     }
 
+    @SuppressWarnings("unchecked")
+    protected void searchMetacodes(Metasitory metasitory) {
+        this.metacodes = (List<C>) metasitory.search(criteria());
+    }
+
     protected Criteria criteria() {
         Criteria.Builder builder = new Criteria.Builder().masterEqDeep(masterClass);
         if (annotationClass != null)
-            builder.usesAnnotation(annotationClass);
+            builder.usesAny(annotationClass);
         return builder.build();
     }
 }

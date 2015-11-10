@@ -1,7 +1,7 @@
 package com.github.brooth.metacode.apt;
 
 import com.github.brooth.metacode.servants.LogServant;
-import com.squareup.javawriter.JavaWriter;
+import com.squareup.javapoet.TypeSpec;
 
 /**
  * -AmcLoggerMethodFormat="setName(\"%s\")"
@@ -13,7 +13,7 @@ public class LogProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(ProcessorContext ctx, JavaWriter out, int round) {
+    public boolean process(ProcessorContext ctx, TypeSpec masterType, int round) {
         return false;
     }
 }
