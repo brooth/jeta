@@ -11,16 +11,33 @@ import javax.inject.Provider;
 /*
  * todo move to samples
  */
-public class Metacode {
+public class MetaHelper {
 
-    private Metasitory metasitory;
+    private static MetaHelper instance;
 
-    public Metacode(String metaPackage) {
+    private final Metasitory metasitory;
+
+    private final Provider<NamedLogger> logProvider;
+
+    private MetaHelper(String metaPackage, Provider<NamedLogger> logProvider) {
         metasitory = HashMapMetasitory.getInstance(metaPackage);
+        this.logProvider = logProvider;
     }
 
-    public void applyLogs(Object master, Provider<NamedLogger> provider) {
-        new LogServant(metasitory, master).apply(provider);
+    public static MetaHelper init(String metaPackage, Provider<NamedLogger> logProvider) {
+        instance = new MetaHelper(metaPackage, logProvider);
+        return instance;
+    }
+
+    public static MetaHelper getInstance() {
+        if (instance == null)
+            throw new IllegalStateException("Not initialized");
+
+        return instance;
+    }
+
+    public void applyLogs(Object master) {
+        new LogServant(metasitory, master).apply(logProvider);
     }
 
     public <I> ImplementationServant<I> getImplementationServant(Class<I> of) {
