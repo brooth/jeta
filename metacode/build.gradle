@@ -1,0 +1,7 @@
+group = 'com.github.brooth.metacode'
+version = '0.1-SNAPSHOT'
+
+dependencies {
+    compile project(':metacode-api')
+    compile 'com.google.guava:guava:18.0'
+}

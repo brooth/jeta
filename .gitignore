@@ -2,5 +2,5 @@
 *.iml
 *.ipr
 *.iws
-*.gradle
-build
+.gradle/
+build/
