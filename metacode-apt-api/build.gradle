@@ -1,13 +1,6 @@
 group = 'com.github.brooth.metacode'
 version = '0.1-SNAPSHOT'
 
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-    }
-}
-
 dependencies {
     compile project(':metacode-api')
     compile 'com.squareup:javawriter:2.5.1'

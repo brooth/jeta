@@ -1,6 +1,6 @@
 rootProject.name = 'metacode-all'
 
 include ':metacode-apt-api'
-include ':metacode-apt-impl'
+include ':metacode-apt'
 include ':metacode-api'
-include ':metacode-impl'
+include ':metacode'
