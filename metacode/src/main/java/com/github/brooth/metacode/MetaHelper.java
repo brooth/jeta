@@ -44,7 +44,7 @@ public class MetaHelper {
     }
 
     public <I> I getImplementation(Class<I> of) {
-        return getImplementationServant(of).getImplementation(of);
+        return getImplementationServant(of).getImplementation();
     }
 
     // others

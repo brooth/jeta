@@ -29,12 +29,12 @@ public class ImplementationServant<I> {
     }
 
     @Nullable
-    public I getImplementation(Class<I> of) {
+    public I getImplementation() {
         MasterMetacode first = Iterables.getFirst(metacodes, null);
         return first == null ? null : ((ImplementationMetacode) first).getImplementation(of);
     }
 
-    public List<I> getImplementations(final Class<I> of) {
+    public List<I> getImplementations() {
         return Lists.transform(metacodes, new Function<MasterMetacode, I>() {
             @Override
             public I apply(MasterMetacode input) {
