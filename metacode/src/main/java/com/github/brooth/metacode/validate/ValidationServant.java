@@ -5,7 +5,6 @@ import com.github.brooth.metacode.MasterServant;
 import com.github.brooth.metacode.metasitory.Metasitory;
 
 /**
- *  
  * 
  */
 public class ValidationServant extends MasterServant<Object, ValidationServant.ValidatorMetacode<Object>> {
@@ -23,18 +22,19 @@ public class ValidationServant extends MasterServant<Object, ValidationServant.V
         void validate(M master);
     }
 
-/*
+
     public class MyAction {
         @Validate(NotNull.class)
         public String name;
         @Validate(NotEmpty.class)
         public String[] hobbies;
         @Validate(expression = "age > 18")
-        public double age;
+        public int age;
+        @Validate(expression = "age >= expirience", message = "expirience can't be higher than age")
+		public int expirience;
 
         public void execute() {
             new ValidationServant(null, this).validate();
         }
     }
-*/
 }

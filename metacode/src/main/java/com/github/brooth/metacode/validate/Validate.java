@@ -8,4 +8,6 @@ public @interface Validate {
     Class<? extends Validator>[] value() default {};
 
     String expression() default "";
+
+    String message() default "";
 }
