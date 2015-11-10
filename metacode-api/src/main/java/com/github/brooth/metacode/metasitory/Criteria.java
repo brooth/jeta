@@ -13,7 +13,7 @@ public final class Criteria {
     @Nullable
     private Class masterEq;
     @Nullable
-    private Class masterEqDeep;
+    private Class masterEqDeep; // the same with assignable to?
     @Nullable
     private Class masterAssignableFrom;
     @Nullable

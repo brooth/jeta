@@ -22,15 +22,14 @@ public class ValidationServant extends MasterServant<Object, ValidationServant.V
         void validate(M master);
     }
 
-
-    public class MyAction {
+    public class HireAction {
         @Validate(NotNull.class)
         public String name;
         @Validate(NotEmpty.class)
-        public String[] hobbies;
+        public String[] deggries;
         @Validate(expression = "age > 18")
         public int age;
-        @Validate(expression = "age >= expirience", message = "expirience can't be higher than age")
+        @Validate(expression = "age - 18 >= expirience", expressionError = "too high expirience")
 		public int expirience;
 
         public void execute() {

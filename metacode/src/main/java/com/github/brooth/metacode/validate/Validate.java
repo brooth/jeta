@@ -9,5 +9,5 @@ public @interface Validate {
 
     String expression() default "";
 
-    String message() default "";
+    String expressionError() default "";
 }
