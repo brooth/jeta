@@ -6,6 +6,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 
 /**
  * -AmcMetasitoryPackage=com.example             - metasitory package
+ * -AmcSuperMetasitoryPackage=com.example        - super metasitory package. ???
  */
 public class HasMapMetasitoryWriter implements MetasitoryWriter {
     /**
