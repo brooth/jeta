@@ -19,10 +19,10 @@ public class ClassForNameMetasitory implements Metasitory {
     }
 
     @Override
-    public List<MasterMetacode<?>> search(Criteria c) {
+    public List<MasterMetacode> search(Criteria c) {
         try {
             MasterMetacode<?> instance = (MasterMetacode) metacodeClass.newInstance();
-            return Collections.<MasterMetacode<?>>singletonList(instance);
+            return Collections.<MasterMetacode>singletonList(instance);
 
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to initiate class " + metacodeClass, e);

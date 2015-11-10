@@ -8,6 +8,6 @@ import java.util.List;
  *
  */
 public interface Metasitory {
-	List<MasterMetacode<?>> search(Criteria criteria);
+	List<MasterMetacode> search(Criteria criteria);
 }
 

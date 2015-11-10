@@ -1,29 +1,31 @@
 package com.github.brooth.metacode.apt;
 
+import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 public abstract class SimpleProcessor implements Processor {
 
     protected Class<? extends Annotation> annotation;
-    //@Nullable
+    @Nullable
     protected Class metacodeInterface;
 
     public SimpleProcessor(Class<? extends Annotation> annotation) {
         this.annotation = annotation;
     }
 
-    public SimpleProcessor(Class<? extends Annotation> annotation, Class metacodeInterface) {
+    public SimpleProcessor(Class<? extends Annotation> annotation, @Nullable Class metacodeInterface) {
         this.annotation = annotation;
         this.metacodeInterface = metacodeInterface;
     }
 
-    public Class<? extends Annotation>[] collectElementWithAnnotations() {
-        return new Class[]{annotation};
+    public List<? extends Class<? extends Annotation>> collectElementWithAnnotations() {
+        return Collections.singletonList(annotation);
     }
 
     @Override
@@ -32,7 +34,7 @@ public abstract class SimpleProcessor implements Processor {
                 ? (TypeElement) element : (TypeElement) element.getEnclosingElement());
     }
 
-    //@Nullable
+    @Nullable
     @Override
     public String[] metacodeInterfacesCodes(MetacodeContext ctx) {
         return metacodeInterface == null ? null : new String[]{metacodeInterface.getCanonicalName()};

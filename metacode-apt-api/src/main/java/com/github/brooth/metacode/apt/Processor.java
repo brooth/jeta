@@ -1,5 +1,8 @@
 package com.github.brooth.metacode.apt;
 
+import com.squareup.javawriter.JavaWriter;
+
+import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
@@ -14,7 +17,7 @@ public interface Processor {
 	 * Tell to MetacodeProcessor the annotations, it should collect elements with.
 	 * All the elements will passed to this processor in generating metacode stage.
 	 */
-	Class<? extends Annotation>[] collectElementWithAnnotations();
+	List<? extends Class<? extends Annotation>> collectElementWithAnnotations();
 
 	/*
 	 * Ensure type elements (masters elements) associated with @param element
@@ -25,7 +28,7 @@ public interface Processor {
 	/*
 	 * Java code of iterfaces, master's metacode should implement. 
 	 */
-	//@Nullable
+	@Nullable
 	String[] metacodeInterfacesCodes(MetacodeContext ctx);
 
 	/*
@@ -37,7 +40,7 @@ public interface Processor {
 	/*
 	 * @return true if next round is needed
 	 */
-	boolean process(ProcessorContext ctx, /*JavaWriver out, */int round);
+	boolean process(ProcessorContext ctx, JavaWriter out, int round);
 
 	public static class ProcessorContext {
 		public List<Element> elements;

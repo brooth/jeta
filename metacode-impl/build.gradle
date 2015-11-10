@@ -10,4 +10,5 @@ buildscript {
 
 dependencies {
     compile project(':metacode-api')
+    compile 'com.google.guava:guava:18.0'
 }

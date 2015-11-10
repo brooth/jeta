@@ -1,5 +1,8 @@
 package com.github.brooth.metacode.apt;
 
+/**
+ *
+ */
 public interface MetacodeContext {
 	/*
 	 * com.example.app

@@ -6,25 +6,23 @@ import com.github.brooth.metacode.util.Multiton;
 
 import java.util.List;
 
-@Multiton(staticConstructor="newInstance")
+@Multiton
 public class HashMapMetasitory implements Metasitory {
 
-	// todo use ClassForNameMetasitory in <init>(masterClass) 
-	private static final MultitonServant multiton = new MultitonServant(
-		new ClassForNameMetasitory(HashMapMetasitory.class), HashMapMetasitory.class);
+    private static final MultitonServant<HashMapMetasitory, String> multiton
+            = new MultitonServant<>(HashMapMetasitory.class, String.class);
 
-  	public static HashMapMetasitory getInstance(String metapackage) {
-		return multiton.getInstance(metapackage);	
-	}
-	
-	static HashMapMetasitory newInstance(String metapackage) {
-	  	//...
-		return null;
-	}
+    public static HashMapMetasitory getInstance(String metaPackage) {
+        return multiton.getInstance(metaPackage);
+    }
 
-	@Override
-	public List<MasterMetacode<?>> search(Criteria criteria) {
-		return null;
-	}
+    HashMapMetasitory(String metaPackage) {
+        //...
+    }
+
+    @Override
+    public List<MasterMetacode> search(Criteria criteria) {
+        return null;
+    }
 }
 
