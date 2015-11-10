@@ -17,25 +17,25 @@ public interface Processor {
 	 * Tell to MetacodeProcessor the annotations, it should collect elements with.
 	 * All the elements will passed to this processor in generating metacode stage.
 	 */
-	List<? extends Class<? extends Annotation>> collectElementWithAnnotations();
+	List<? extends Class<? extends Annotation>> collectElementsAnnotatedWith();
 
 	/*
 	 * Ensure type elements (masters elements) associated with @param element
 	 * For those elements metacode will be generated.
 	 */
-	Collection<TypeElement> applicableMastersElements(ProcessingEnvironment env, Element element);
+	Collection<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element);
 
 	/*
-	 * Java code of iterfaces, master's metacode should implement. 
+	 * Java code of interfaces, master's metacode will be implementation of.
 	 */
 	@Nullable
-	String[] metacodeInterfacesCodes(MetacodeContext ctx);
+	String[] masterMetacodeInterfaces(MetacodeContext ctx);
 
 	/*
 	 * No mater if master's source code hasn't been changed since its meta code generated,
 	 * return true to rebuild it 
 	 */
-	public boolean forceOverrideMetacode();
+	public boolean forceOverwriteMetacode();
 
 	/*
 	 * @return true if next round is needed

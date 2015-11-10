@@ -24,24 +24,24 @@ public abstract class SimpleProcessor implements Processor {
         this.metacodeInterface = metacodeInterface;
     }
 
-    public List<? extends Class<? extends Annotation>> collectElementWithAnnotations() {
+    public List<? extends Class<? extends Annotation>> collectElementsAnnotatedWith() {
         return Collections.singletonList(annotation);
     }
 
     @Override
-    public Collection<TypeElement> applicableMastersElements(ProcessingEnvironment env, Element element) {
+    public Collection<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element) {
         return Collections.singletonList(element.getKind().isClass() || element.getKind().isInterface()
                 ? (TypeElement) element : (TypeElement) element.getEnclosingElement());
     }
 
     @Nullable
     @Override
-    public String[] metacodeInterfacesCodes(MetacodeContext ctx) {
+    public String[] masterMetacodeInterfaces(MetacodeContext ctx) {
         return metacodeInterface == null ? null : new String[]{metacodeInterface.getCanonicalName()};
     }
 
     @Override
-    public boolean forceOverrideMetacode() {
+    public boolean forceOverwriteMetacode() {
         return false;
     }
 }
