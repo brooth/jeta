@@ -1,4 +1,4 @@
-package com.github.brooth.metacode.servants;
+package com.github.brooth.metacode.util;
 
 import com.github.brooth.metacode.MasterClassServant;
 import com.github.brooth.metacode.MasterMetacode;
@@ -8,8 +8,7 @@ import com.github.brooth.metacode.metasitory.Metasitory;
 import com.google.common.collect.Iterables;
 
 /**
- * @author khalidov
- * @version $Id$
+ *
  */
 public class MultitonServant<M, K> extends MasterClassServant<M, MasterMetacode> {
 

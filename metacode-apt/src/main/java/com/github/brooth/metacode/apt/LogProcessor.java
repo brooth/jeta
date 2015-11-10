@@ -1,6 +1,7 @@
 package com.github.brooth.metacode.apt;
 
-import com.github.brooth.metacode.servants.LogServant;
+import com.github.brooth.metacode.log.Log;
+import com.github.brooth.metacode.log.LogMetacode;
 import com.squareup.javapoet.TypeSpec;
 
 /**
@@ -9,7 +10,7 @@ import com.squareup.javapoet.TypeSpec;
 public class LogProcessor extends SimpleProcessor {
 
     public LogProcessor() {
-        super(Log.class, LogServant.LogMetacode.class);
+        super(Log.class, LogMetacode.class);
     }
 
     @Override

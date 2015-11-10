@@ -23,6 +23,11 @@ public final class Criteria {
     @Nullable
     private List<Class<? extends Annotation>> usesAll;
 
+    // ???
+    private Class metacodeImplements;
+    private String masterInPackage;
+    private String masterInPackageDeep;
+
     private Criteria() {
 
     }

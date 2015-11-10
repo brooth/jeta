@@ -1,10 +1,9 @@
 package com.github.brooth.metacode;
 
-import com.github.brooth.metacode.log.NamedLogger;
 import com.github.brooth.metacode.metasitory.HashMapMetasitory;
 import com.github.brooth.metacode.metasitory.Metasitory;
-import com.github.brooth.metacode.servants.ImplementationServant;
-import com.github.brooth.metacode.servants.LogServant;
+import com.github.brooth.metacode.util.ImplementationServant;
+import com.github.brooth.metacode.log.LogServant;
 
 import javax.inject.Provider;
 
@@ -17,14 +16,14 @@ public class MetaHelper {
 
     private final Metasitory metasitory;
 
-    private final Provider<NamedLogger> logProvider;
+    private final Provider<?> logProvider;
 
-    private MetaHelper(String metaPackage, Provider<NamedLogger> logProvider) {
+    private MetaHelper(String metaPackage, Provider<?> logProvider) {
         metasitory = HashMapMetasitory.getInstance(metaPackage);
         this.logProvider = logProvider;
     }
 
-    public static MetaHelper init(String metaPackage, Provider<NamedLogger> logProvider) {
+    public static MetaHelper init(String metaPackage, Provider<?> logProvider) {
         instance = new MetaHelper(metaPackage, logProvider);
         return instance;
     }

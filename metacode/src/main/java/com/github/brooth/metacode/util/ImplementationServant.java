@@ -1,4 +1,4 @@
-package com.github.brooth.metacode.servants;
+package com.github.brooth.metacode.util;
 
 import com.github.brooth.metacode.MasterMetacode;
 import com.github.brooth.metacode.metasitory.Criteria;
@@ -11,8 +11,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * @author khalidov
- * @version $Id$
+ *
  */
 public class ImplementationServant<I> {
 
