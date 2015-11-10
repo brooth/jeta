@@ -11,8 +11,10 @@ public class ClassForNameMetasitory implements Metasitory {
     public List<MasterMetacode> search(Criteria c) {
         if (c.getMasterEqDeep() != null)
             throw new UnsupportedOperationException("Criteria.masterEqDeep not supported. Criteria.masterEq only.");
-        if (c.getMasterInstanceOf() != null)
-            throw new UnsupportedOperationException("Criteria.masterInstanceOf not supported. Criteria.masterEq only.");
+        if (c.getMasterAssignableFrom() != null)
+            throw new UnsupportedOperationException("Criteria.masterAssignableFrom not supported. Criteria.masterEq only.");
+        if (c.getMasterAssignableTo() != null)
+            throw new UnsupportedOperationException("Criteria.masterAssignableTo not supported. Criteria.masterEq only.");
         if (c.getUsesAny() != null)
             throw new UnsupportedOperationException("Criteria.usesAny not supported. Criteria.masterEq only.");
         if (c.getUsesAll() != null)

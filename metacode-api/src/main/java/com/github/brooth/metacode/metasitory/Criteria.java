@@ -15,7 +15,9 @@ public final class Criteria {
     @Nullable
     private Class masterEqDeep;
     @Nullable
-    private Class masterInstanceOf;
+    private Class masterAssignableFrom;
+    @Nullable
+    private Class masterAssignableTo;
     @Nullable
     private List<Class<? extends Annotation>> usesAny;
     @Nullable
@@ -42,8 +44,13 @@ public final class Criteria {
             return this;
         }
 
-        public Builder masterInstanceOf(Class value) {
-            criteria.masterInstanceOf = value;
+        public Builder masterAssignableFrom(Class value) {
+            criteria.masterAssignableFrom = value;
+            return this;
+        }
+
+        public Builder masterAssignableTo(Class value) {
+            criteria.masterAssignableTo = value;
             return this;
         }
 
@@ -76,8 +83,13 @@ public final class Criteria {
     }
 
     @Nullable
-    public Class getMasterInstanceOf() {
-        return masterInstanceOf;
+    public Class getMasterAssignableFrom() {
+        return masterAssignableFrom;
+    }
+
+    @Nullable
+    public Class getMasterAssignableTo() {
+        return masterAssignableTo;
     }
 
     @Nullable
