@@ -30,19 +30,41 @@ public class ObserverProcessor implements Processor {
         builder.addSuperinterface(ParameterizedTypeName.get(
 			ClassName.get(ObservableServant.ObservableMetacode.class), masterClassName));
 
+		MethodSpec.Builder applyMethodSpecBuilder = MethodSpec.methodBuilder("applyObservable")
+		    .addModifiers(Modifier.PUBLIC)
+		    .returns(void.class)
+		    .addParameter(masterClassName, "master");
+
 		for(Element element : ctx.elements) {
-			TypeName eventTypeName = TypeName.get(element.asType());
-			TypeName observersTypeName = ParameterizedTypeName.get(
-				ClassName.get(Observers.class), eventTypeName); 
+			TypeName observersTypeName = TypeName.get(element.asType());
 			TypeName mapTypeName = ParameterizedTypeName.get(ClassName.get(Map.class), 
 				masterClassName, observersTypeName);
 
-			FieldSpec observersField = FieldSpec.builder(mapTypeName, element.getSimpleName().toString())
-    			.addModifiers(Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC)
+			String fieldName = element.getSimpleName().toString();
+			FieldSpec observersField = FieldSpec.builder(mapTypeName, fieldName)
+    			.addModifiers(Modifier.PRIVATE, Modifier.STATIC)
     			.initializer("new $T<>()", WeakHashMap.class)
     			.build();
 			builder.addField(observersField);
+
+			String methodHashName = ("getObservers" + 
+				observersTypeName.toString().hashCode()).replace("-", "N");
+			
+			MethodSpec getObserversMethodSpec = MethodSpec.methodBuilder(methodHashName)
+			    .addJavadoc("method name hash of $S\n", observersTypeName.toString())
+				.addModifiers(Modifier.STATIC, Modifier.PUBLIC, Modifier.FINAL)
+			    .returns(observersTypeName)
+				.addParameter(masterClassName, "master")
+				.beginControlFlow("if (!$L.containsKey(master))", fieldName)
+      			.addStatement("$L.put(master, new $T())", fieldName, observersTypeName)
+      			.endControlFlow()
+      			.addStatement("return $L.get(master)", fieldName)
+				.build();
+			builder.addMethod(getObserversMethodSpec);
+
+			applyMethodSpecBuilder.addStatement("master.$L = $L(master)", fieldName, methodHashName);
 		}
+ 		builder.addMethod(applyMethodSpecBuilder.build());
 
         return false;
     }
