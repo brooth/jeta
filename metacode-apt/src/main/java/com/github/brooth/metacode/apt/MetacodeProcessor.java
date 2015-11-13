@@ -106,10 +106,11 @@ public class MetacodeProcessor extends AbstractProcessor {
             Iterator<Map.Entry<Processor, ProcessorContext>> processorContextIterator
                     = context.processorContextMap.entrySet().iterator();
             while (processorContextIterator.hasNext()) {
-                Processor processor = processorContextIterator.next().getKey();
-                ProcessorContext processorContext = processorContextIterator.next().getValue();
+			    Map.Entry<Processor, ProcessorContext> entry = processorContextIterator.next();
+                Processor processor = entry.getKey();
+                ProcessorContext processorContext = entry.getValue();
 
-                messager.printMessage(Diagnostic.Kind.NOTE, "Processing " +
+                messager.printMessage(Diagnostic.Kind.NOTE, "processing " +
                         context.metacodeCanonicalName + " with " + processor.getClass().getSimpleName());
 
                 if (!processor.process(roundEnv, processorContext, context.metaTypeSpec, round))
@@ -124,7 +125,7 @@ public class MetacodeProcessor extends AbstractProcessor {
 
                 Writer out = null;
                 try {
-                    JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(context.metacodeSimplelName);
+                    JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(context.metacodeSimpleName);
                     out = sourceFile.openWriter();
                     javaFile.writeTo(out);
                     out.close();
@@ -187,6 +188,14 @@ public class MetacodeProcessor extends AbstractProcessor {
 						if(context == null) {
                         	context = new MetacodeContextImpl(elementsUtils, masterTypeElement);
 							metacodeContextList.add(context);
+
+        					messager.printMessage(Diagnostic.Kind.NOTE, "   masterPackage         - " + context.masterPackage);
+        					messager.printMessage(Diagnostic.Kind.NOTE, "   masterSimpleName      - " + context.masterSimpleName);
+        					messager.printMessage(Diagnostic.Kind.NOTE, "   masterCanonicalName   - " + context.masterCanonicalName);
+							messager.printMessage(Diagnostic.Kind.NOTE, "   masterFlatName        - " + context.masterFlatName);
+        					messager.printMessage(Diagnostic.Kind.NOTE, "   sourceCanonicalName   - " + context.sourceCanonicalName);
+        					messager.printMessage(Diagnostic.Kind.NOTE, "   metacodeSimpleName    - " + context.metacodeSimpleName);
+        					messager.printMessage(Diagnostic.Kind.NOTE, "   metacodeCanonicalName - " + context.metacodeCanonicalName);
 						}
 
                         ProcessorContext processorContext = context.processorContextMap.get(processor);
@@ -211,7 +220,7 @@ public class MetacodeProcessor extends AbstractProcessor {
         private String masterPackage;
         private String masterCanonicalName;
         private String masterSimpleName;
-        private String metacodeSimplelName;
+        private String metacodeSimpleName;
         private String metacodeCanonicalName;
 		private String masterFlatName;
         private String sourceCanonicalName;
@@ -220,10 +229,11 @@ public class MetacodeProcessor extends AbstractProcessor {
 			masterPackage = elementsUtils.getPackageOf(masterTypeElement).getQualifiedName().toString(); 
             masterCanonicalName = masterTypeElement.toString();
             masterSimpleName = masterTypeElement.getSimpleName().toString();
-			metacodeCanonicalName = MetacodeUtils.getMetacodeOf(elementsUtils, masterCanonicalName);
 			sourceCanonicalName = MetacodeUtils.getSourceTypeElement(masterTypeElement).toString();
-			masterFlatName = masterPackage + "." + masterCanonicalName.replace(masterPackage + ".", "")
-				.replaceAll("\\.", "\\$");
+			masterFlatName = masterPackage + "." + masterCanonicalName.replace(masterPackage + ".", "").replaceAll("\\.", "\\$");
+			metacodeCanonicalName = MetacodeUtils.getMetacodeOf(elementsUtils, masterCanonicalName);
+			int i = metacodeCanonicalName.lastIndexOf('.');     
+			metacodeSimpleName = i >= 0 ? metacodeCanonicalName.substring(i + 1) : metacodeCanonicalName;
         }
 
         @Override
