@@ -1,5 +1,8 @@
 package com.github.brooth.metacode.apt;
 
+import java.lang.annotation.Annotation;
+import java.util.Set;
+
 /**
  *
  */
@@ -33,6 +36,8 @@ public interface MetacodeContext {
      * com.example.app.Foo
      */
     public String getSourceCanonicalName();
+
+    public Set<Class<? extends Annotation>> metacodeAnnotations();
 
     // package livel, in MetacodeContextImpl;
     // JavaWriter writer();

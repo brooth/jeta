@@ -1,5 +1,7 @@
 package com.github.brooth.metacode.samples;
 
+import com.github.brooth.metacode.observer.ObservableServant;
+import com.github.brooth.metacode.observer.ObserverServant;
 import com.github.brooth.metacode.pubsub.Message;
 import com.github.brooth.metacode.pubsub.SubscriptionHandler;
 import com.github.brooth.metacode.metasitory.HashMapMetasitory;
@@ -50,12 +52,12 @@ public class MetaHelper {
         return null;
     }
 
-    public static void createObservable(Object observer) {
-
+    public static <M> void createObservable(M observer) {
+        new ObservableServant<>(getInstance().metasitory, observer).createObservable();
     }
 
-    public static ObserverHandler registerObserver(Object observer, Object observable) {
-        return null;
+    public static <M> ObserverHandler registerObserver(M observer, Object observable) {
+        return new ObserverServant<>(getInstance().metasitory, observer).registerObserver(observable);
     }
 
     public static void validate(Object master) {

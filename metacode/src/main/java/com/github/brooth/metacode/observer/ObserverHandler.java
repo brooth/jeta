@@ -6,6 +6,10 @@ package com.github.brooth.metacode.observer;
  */
 public final class ObserverHandler {
 
+    public void add(ObserverHandler observerHandler) {
+
+    }
+
     public boolean unregister(Class<?> eventClass) {
         return false;
     }

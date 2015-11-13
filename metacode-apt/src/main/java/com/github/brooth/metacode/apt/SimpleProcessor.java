@@ -5,9 +5,8 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 public abstract class SimpleProcessor implements Processor {
 
@@ -24,20 +23,20 @@ public abstract class SimpleProcessor implements Processor {
         this.metacodeInterface = metacodeInterface;
     }
 
-    public List<? extends Class<? extends Annotation>> collectElementsAnnotatedWith() {
-        return Collections.singletonList(annotation);
+    @Override
+    public void collectElementsAnnotatedWith(Set<Class<? extends Annotation>> set) {
+        set.add(annotation);
     }
 
     @Override
-    public Collection<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element) {
-        return Collections.singletonList(element.getKind().isClass() || element.getKind().isInterface()
-                ? (TypeElement) element : (TypeElement) element.getEnclosingElement());
+    public Set<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element) {
+        return Collections.singleton(MetacodeUtils.typeOf(element));
     }
 
     @Nullable
     @Override
-    public String[] masterMetacodeInterfaces(MetacodeContext ctx) {
-        return metacodeInterface == null ? null : new String[]{metacodeInterface.getCanonicalName()};
+    public Set<String> masterMetacodeInterfaces(MetacodeContext ctx) {
+        return metacodeInterface == null ? null : Collections.singleton(metacodeInterface.getCanonicalName());
     }
 
     @Override

@@ -10,42 +10,43 @@ import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public interface Processor {
 
-	/*
-	 * Tell to MetacodeProcessor the annotations, it should collect elements with.
-	 * All the elements will passed to this processor in generating metacode stage.
-	 */
-	List<? extends Class<? extends Annotation>> collectElementsAnnotatedWith();
+    /*
+     * @return true if next round is needed
+     */
+    boolean process(ProcessorContext ctx, TypeSpec masterType, int round);
 
-	/*
-	 * Ensure type elements (masters elements) associated with @param element
-	 * For those elements metacode will be generated.
-	 */
-	Collection<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element);
+    /*
+     * Tell to MetacodeProcessor the annotations, it should collect elements with.
+     * All the elements will passed to this processor in generating metacode stage.
+     */
+    public void collectElementsAnnotatedWith(Set<Class<? extends Annotation>> set) ;
 
-	/*
-	 * Java code of interfaces, master's metacode will be implementation of.
-	 */
-	@Nullable
-	String[] masterMetacodeInterfaces(MetacodeContext ctx);
+    /*
+     * Ensure type elements (masters elements) associated with @param element
+     * For those elements metacode will be generated.
+     */
+    Set<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element);
 
-	/*
-	 * No mater if master's source code hasn't been changed since its meta code generated,
-	 * return true to rebuild it 
-	 */
-	public boolean forceOverwriteMetacode();
+    /*
+     * Java code of interfaces, master's metacode will be implementation of.
+     */
+    @Nullable
+    Set<String> masterMetacodeInterfaces(MetacodeContext ctx);
 
-	/*
-	 * @return true if next round is needed
-	 */
-	boolean process(ProcessorContext ctx, TypeSpec masterType, int round);
+    /*
+     * No mater if master's source code hasn't been changed since its meta code generated,
+     * return true to rebuild it
+     */
+    public boolean forceOverwriteMetacode();
 
-	public static class ProcessorContext {
-		public List<Element> elements;
-		public ProcessingEnvironment env;
-		public RoundEnvironment roundEnv;
-		public MetacodeContext metacodeContext;
-	}
+    public static class ProcessorContext {
+        public List<Element> elements;
+        public ProcessingEnvironment env;
+        public RoundEnvironment roundEnv;
+        public MetacodeContext metacodeContext;
+    }
 }

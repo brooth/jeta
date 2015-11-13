@@ -1,6 +1,13 @@
 group = 'com.github.brooth.metacode'
 version = '0.1-SNAPSHOT'
 
+apply plugin: 'java'
+
+repositories{
+    mavenLocal()
+    mavenCentral()
+}
+
 dependencies {
     compile project(':metacode-api')
     compile 'com.google.guava:guava:18.0'
