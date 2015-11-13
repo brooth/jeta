@@ -1,14 +1,17 @@
-package com.github.brooth.metacode;
+package com.github.brooth.metacode.samples;
 
+import com.github.brooth.metacode.broadcast.Message;
+import com.github.brooth.metacode.broadcast.ReceiverHandler;
+import com.github.brooth.metacode.log.LogServant;
 import com.github.brooth.metacode.metasitory.HashMapMetasitory;
 import com.github.brooth.metacode.metasitory.Metasitory;
+import com.github.brooth.metacode.observer.ObserverHandler;
 import com.github.brooth.metacode.util.ImplementationServant;
-import com.github.brooth.metacode.log.LogServant;
 
 import javax.inject.Provider;
 
 /*
- * todo move to samples
+ *
  */
 public class MetaHelper {
 
@@ -47,5 +50,20 @@ public class MetaHelper {
         return getImplementationServant(of).getImplementation();
     }
 
-    // others
+    public static void broadcastMessage(Class<?> masterClass, Message msg) {
+
+    }
+
+    public static ReceiverHandler registerReceiver(Object receiver, Class<?> broadcasterClass) {
+        return null;
+    }
+
+    public static void createObservable(Object observer) {
+
+    }
+
+    public static ObserverHandler registerObserver(Object observer, Object observable) {
+
+        return null;
+    }
 }

@@ -5,6 +5,8 @@ package com.github.brooth.metacode.broadcast;
  */
 public @interface Receiver {
 
+	Class<?>[] value();
+
 	Class<? extends Filter>[] filters() default {};
 
 	int[] ids() default {};

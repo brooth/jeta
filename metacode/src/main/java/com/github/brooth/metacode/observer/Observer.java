@@ -6,6 +6,7 @@ import java.lang.annotation.Target;
 /**
  *
  */
-@Target(ElementType.FIELD)
-public @interface Observable {
+@Target(ElementType.METHOD)
+public @interface Observer {
+    Class<?>[] value();
 }

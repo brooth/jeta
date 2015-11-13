@@ -1,8 +1,8 @@
-package com.github.brooth.metacode.event;
+package com.github.brooth.metacode.broadcast;
 
 /**
- * 
+ *
  */
 public interface Filter {
-    boolean filter(Object master, String methodName, Message msg);
+    boolean accepts(Object master, String methodName, Message msg);
 }

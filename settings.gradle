@@ -4,3 +4,5 @@ include ':metacode-apt-api'
 include ':metacode-apt'
 include ':metacode-api'
 include ':metacode'
+include ':metacode-samples'
+
