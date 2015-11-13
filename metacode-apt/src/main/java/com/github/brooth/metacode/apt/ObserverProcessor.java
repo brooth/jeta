@@ -5,7 +5,7 @@ import com.github.brooth.metacode.observer.Subject;
 import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.Nullable;
-import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.*;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
@@ -20,7 +20,7 @@ import java.util.Set;
 public class ObserverProcessor implements Processor {
 
     @Override
-    public boolean process(ProcessorContext ctx, TypeSpec masterType, int round) {
+    public boolean process(RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec masterType, int round) {
         return false;
     }
 
@@ -45,6 +45,11 @@ public class ObserverProcessor implements Processor {
             set.add("com.github.brooth.metacode.observer.ObserverServant.Observer<" + ctx.getMasterCanonicalName() + '>');
         return set;
     }
+
+    @Override
+	public boolean needReclaim() {
+		return false;
+	}
 
     @Override
     public boolean forceOverwriteMetacode() {

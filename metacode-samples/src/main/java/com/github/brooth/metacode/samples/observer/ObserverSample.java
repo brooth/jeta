@@ -25,7 +25,7 @@ public class ObserverSample {
 
         public void run() {
             // ...
-            observers.notifyAndClear(new CompleteEvent("hello world"));
+            observers.notifyAndClear(new CompleteEvent("Hello world"));
         }
 
         public static class CompleteEvent {

@@ -17,7 +17,7 @@ public interface Processor {
     /*
      * @return true if next round is needed
      */
-    boolean process(ProcessorContext ctx, TypeSpec masterType, int round);
+    boolean process(RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec masterType, int round);
 
     /*
      * Tell to MetacodeProcessor the annotations, it should collect elements with.
@@ -43,11 +43,9 @@ public interface Processor {
      * return true to rebuild it
      */
     public boolean forceOverwriteMetacode();
-
-    public static class ProcessorContext {
-        public List<Element> elements;
-        public ProcessingEnvironment env;
-        public RoundEnvironment roundEnv;
-        public MetacodeContext metacodeContext;
-    }
+    
+	/**
+	 * return true if current round's set of annotations is needed in the next round 
+	 */
+	public boolean needReclaim();
 }

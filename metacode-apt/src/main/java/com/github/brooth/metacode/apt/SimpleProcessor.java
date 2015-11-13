@@ -40,6 +40,11 @@ public abstract class SimpleProcessor implements Processor {
     }
 
     @Override
+	public boolean needReclaim() {
+		return false;
+	}
+
+    @Override
     public boolean forceOverwriteMetacode() {
         return false;
     }

@@ -1,6 +1,7 @@
 package com.github.brooth.metacode.apt;
 
 import com.github.brooth.metacode.log.Log;
+import javax.annotation.processing.*;
 import com.github.brooth.metacode.log.LogServant;
 import com.squareup.javapoet.TypeSpec;
 
@@ -14,7 +15,7 @@ public class LogProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(ProcessorContext ctx, TypeSpec masterType, int round) {
+    public boolean process(RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec masterType, int round) {
         return false;
     }
 }

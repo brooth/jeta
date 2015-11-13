@@ -23,16 +23,6 @@ public interface MetacodeContext {
     public String getMasterSimpleName();
 
     /*
-     * Boo_Metacode
-     */
-    public String getMetacodeSimplelName();
-
-    /*
-     * Boo_Metacode
-     */
-    public String getMetacodeCanonicalName();
-
-    /*
      * com.example.app.Foo$Boo
      */
     public String getMasterFlatName();

@@ -10,12 +10,20 @@ import javax.lang.model.util.Elements;
  */
 public class MetacodeUtils {
 
-    public String getMetacodeOf(Elements elementsUtils, String masterCanonicalName) {
+    public static String getMetacodeOf(Elements elementsUtils, String masterCanonicalName) {
         TypeElement typeElement = elementsUtils.getTypeElement(masterCanonicalName);
         Object packageName = elementsUtils.getPackageOf(typeElement).getQualifiedName().toString();
         return packageName + "." + masterCanonicalName.replace(packageName + ".", "")
                 .replaceAll("\\.", "\\$") + MetacodeProcessor.METACODE_CLASS_POSTFIX;
     }
+
+	public static TypeElement getSourceTypeElement(Element element) {
+	    Element sourceElement = element;
+        while (sourceElement.getEnclosingElement() != null && sourceElement.getEnclosingElement().getKind().isClass()) {
+	        sourceElement = sourceElement.getEnclosingElement();
+		}
+		return (TypeElement) sourceElement;
+	}
 
     public static TypeElement typeOf(Element element) {
         return element.getKind().isClass() || element.getKind().isInterface()
