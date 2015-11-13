@@ -1,44 +1,44 @@
-package com.github.brooth.metacode.samples.broadcast;
+package com.github.brooth.metacode.samples.pubsub;
 
-import com.github.brooth.metacode.broadcast.*;
+import com.github.brooth.metacode.pubsub.*;
 import com.github.brooth.metacode.samples.MetaHelper;
 
 /**
  *
  */
-public class BroadcastingSample {
+public class PublishSubscribeSample {
 
     /**
-     * Broadcaster
+     * Publisher
      */
-    @Broadcast(AlarmManager.AlertMessage.class)
+    @Publisher(AlarmManager.AlertMessage.class)
     public static class AlarmManager {
 
         public void alarm(String type) {
-            MetaHelper.broadcastMessage(getClass(), new AlertMessage(type));
+            MetaHelper.publishMessage(AlarmManager.class, new AlertMessage(type));
         }
 
         public static class AlertMessage extends BaseMessage {
-            public AlertMessage(String type) {
+            private AlertMessage(String type) {
                 super(42, type);
             }
         }
     }
 
     /**
-     * Receiver
+     * Subscriber
      */
     public static class PanicAtTheDisco {
-        private ReceiverHandler handler;
+        private SubscriptionHandler handler;
 
         public PanicAtTheDisco() {
-            handler = MetaHelper.registerReceiver(this, AlarmManager.class);
+            handler = MetaHelper.registerSubscriber(this);
         }
 
-        @Receiver(AlarmManager.class)
+        @Subscribe(AlarmManager.class)
         protected void alert(AlarmManager.AlertMessage alert) {
             handler.unregisterAll();
-            quit(alert.getTag());
+            quit(alert.getTopic());
         }
 
         private void quit(String reason) {

@@ -6,10 +6,9 @@ import javax.lang.model.element.TypeElement;
 import java.util.Set;
 
 /**
- *
- * -AmcAdd={com.example.apt.MyCustomProcessor}   - add processor	
- * -AmcExclude={Inject.*, LogProcessor}          - exclude processors 	
- * -AmcMetasiroty=com.example.MyRepository       - set mepository       
+ * -AmcAdd={com.example.apt.MyCustomProcessor}   - add processor
+ * -AmcExclude={Inject.*, LogProcessor}          - exclude processors
+ * -AmcMetasitory=com.example.MyMetasitory       - set metasitory
  */
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_7)

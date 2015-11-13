@@ -1,16 +1,15 @@
 package com.github.brooth.metacode.samples;
 
-import com.github.brooth.metacode.broadcast.Message;
-import com.github.brooth.metacode.broadcast.ReceiverHandler;
-import com.github.brooth.metacode.log.LogServant;
+import com.github.brooth.metacode.pubsub.Message;
+import com.github.brooth.metacode.pubsub.SubscriptionHandler;
 import com.github.brooth.metacode.metasitory.HashMapMetasitory;
 import com.github.brooth.metacode.metasitory.Metasitory;
 import com.github.brooth.metacode.observer.ObserverHandler;
+import com.github.brooth.metacode.samples.validate.ValidatorSample;
 import com.github.brooth.metacode.util.ImplementationServant;
+import com.github.brooth.metacode.validate.ValidationServant;
 
-import javax.inject.Provider;
-
-/*
+/**
  *
  */
 public class MetaHelper {
@@ -19,15 +18,12 @@ public class MetaHelper {
 
     private final Metasitory metasitory;
 
-    private final Provider<?> logProvider;
-
-    private MetaHelper(String metaPackage, Provider<?> logProvider) {
+    private MetaHelper(String metaPackage) {
         metasitory = HashMapMetasitory.getInstance(metaPackage);
-        this.logProvider = logProvider;
     }
 
-    public static MetaHelper init(String metaPackage, Provider<?> logProvider) {
-        instance = new MetaHelper(metaPackage, logProvider);
+    public static MetaHelper init(String metaPackage) {
+        instance = new MetaHelper(metaPackage);
         return instance;
     }
 
@@ -38,10 +34,6 @@ public class MetaHelper {
         return instance;
     }
 
-    public void applyLogs(Object master) {
-        new LogServant(metasitory, master).apply(logProvider);
-    }
-
     public <I> ImplementationServant<I> getImplementationServant(Class<I> of) {
         return new ImplementationServant<>(metasitory, of);
     }
@@ -50,11 +42,11 @@ public class MetaHelper {
         return getImplementationServant(of).getImplementation();
     }
 
-    public static void broadcastMessage(Class<?> masterClass, Message msg) {
+    public static void publishMessage(Class<?> masterClass, Message msg) {
 
     }
 
-    public static ReceiverHandler registerReceiver(Object receiver, Class<?> broadcasterClass) {
+    public static SubscriptionHandler registerSubscriber(Object subscriber) {
         return null;
     }
 
@@ -63,7 +55,10 @@ public class MetaHelper {
     }
 
     public static ObserverHandler registerObserver(Object observer, Object observable) {
-
         return null;
+    }
+
+    public static void validate(Object master) {
+        new ValidationServant(getInstance().metasitory, master).validate();
     }
 }

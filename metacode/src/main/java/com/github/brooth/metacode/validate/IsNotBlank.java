@@ -3,7 +3,7 @@ package com.github.brooth.metacode.validate;
 /**
  * 
  */
-public class NotBlank implements Validator {
+public class IsNotBlank implements Validator {
 
     @Override
     public void validate(Object object, String name) throws ValidationException {

@@ -1,11 +1,11 @@
-package com.github.brooth.metacode.broadcast;
+package com.github.brooth.metacode.pubsub;
 
 /**
  *
  */
-public final class ReceiverHandler {
+public final class SubscriptionHandler {
 
-    public void add(ReceiverHandler other) {
+    public void add(SubscriptionHandler other) {
 
     }
 

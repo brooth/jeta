@@ -27,7 +27,7 @@ public final class Observers<E> {
         return result;
     }
 
-    private void clear() {
+    public void clear() {
         observers.clear();
     }
 

@@ -1,9 +1,9 @@
-package com.github.brooth.metacode.broadcast;
+package com.github.brooth.metacode.pubsub;
 
 /**
  *  
  */
-public @interface Receiver {
+public @interface Subscribe {
 
 	Class<?>[] value();
 
@@ -11,7 +11,7 @@ public @interface Receiver {
 
 	int[] ids() default {};
 
-	String[] tags() default {};
+	String[] topics() default {};
 
     String filterExpression() default "";
 

@@ -1,6 +1,6 @@
 package com.github.brooth.metacode.samples.observer;
 
-import com.github.brooth.metacode.observer.Observable;
+import com.github.brooth.metacode.observer.Subject;
 import com.github.brooth.metacode.observer.Observer;
 import com.github.brooth.metacode.observer.ObserverHandler;
 import com.github.brooth.metacode.observer.Observers;
@@ -15,7 +15,8 @@ public class ObserverSample {
      * Observable
      */
     public static class AsyncRequest extends Thread {
-        @Observable
+
+        @Subject
         protected Observers<CompleteEvent> observers;
 
         public AsyncRequest() {
@@ -44,6 +45,7 @@ public class ObserverSample {
      * Observer
      */
     public static class RequestWindow {
+
         private ObserverHandler handler;
 
         public void doRequest() {
@@ -54,7 +56,6 @@ public class ObserverSample {
 
         @Observer(AsyncRequest.class)
         protected void onCompleteEvent(AsyncRequest.CompleteEvent e) {
-            // ...
             System.out.print("request complete with status: " + e.getStatus());
         }
 
@@ -64,7 +65,9 @@ public class ObserverSample {
     }
 
     public static void main(String[] args) {
-        new RequestWindow().doRequest();
+        RequestWindow window = new RequestWindow();
+        window.doRequest();
+        window.close();
     }
 }
 

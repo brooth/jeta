@@ -1,4 +1,4 @@
-package com.github.brooth.metacode.broadcast;
+package com.github.brooth.metacode.pubsub;
 
 import javax.annotation.Nullable;
 
@@ -8,26 +8,29 @@ import javax.annotation.Nullable;
  */
 public class BaseMessage implements Message {
 
-    protected int id;
-    protected String tag;
+    protected int id = 0;
+    protected String topic;
+
+    public BaseMessage() {
+    }
 
     public BaseMessage(int id) {
         this.id = id;
     }
 
-    public BaseMessage(int id, String tag) {
+    public BaseMessage(int id, String topic) {
         this.id = id;
-        this.tag = tag;
+        this.topic = topic;
     }
 
     @Override
     public int getId() {
-        return 0;
+        return id;
     }
 
     @Nullable
     @Override
-    public String getTag() {
-        return null;
+    public String getTopic() {
+        return topic;
     }
 }

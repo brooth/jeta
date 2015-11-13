@@ -1,4 +1,4 @@
-package com.github.brooth.metacode.broadcast;
+package com.github.brooth.metacode.pubsub;
 
 /**
  *

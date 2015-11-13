@@ -1,4 +1,4 @@
-package com.github.brooth.metacode.broadcast;
+package com.github.brooth.metacode.pubsub;
 
 import javax.annotation.Nullable;
 
@@ -10,5 +10,5 @@ public interface Message {
 	int getId();
 
 	@Nullable
-	String getTag();
+	String getTopic();
 }
