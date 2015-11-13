@@ -39,9 +39,4 @@ public interface MetacodeContext {
 
     public Set<Class<? extends Annotation>> metacodeAnnotations();
 
-    // package livel, in MetacodeContextImpl;
-    // JavaWriter writer();
-
-    // package livel, in MetacodeContextImpl;
-    //Map<BaseProcessor, ProcessorContext> processors();
 }   
