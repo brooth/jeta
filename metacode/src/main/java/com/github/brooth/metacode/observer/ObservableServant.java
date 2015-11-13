@@ -8,18 +8,18 @@ import com.github.brooth.metacode.metasitory.Metasitory;
  * @author khalidov
  * @version $Id$
  */
-public class ObservableServant<M> extends MasterServant<M, ObservableServant.Observable<M>> {
+public class ObservableServant<M> extends MasterServant<M, ObservableServant.ObservableMetacode<M>> {
 
     public ObservableServant(Metasitory metasitory, M master) {
         super(metasitory, master);
     }
 
     public void createObservable() {
-        for (ObservableServant.Observable<M> observable : metacodes)
+        for (ObservableServant.ObservableMetacode<M> observable : metacodes)
             observable.applyObservable(master);
     }
 
-    public interface Observable<M> extends MasterMetacode<M> {
+    public interface ObservableMetacode<M> extends MasterMetacode<M> {
         void applyObservable(M master);
     }
 }

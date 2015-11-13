@@ -33,12 +33,6 @@ public abstract class SimpleProcessor implements Processor {
         return Collections.singleton(MetacodeUtils.typeOf(element));
     }
 
-    @Nullable
-    @Override
-    public Set<String> masterMetacodeInterfaces(MetacodeContext ctx) {
-        return metacodeInterface == null ? null : Collections.singleton(metacodeInterface.getCanonicalName());
-    }
-
     @Override
 	public boolean needReclaim() {
 		return false;

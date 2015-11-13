@@ -5,9 +5,7 @@ import com.github.brooth.metacode.apt.metasitory.HasMapMetasitoryWriter;
 import com.github.brooth.metacode.apt.metasitory.MetasitoryWriter;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -90,11 +88,21 @@ public class MetacodeProcessor extends AbstractProcessor {
 		for (MetacodeContextImpl context : metacodeContextList) {
         	messager.printMessage(Diagnostic.Kind.NOTE, "meta skeleton for: " + context.metacodeCanonicalName);
 
-            TypeSpec.Builder builder = TypeSpec.classBuilder(context.metacodeCanonicalName)
-                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)    
-                    .addSuperinterface(TypeName.get(MasterMetacode.class));
+			ClassName masterClassName = ClassName.bestGuess(context.masterCanonicalName);
 
-            context.metaTypeSpec = builder.build();
+            TypeSpec.Builder builder = TypeSpec.classBuilder(context.metacodeSimpleName)
+                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)    
+                    .addSuperinterface(ParameterizedTypeName.get(
+						ClassName.get(MasterMetacode.class), masterClassName));
+
+			builder.addMethod(MethodSpec.methodBuilder("getMasterClass")
+			    .addModifiers(Modifier.PUBLIC)
+			    .returns(ParameterizedTypeName.get(
+					ClassName.get(Class.class), masterClassName))
+			    .addStatement("return $T.class", masterClassName)
+			    .build());
+
+            context.builder = builder;
         }
     }
 
@@ -113,7 +121,7 @@ public class MetacodeProcessor extends AbstractProcessor {
                 messager.printMessage(Diagnostic.Kind.NOTE, "processing " +
                         context.metacodeCanonicalName + " with " + processor.getClass().getSimpleName());
 
-                if (!processor.process(roundEnv, processorContext, context.metaTypeSpec, round))
+                if (!processor.process(roundEnv, processorContext, context.builder, round))
                     processorContextIterator.remove();
 
 				if(processor.needReclaim())
@@ -121,11 +129,11 @@ public class MetacodeProcessor extends AbstractProcessor {
             }
 
             if (context.processorContextMap.isEmpty()) {
-                JavaFile javaFile = JavaFile.builder(context.getMasterPackage(), context.metaTypeSpec).build();
+                JavaFile javaFile = JavaFile.builder(context.getMasterPackage(), context.builder.build()).build();
 
                 Writer out = null;
                 try {
-                    JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(context.metacodeSimpleName);
+                    JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(context.metacodeCanonicalName);
                     out = sourceFile.openWriter();
                     javaFile.writeTo(out);
                     out.close();
@@ -177,7 +185,7 @@ public class MetacodeProcessor extends AbstractProcessor {
 
                 // go through annotated elements
                 for (Element element : elements) {
-        			messager.printMessage(Diagnostic.Kind.NOTE, "fount element: " + element.toString());
+        			messager.printMessage(Diagnostic.Kind.NOTE, "found element: " + element.toString());
                     
 					// go through element's masters
                     for (TypeElement masterTypeElement : processor.applicableMastersOfElement(env, element)) {
@@ -214,7 +222,7 @@ public class MetacodeProcessor extends AbstractProcessor {
     }
 
     private static class MetacodeContextImpl implements MetacodeContext {
-        private TypeSpec metaTypeSpec;
+        private TypeSpec.Builder builder;
         private Map<Processor, ProcessorContext> processorContextMap = new HashMap<>();
 
         private String masterPackage;

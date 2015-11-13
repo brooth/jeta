@@ -17,7 +17,7 @@ public interface Processor {
     /*
      * @return true if next round is needed
      */
-    boolean process(RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec masterType, int round);
+    boolean process(RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round);
 
     /*
      * Tell to MetacodeProcessor the annotations, it should collect elements with.
@@ -30,13 +30,6 @@ public interface Processor {
      * For those elements metacode will be generated.
      */
     Set<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element);
-
-    /**
-     * Java code of interfaces, master's metacode will be implementation of.
-     * @deprecated add in type itself
-     */
-    @Deprecated
-    Set<String> masterMetacodeInterfaces(MetacodeContext ctx);
 
     /*
      * No mater if master's source code hasn't been changed since its meta code generated,

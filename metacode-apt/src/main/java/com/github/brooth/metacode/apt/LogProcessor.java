@@ -15,7 +15,7 @@ public class LogProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec masterType, int round) {
+    public boolean process(RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
         return false;
     }
 }
