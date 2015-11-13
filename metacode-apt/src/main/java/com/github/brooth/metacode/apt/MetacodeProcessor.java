@@ -1,16 +1,24 @@
 package com.github.brooth.metacode.apt;
 
+import com.github.brooth.metacode.MasterMetacode;
 import com.github.brooth.metacode.apt.metasitory.HasMapMetasitoryWriter;
 import com.github.brooth.metacode.apt.metasitory.MetasitoryWriter;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
+import java.io.IOException;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
@@ -61,10 +69,10 @@ public class MetacodeProcessor extends AbstractProcessor {
         if (!metacodeContextList.isEmpty()) {
             if (round == 0) {
                 metasitoryWriter.open(env);
-                generateMetaCodes();
+                generateMetaSkeletons();
             }
 
-            return processAutoCodes(roundEnv);
+            processAutoCodes(roundEnv);
         }
 
         if (blankRounds == 2) {
@@ -75,12 +83,66 @@ public class MetacodeProcessor extends AbstractProcessor {
         return false;
     }
 
-    private void generateMetaCodes() {
+    private void generateMetaSkeletons() {
+        for (MetacodeContextImpl context : metacodeContextList) {
+            TypeSpec.Builder builder = TypeSpec.classBuilder(context.getMetacodeCanonicalName())
+                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                    .addSuperinterface(TypeName.get(MasterMetacode.class));
 
+            context.metaTypeSpec = builder.build();
+        }
     }
 
-    private boolean processAutoCodes(RoundEnvironment roundEnv) {
-        return false;
+    private void processAutoCodes(RoundEnvironment roundEnv) {
+        Iterator<MetacodeContextImpl> iterator = metacodeContextList.iterator();
+        while (iterator.hasNext()) {
+
+            MetacodeContextImpl context = iterator.next();
+            Iterator<Map.Entry<Processor, Processor.ProcessorContext>> processorContextIterator
+                    = context.processorContextMap.entrySet().iterator();
+
+            while (processorContextIterator.hasNext()) {
+                Processor processor = processorContextIterator.next().getKey();
+                Processor.ProcessorContext processorContext = processorContextIterator.next().getValue();
+
+                messager.printMessage(Diagnostic.Kind.NOTE, "Processing " +
+                        context.getMetacodeCanonicalName() + " with " + processor.getClass().getSimpleName());
+
+                processorContext.roundEnv = roundEnv;
+                if (!processor.process(processorContext, context.metaTypeSpec, round))
+                    processorContextIterator.remove();
+            }
+
+            if (context.processorContextMap.isEmpty()) {
+                JavaFile javaFile = JavaFile.builder(context.getMasterPackage(), context.metaTypeSpec).build();
+
+                Writer out = null;
+                try {
+                    JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(context.getMetacodeSimplelName());
+                    out = sourceFile.openWriter();
+                    javaFile.writeTo(out);
+                    out.close();
+
+                } catch (IOException e) {
+                    throw new RuntimeException("failed to write metacode file", e);
+
+                } finally {
+                    if (out != null)
+                        try {
+                            out.close();
+
+                        } catch (IOException e) {
+                            // os corrupted successfully
+                        }
+                }
+
+                metasitoryWriter.write(context);
+
+                iterator.remove();
+                messager.printMessage(Diagnostic.Kind.NOTE, "generating " +
+                        context.getMetacodeCanonicalName() + " complete");
+            }
+        }
     }
 
     private void assembleMetacodeContextList(RoundEnvironment roundEnv) {
@@ -128,11 +190,11 @@ public class MetacodeProcessor extends AbstractProcessor {
 
     private static class MetacodeContextImpl implements MetacodeContext {
 
-        // JavaWriter writer();
+        private TypeSpec metaTypeSpec;
         private Map<Processor, Processor.ProcessorContext> processorContextMap;
 
         public MetacodeContextImpl(TypeElement masterTypeElement) {
-
+            processorContextMap = new HashMap<>();
         }
 
         @Override
@@ -151,7 +213,12 @@ public class MetacodeProcessor extends AbstractProcessor {
         }
 
         @Override
-        public String getMetacodeSimpleName() {
+        public String getMetacodeSimplelName() {
+            return null;
+        }
+
+        @Override
+        public String getMetacodeCanonicalName() {
             return null;
         }
 

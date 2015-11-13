@@ -25,7 +25,12 @@ public interface MetacodeContext {
     /*
      * Boo_Metacode
      */
-    public String getMetacodeSimpleName();
+    public String getMetacodeSimplelName();
+
+    /*
+     * Boo_Metacode
+     */
+    public String getMetacodeCanonicalName();
 
     /*
      * com.example.app.Foo$Boo

@@ -31,10 +31,11 @@ public interface Processor {
      */
     Set<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element);
 
-    /*
+    /**
      * Java code of interfaces, master's metacode will be implementation of.
+     * @deprecated add in type itself
      */
-    @Nullable
+    @Deprecated
     Set<String> masterMetacodeInterfaces(MetacodeContext ctx);
 
     /*
