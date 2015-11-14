@@ -32,7 +32,7 @@ public class MetacodeProcessor extends AbstractProcessor {
     public static final String METACODE_CLASS_POSTFIX = "_Metacode";
 
     private ProcessingEnvironment env;
-    private Messager messager;
+    private MessagerLogger logger;
     private Elements elementUtils;
 
     private List<Processor> processors = new ArrayList<>();
@@ -46,8 +46,10 @@ public class MetacodeProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        messager = processingEnv.getMessager();
-        messager.printMessage(Diagnostic.Kind.NOTE, "init");
+		logger = new MessagerLogger();
+        logger.messager = processingEnv.getMessager();
+        logger.debug = true;
+		logger.debug("init");
 
         this.env = processingEnv;
         this.elementUtils = processingEnv.getElementUtils();
@@ -58,7 +60,7 @@ public class MetacodeProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        messager.printMessage(Diagnostic.Kind.NOTE, "processing. round: " + (++round));
+        logger.debug("processing. round: " + (++round));
 
         if (round == 1) {
             metacodeContextList.clear();
@@ -84,10 +86,10 @@ public class MetacodeProcessor extends AbstractProcessor {
     }
 
     private void generateMetaSkeletons() {
-        messager.printMessage(Diagnostic.Kind.NOTE, "generating meta skeletons");
+        logger.debug("generating meta skeletons");
 
 		for (MetacodeContextImpl context : metacodeContextList) {
-        	messager.printMessage(Diagnostic.Kind.NOTE, "meta skeleton for: " + context.metacodeCanonicalName);
+        	logger.debug("meta skeleton for: " + context.metacodeCanonicalName);
 
 			ClassName masterClassName = ClassName.bestGuess(context.masterCanonicalName);
 
@@ -119,7 +121,7 @@ public class MetacodeProcessor extends AbstractProcessor {
                 Processor processor = entry.getKey();
                 ProcessorContext processorContext = entry.getValue();
 
-                messager.printMessage(Diagnostic.Kind.NOTE, "processing " +
+                logger.debug("processing " +
                         context.metacodeCanonicalName + " with " + processor.getClass().getSimpleName());
 
                 if (!processor.process(roundEnv, processorContext, context.builder, round))
@@ -131,7 +133,6 @@ public class MetacodeProcessor extends AbstractProcessor {
 
             if (context.processorContextMap.isEmpty()) {
                 JavaFile javaFile = JavaFile.builder(context.getMasterPackage(), context.builder.build()).build();
-
                 Writer out = null;
                 try {
                     JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(context.metacodeCanonicalName);
@@ -155,42 +156,42 @@ public class MetacodeProcessor extends AbstractProcessor {
                 metasitoryWriter.write(context);
 
                 iterator.remove();
-                messager.printMessage(Diagnostic.Kind.NOTE, "generating " + context.metacodeCanonicalName + " complete");
+                logger.debug("generating " + context.metacodeCanonicalName + " complete");
             }
         }
 		return reclaim;
     }
 
     private void assembleMetacodeContextList(RoundEnvironment roundEnv) {
-        messager.printMessage(Diagnostic.Kind.NOTE, "assemble metacode context list");
+        logger.debug("assemble metacode context list");
 
         Set<Class<? extends Annotation>> annotations = new HashSet<>(5);
         for (final Processor processor : processors) {
             annotations.clear();
             processor.collectElementsAnnotatedWith(annotations);
             if (annotations.isEmpty()) {
-                messager.printMessage(Diagnostic.Kind.WARNING, "Processor " + processor.getClass().getCanonicalName()
+                logger.warn("Processor " + processor.getClass().getCanonicalName()
                         + " without annotations. Nothing to collect");
                 continue;
             }
 
             // go through processor's annotations
             for (Class<? extends Annotation> annotation : annotations) {
-        		messager.printMessage(Diagnostic.Kind.NOTE, "collecting elements with @" + annotation.getSimpleName());
+        		logger.debug("collecting elements with @" + annotation.getSimpleName());
                 
 				Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(annotation);
                 if (elements.isEmpty()) {
-                    messager.printMessage(Diagnostic.Kind.NOTE, "no elements found with @" + annotation.getSimpleName());
+                    logger.debug("no elements found with @" + annotation.getSimpleName());
                     continue;
                 }
 
                 // go through annotated elements
                 for (Element element : elements) {
-        			messager.printMessage(Diagnostic.Kind.NOTE, "found element: " + element.toString());
+        			logger.debug("found element: " + element.toString());
                     
 					// go through element's masters
                     for (TypeElement masterTypeElement : processor.applicableMastersOfElement(env, element)) {
-        				messager.printMessage(Diagnostic.Kind.NOTE, "applicable master: " + masterTypeElement.toString());
+        				logger.debug("applicable master: " + masterTypeElement.toString());
                         
                         MetacodeContextImpl context = Iterables.find(metacodeContextList,
                                 new MasterTypePredicate(masterTypeElement), null);
@@ -198,13 +199,13 @@ public class MetacodeProcessor extends AbstractProcessor {
                         	context = new MetacodeContextImpl(elementUtils, masterTypeElement);
 							metacodeContextList.add(context);
 
-        					messager.printMessage(Diagnostic.Kind.NOTE, "   masterPackage         - " + context.masterPackage);
-        					messager.printMessage(Diagnostic.Kind.NOTE, "   masterSimpleName      - " + context.masterSimpleName);
-        					messager.printMessage(Diagnostic.Kind.NOTE, "   masterCanonicalName   - " + context.masterCanonicalName);
-							messager.printMessage(Diagnostic.Kind.NOTE, "   masterFlatName        - " + context.masterFlatName);
-        					messager.printMessage(Diagnostic.Kind.NOTE, "   sourceCanonicalName   - " + context.sourceCanonicalName);
-        					messager.printMessage(Diagnostic.Kind.NOTE, "   metacodeSimpleName    - " + context.metacodeSimpleName);
-        					messager.printMessage(Diagnostic.Kind.NOTE, "   metacodeCanonicalName - " + context.metacodeCanonicalName);
+        					logger.debug("   masterPackage         - " + context.masterPackage);
+        					logger.debug("   masterSimpleName      - " + context.masterSimpleName);
+        					logger.debug("   masterCanonicalName   - " + context.masterCanonicalName);
+							logger.debug("   masterFlatName        - " + context.masterFlatName);
+        					logger.debug("   sourceCanonicalName   - " + context.sourceCanonicalName);
+        					logger.debug("   metacodeSimpleName    - " + context.metacodeSimpleName);
+        					logger.debug("   metacodeCanonicalName - " + context.metacodeCanonicalName);
 						}
 
                         ProcessorContext processorContext = context.processorContextMap.get(processor);
@@ -213,6 +214,7 @@ public class MetacodeProcessor extends AbstractProcessor {
                             processorContext.env = env;
                             processorContext.metacodeContext = context;
                             processorContext.elements = new ArrayList<>();
+							processorContext.logger = logger;
                             context.processorContextMap.put(processor, processorContext);
                         }
                         processorContext.elements.add(element);
@@ -275,6 +277,28 @@ public class MetacodeProcessor extends AbstractProcessor {
             return new HashSet<>();
         }
     }
+	
+	private static class MessagerLogger implements Logger {
+        private Messager messager;
+		private boolean debug = true;
+		
+		@Override
+		public void debug(String msg) {
+			if(debug) {
+           		messager.printMessage(Diagnostic.Kind.NOTE, msg);
+			}
+		}
+
+		@Override
+		public void warn(String msg) {
+           	messager.printMessage(Diagnostic.Kind.WARNING, msg);
+		}
+		
+		@Override
+		public void error(String msg) {
+           	messager.printMessage(Diagnostic.Kind.ERROR, msg);
+		}
+	}
 
     private static class MasterTypePredicate implements Predicate<MetacodeContext> {
         private final TypeElement masterTypeElement; 

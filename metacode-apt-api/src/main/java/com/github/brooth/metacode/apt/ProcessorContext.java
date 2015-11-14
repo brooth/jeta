@@ -8,4 +8,5 @@ public final class ProcessorContext {
 	public ProcessingEnvironment env;
 	public List<Element> elements;
 	public MetacodeContext metacodeContext;
+	public Logger logger;
 }

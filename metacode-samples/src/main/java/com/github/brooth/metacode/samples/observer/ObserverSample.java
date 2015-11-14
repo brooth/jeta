@@ -25,7 +25,7 @@ public class ObserverSample {
 
         public void run() {
             // ...
-            observers.notifyAndClear(new CompleteEvent("Hello world"));
+            observers.notifyAndClear(new CompleteEvent("Hello  world"));
         }
 
         public static class CompleteEvent {
@@ -60,7 +60,8 @@ public class ObserverSample {
         }
 
         protected void close() {
-            handler.unregisterAll();
+			if(handler != null)
+            	handler.unregisterAll();
         }
     }
 
