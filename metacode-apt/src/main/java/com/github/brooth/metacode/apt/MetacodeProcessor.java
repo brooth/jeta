@@ -33,7 +33,7 @@ public class MetacodeProcessor extends AbstractProcessor {
 
     private ProcessingEnvironment env;
     private Messager messager;
-    private Elements elementsUtils;
+    private Elements elementUtils;
 
     private List<Processor> processors = new ArrayList<>();
     private List<MetacodeContextImpl> metacodeContextList = new ArrayList<>(500);
@@ -50,8 +50,9 @@ public class MetacodeProcessor extends AbstractProcessor {
         messager.printMessage(Diagnostic.Kind.NOTE, "init");
 
         this.env = processingEnv;
-        this.elementsUtils = processingEnv.getElementUtils();
+        this.elementUtils = processingEnv.getElementUtils();
 
+        processors.add(new ObservableProcessor());
         processors.add(new ObserverProcessor());
     }
 
@@ -194,7 +195,7 @@ public class MetacodeProcessor extends AbstractProcessor {
                         MetacodeContextImpl context = Iterables.find(metacodeContextList,
                                 new MasterTypePredicate(masterTypeElement), null);
 						if(context == null) {
-                        	context = new MetacodeContextImpl(elementsUtils, masterTypeElement);
+                        	context = new MetacodeContextImpl(elementUtils, masterTypeElement);
 							metacodeContextList.add(context);
 
         					messager.printMessage(Diagnostic.Kind.NOTE, "   masterPackage         - " + context.masterPackage);
@@ -233,13 +234,13 @@ public class MetacodeProcessor extends AbstractProcessor {
 		private String masterFlatName;
         private String sourceCanonicalName;
 
-        public MetacodeContextImpl(Elements elementsUtils, TypeElement masterTypeElement) {
-			masterPackage = elementsUtils.getPackageOf(masterTypeElement).getQualifiedName().toString(); 
+        public MetacodeContextImpl(Elements elementUtils, TypeElement masterTypeElement) {
+			masterPackage = elementUtils.getPackageOf(masterTypeElement).getQualifiedName().toString(); 
             masterCanonicalName = masterTypeElement.toString();
             masterSimpleName = masterTypeElement.getSimpleName().toString();
 			sourceCanonicalName = MetacodeUtils.getSourceTypeElement(masterTypeElement).toString();
 			masterFlatName = masterPackage + "." + masterCanonicalName.replace(masterPackage + ".", "").replaceAll("\\.", "\\$");
-			metacodeCanonicalName = MetacodeUtils.getMetacodeOf(elementsUtils, masterCanonicalName);
+			metacodeCanonicalName = MetacodeUtils.getMetacodeOf(elementUtils, masterCanonicalName);
 			int i = metacodeCanonicalName.lastIndexOf('.');     
 			metacodeSimpleName = i >= 0 ? metacodeCanonicalName.substring(i + 1) : metacodeCanonicalName;
         }

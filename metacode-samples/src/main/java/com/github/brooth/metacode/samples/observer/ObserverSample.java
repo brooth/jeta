@@ -94,7 +94,7 @@ public class ObserverSample {
 //		// handler.unregister(AsyncRequest.class);
 //		// handler.unregisterAll();
 //		if(observable.getClass() == AsyncRequest.class) {
-//			handler.add(AsyncRequest_Metacode.getCompleteEventObservers(observable)
+//			handler.add(AsyncRequest.class, CompleteEvent.class, AsyncRequest_Metacode.getCompleteEventObservers(observable)
 //				.register(new EventObserver() {
 //					@Override
 //         			void onEvent(CompleteEvent event) {

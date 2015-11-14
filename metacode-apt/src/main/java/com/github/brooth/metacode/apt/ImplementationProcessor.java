@@ -11,7 +11,7 @@ import com.squareup.javapoet.TypeSpec;
 public class ImplementationProcessor extends SimpleProcessor {
 
     public ImplementationProcessor() {
-        super(Implementation.class, ImplementationServant.ImplementationMetacode.class);
+        super(Implementation.class);
     }
 
     @Override

@@ -11,16 +11,9 @@ import java.util.Set;
 public abstract class SimpleProcessor implements Processor {
 
     protected Class<? extends Annotation> annotation;
-    @Nullable
-    protected Class metacodeInterface;
 
     public SimpleProcessor(Class<? extends Annotation> annotation) {
         this.annotation = annotation;
-    }
-
-    public SimpleProcessor(Class<? extends Annotation> annotation, @Nullable Class metacodeInterface) {
-        this.annotation = annotation;
-        this.metacodeInterface = metacodeInterface;
     }
 
     @Override

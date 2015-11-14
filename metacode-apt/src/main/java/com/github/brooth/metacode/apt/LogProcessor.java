@@ -11,7 +11,7 @@ import com.squareup.javapoet.TypeSpec;
 public class LogProcessor extends SimpleProcessor {
 
     public LogProcessor() {
-        super(Log.class, LogServant.LogMetacode.class);
+        super(Log.class);
     }
 
     @Override

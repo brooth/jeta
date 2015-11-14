@@ -10,12 +10,12 @@ import java.util.List;
  */
 public final class Observers<E> {
 
-    private final List<Observer<E>> observers =
-            Collections.synchronizedList(new ArrayList<Observer<E>>());
+    private final List<EventObserver<E>> observers =
+            Collections.synchronizedList(new ArrayList<EventObserver<E>>());
 
     public int notify(E event) {
         synchronized (observers) {
-            for (Observer<E> observer : observers)
+            for (EventObserver<E> observer : observers)
                 observer.onEvent(event);
             return observers.size();
         }
@@ -31,16 +31,16 @@ public final class Observers<E> {
         observers.clear();
     }
 
-    public List<Observer<E>> getAll() {
+    public List<EventObserver<E>> getAll() {
         return observers;
     }
 
-    public Handler<E> register(Observer<E> observer) {
+    public Handler<E> register(EventObserver<E> observer) {
         observers.add(observer);
         return new Handler<>(observers, observer);
     }
 
-    public boolean unregister(Observer<E> observer) {
+    public boolean unregister(EventObserver<E> observer) {
         return observers.remove(observer);
     }
 
@@ -49,10 +49,10 @@ public final class Observers<E> {
      * @param <E>
      */
     public static final class Handler<E> {
-        private List<Observer<E>> observers;
-        private Observer<E> observer;
+        private List<EventObserver<E>> observers;
+        private EventObserver<E> observer;
 
-        private Handler(List<Observer<E>> observers, Observer<E> observer) {
+        private Handler(List<EventObserver<E>> observers, EventObserver<E> observer) {
             this.observers = observers;
             this.observer = observer;
         }
@@ -66,7 +66,7 @@ public final class Observers<E> {
      *
      * @param <E>
      */
-    public interface Observer<E> {
+    public interface EventObserver<E> {
         void onEvent(E event);
     }
 }
