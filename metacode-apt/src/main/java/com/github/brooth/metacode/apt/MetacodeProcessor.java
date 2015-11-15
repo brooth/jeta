@@ -71,10 +71,10 @@ public class MetacodeProcessor extends AbstractProcessor {
             if (round == 1) {
         		metasitoryWriter = new HasMapMetasitoryWriter();
                 metasitoryWriter.open(env);
-                generateMetaSkeletons();
+                generateMetaTypeBuilders();
             }
 
-            return !processAutoCodes(roundEnv);
+            return !processMetacodes(roundEnv);
         }
 
         if (round > 1 && blankRounds == 0) {
@@ -85,11 +85,11 @@ public class MetacodeProcessor extends AbstractProcessor {
         return true;
     }
 
-    private void generateMetaSkeletons() {
-        logger.debug("generating meta skeletons");
+    private void generateMetaTypeBuilders() {
+        logger.debug("generating meta type builders");
 
 		for (MetacodeContextImpl context : metacodeContextList) {
-        	logger.debug("meta skeleton for: " + context.metacodeCanonicalName);
+        	logger.debug("    - " + context.metacodeCanonicalName);
 
 			ClassName masterClassName = ClassName.bestGuess(context.masterCanonicalName);
 
@@ -109,7 +109,7 @@ public class MetacodeProcessor extends AbstractProcessor {
         }
     }
 
-    private boolean processAutoCodes(RoundEnvironment roundEnv) {
+    private boolean processMetacodes(RoundEnvironment roundEnv) {
 		boolean reclaim = false;
         Iterator<MetacodeContextImpl> iterator = metacodeContextList.iterator();
         while (iterator.hasNext()) {
@@ -121,8 +121,8 @@ public class MetacodeProcessor extends AbstractProcessor {
                 Processor processor = entry.getKey();
                 ProcessorContext processorContext = entry.getValue();
 
-                logger.debug("processing " +
-                        context.metacodeCanonicalName + " with " + processor.getClass().getSimpleName());
+                logger.debug("processing " + context.metacodeCanonicalName + 
+					" with " + processor.getClass().getSimpleName());
 
                 if (!processor.process(roundEnv, processorContext, context.builder, round))
                     processorContextIterator.remove();
