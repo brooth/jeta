@@ -3,17 +3,24 @@ version = '0.1-SNAPSHOT'
 
 buildscript {
     repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
+		jcenter()
     }
     dependencies {
-        classpath "net.ltgt.gradle:gradle-apt-plugin:0.4"
+		classpath 'net.sf.gapt:apt:1'
     }
 }
 
 apply plugin: 'java'
-apply plugin: "net.ltgt.apt"
+apply plugin: 'net.sf.gapt'
+apply plugin: 'application'
+
+mainClassName = 'com.github.brooth.metacode.samples.observer.ObserverSample'
+
+apt {
+	arguments {
+    	 mcMetasitoryPackage 'com.github.brooth.metacode.samples'
+	}
+}
 
 repositories {
     mavenLocal()
@@ -24,3 +31,4 @@ dependencies {
     apt project(':metacode-apt')
     compile project(':metacode')
 }
+

@@ -25,7 +25,7 @@ public class ObserverSample {
 
         public void run() {
             // ...
-            observers.notifyAndClear(new CompleteEvent("Hello world"));
+            observers.notifyAndClear(new CompleteEvent("Hello world!"));
         }
 
         public static class CompleteEvent {
@@ -56,7 +56,8 @@ public class ObserverSample {
 
         @Observer(AsyncRequest.class)
         protected void onCompleteEvent(AsyncRequest.CompleteEvent e) {
-            System.out.print("request complete with status: " + e.getStatus());
+            System.out.print(String.format("request complete: [%s] %s",
+                Thread.currentThread().getName(), e.getStatus()));
         }
 
         protected void close() {
@@ -66,7 +67,6 @@ public class ObserverSample {
     }
 
     public static void main(String[] args) {
-        MetaHelper.init("");
         RequestWindow window = new RequestWindow();
         window.doRequest();
         window.close();

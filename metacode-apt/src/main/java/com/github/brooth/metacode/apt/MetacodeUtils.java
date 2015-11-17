@@ -14,7 +14,7 @@ public class MetacodeUtils {
         TypeElement typeElement = elementsUtils.getTypeElement(masterCanonicalName);
         Object packageName = elementsUtils.getPackageOf(typeElement).getQualifiedName().toString();
         return packageName + "." + masterCanonicalName.replace(packageName + ".", "")
-                .replaceAll("\\.", "\\$") + MetacodeProcessor.METACODE_CLASS_POSTFIX;
+                .replaceAll("\\.", "_") + MetacodeProcessor.METACODE_CLASS_POSTFIX;
     }
 
 	public static TypeElement getSourceTypeElement(Element element) {

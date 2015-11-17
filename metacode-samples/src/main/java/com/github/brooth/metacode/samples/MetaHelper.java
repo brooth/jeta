@@ -20,20 +20,14 @@ public class MetaHelper {
 
     private final Metasitory metasitory;
 
-    private MetaHelper(String metaPackage) {
-        metasitory = HashMapMetasitory.getInstance(metaPackage);
-    }
-
-    public static MetaHelper init(String metaPackage) {
-        instance = new MetaHelper(metaPackage);
-        return instance;
-    }
-
     public static MetaHelper getInstance() {
         if (instance == null)
-            throw new IllegalStateException("Not initialized");
-
+            instance = new MetaHelper("com.github.brooth.metacode.samples");
         return instance;
+    }
+
+    private MetaHelper(String metaPackage) {
+        metasitory = new HashMapMetasitory(metaPackage);
     }
 
     public <I> ImplementationServant<I> getImplementationServant(Class<I> of) {

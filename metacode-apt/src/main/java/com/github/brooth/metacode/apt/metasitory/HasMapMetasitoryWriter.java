@@ -66,20 +66,18 @@ public class HasMapMetasitoryWriter implements MetasitoryWriter {
                     }
                 }));
         methodBuilder.addCode("result.put($L.class,\n" +
-                        "\tnew com.github.brooth.metacode.metasitory.HashMapMetasitoryContainer.Context(\n" +
+                        "\tnew $T(\n" +
                         "\t\t$L.class,\n" +
                         "\t\tnew javax.inject.Provider<$L>() {\n" +
                         "\t\t\tpublic $L get() {\n" +
                         "\t\t\t\treturn new $L();\n" +
                         "\t\t}},\n" +
                         "\t\tnew Class[] {$L\n\t\t}));\n",
-                master, master, metacode, metacode, metacode, annotations);
+                master, TypeName.get(HashMapMetasitoryContainer.Context.class),  master, metacode, metacode, metacode, annotations);
     }
 
     @Override
     public void close() {
-        messager.printMessage(Diagnostic.Kind.NOTE, "writing metasitory");
-
         String metasitoryPackage = env.getOptions().get("mcMetasitoryPackage");
         if (metasitoryPackage == null) {
             messager.printMessage(Diagnostic.Kind.WARNING, "mcMetasitoryPackage not present. used root package");
@@ -92,7 +90,11 @@ public class HasMapMetasitoryWriter implements MetasitoryWriter {
         JavaFile javaFile = JavaFile.builder(metasitoryPackage, typeBuilder.build()).build();
         Writer out = null;
         try {
-            JavaFileObject sourceFile = env.getFiler().createSourceFile("MetasitoryContainer");
+			String fileName = metasitoryPackage.isEmpty() ? 
+				"MetasitoryContainer" : metasitoryPackage + ".MetasitoryContainer";
+        	messager.printMessage(Diagnostic.Kind.NOTE, "writing metasitory to " + fileName);
+            
+			JavaFileObject sourceFile = env.getFiler().createSourceFile(fileName);
             out = sourceFile.openWriter();
             javaFile.writeTo(out);
             out.close();

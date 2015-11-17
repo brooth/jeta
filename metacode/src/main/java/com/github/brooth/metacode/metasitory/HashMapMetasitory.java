@@ -9,28 +9,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class HashMapMetasitory implements Metasitory {
 
-    private static final Map<String, HashMapMetasitory> multiton = new HashMap<>();
+    private final Map<Class, HashMapMetasitoryContainer.Context> map = new LinkedHashMap<>();
 
-    private final Map<Class, HashMapMetasitoryContainer.Context> map;
-
-    public static HashMapMetasitory getInstance(String metaPackage) {
-        HashMapMetasitory instance = multiton.get(metaPackage);
-        if (instance == null) {
-            synchronized (HashMapMetasitory.class) {
-                if (!multiton.containsKey(metaPackage)) {
-                    instance = new HashMapMetasitory(metaPackage);
-                    multiton.put(metaPackage, instance);
-                }
-            }
-        }
-
-        return instance;
+    public HashMapMetasitory(String metaPackage) {
+        loadContainer(metaPackage);
     }
 
-    private HashMapMetasitory(String metaPackage) {
+    public void loadContainer(String metaPackage) {
         String className = metaPackage.isEmpty() ? "MetasitoryContainer" : metaPackage + ".MetasitoryContainer";
         Class<?> clazz;
         try {
@@ -48,7 +37,7 @@ public class HashMapMetasitory implements Metasitory {
             throw new IllegalArgumentException("Failed to initiate class " + clazz, e);
         }
 
-        map = container.get();
+        map.putAll(container.get());
     }
 
     @Override
