@@ -1,9 +1,9 @@
 package com.github.brooth.metacode.samples.observer;
 
-import com.github.brooth.metacode.observer.Subject;
 import com.github.brooth.metacode.observer.Observer;
 import com.github.brooth.metacode.observer.ObserverHandler;
 import com.github.brooth.metacode.observer.Observers;
+import com.github.brooth.metacode.observer.Subject;
 import com.github.brooth.metacode.samples.MetaHelper;
 
 /**
@@ -25,7 +25,7 @@ public class ObserverSample {
 
         public void run() {
             // ...
-            observers.notifyAndClear(new CompleteEvent("Hello  world"));
+            observers.notifyAndClear(new CompleteEvent("Hello world"));
         }
 
         public static class CompleteEvent {
@@ -66,6 +66,7 @@ public class ObserverSample {
     }
 
     public static void main(String[] args) {
+        MetaHelper.init("");
         RequestWindow window = new RequestWindow();
         window.doRequest();
         window.close();
