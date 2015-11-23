@@ -7,7 +7,7 @@ import com.github.brooth.metacode.metasitory.Metasitory;
 /**
  *
  */
-public class MetaController<M> extends MasterController<M, MetaController.MetaMetacode<M>> {
+public class MetaController<M> extends MasterController<M, MetaMetacode<M>> {
 
     protected final MetaEntityFactory factory;
 
@@ -19,9 +19,5 @@ public class MetaController<M> extends MasterController<M, MetaController.MetaMe
     public void applyMeta() {
         for (MetaMetacode<M> metacode : metacodes)
             metacode.applyMeta(master, factory);
-    }
-
-    public interface MetaMetacode<M> extends MasterMetacode<M> {
-        public void applyMeta(M master, MetaEntityFactory factory);
     }
 }

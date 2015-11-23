@@ -52,8 +52,8 @@ public class ProxySample {
         }
 
         public void test() {
-            System.out.println(String.format("ping '%s'...", ping.getUti()));
             MetaHelper.createProxy(this, ping);
+            System.out.println(String.format("ping '%s'...", ping.getUti()));
             System.out.println(String.format("done in %dms", ping.execute()));
         }
     }

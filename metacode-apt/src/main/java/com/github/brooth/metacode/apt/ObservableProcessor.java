@@ -1,6 +1,6 @@
 package com.github.brooth.metacode.apt;
 
-import com.github.brooth.metacode.observer.ObservableController;
+import com.github.brooth.metacode.observer.ObservableMetacode;
 import com.github.brooth.metacode.observer.Subject;
 import com.squareup.javapoet.*;
 
@@ -24,7 +24,7 @@ public class ObservableProcessor extends SimpleProcessor {
         MetacodeContext context = ctx.metacodeContext;
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
-                ClassName.get(ObservableController.ObservableMetacode.class), masterClassName));
+                ClassName.get(ObservableMetacode.class), masterClassName));
 
         MethodSpec.Builder applyMethodSpecBuilder = MethodSpec.methodBuilder("applyObservable")
                 .addModifiers(Modifier.PUBLIC)
