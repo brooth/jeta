@@ -1,7 +1,7 @@
 package com.github.brooth.metacode.apt;
 
 import com.github.brooth.metacode.proxy.Proxy;
-import com.github.brooth.metacode.proxy.ProxyMetaController;
+import com.github.brooth.metacode.proxy.ProxyMetacode;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -32,7 +32,7 @@ public class ProxyMetaProcessor extends SimpleProcessor {
         MetacodeContext context = ctx.metacodeContext;
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
-                ClassName.get(ProxyMetaController.ProxyMetacode.class), masterClassName));
+                ClassName.get(ProxyMetacode.class), masterClassName));
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyProxy")
                 .addModifiers(Modifier.PUBLIC)
@@ -71,6 +71,7 @@ public class ProxyMetaProcessor extends SimpleProcessor {
 
             for (final Element subElement : ((TypeElement) proxyTypeElement).getEnclosedElements()) {
                 if (subElement.getKind() == ElementKind.METHOD) {
+                    // todo: iterator.remove();
                     toImplementMethods = Sets.filter(toImplementMethods, new Predicate<ExecutableElement>() {
                         @Override
                         public boolean apply(ExecutableElement input) {
@@ -82,7 +83,7 @@ public class ProxyMetaProcessor extends SimpleProcessor {
 
             for (ExecutableElement method : toImplementMethods) {
                 TypeMirror[] params = new TypeMirror[method.getParameters().size()];
-                String[] values = new String[method.getParameters().size()];
+                String[] values = new String[params.lenght];
                 int pi = 0;
                 for (VariableElement param : method.getParameters()) {
                     params[pi] = param.asType();

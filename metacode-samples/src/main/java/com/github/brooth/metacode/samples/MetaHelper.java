@@ -2,7 +2,7 @@ package com.github.brooth.metacode.samples;
 
 import com.github.brooth.metacode.observer.ObservableServant;
 import com.github.brooth.metacode.observer.ObserverServant;
-import com.github.brooth.metacode.proxy.ProxyMetaController;
+import com.github.brooth.metacode.proxy.ProxyController;
 import com.github.brooth.metacode.pubsub.Message;
 import com.github.brooth.metacode.pubsub.SubscriptionHandler;
 import com.github.brooth.metacode.metasitory.HashMapMetasitory;
@@ -59,6 +59,6 @@ public class MetaHelper {
     }
 
     public static void createProxy(Object master, Object real) {
-        new ProxyMetaController(getInstance().metasitory, master).createProxy(real);
+        new ProxyController(getInstance().metasitory, master).createProxy(real);
     }
 }
