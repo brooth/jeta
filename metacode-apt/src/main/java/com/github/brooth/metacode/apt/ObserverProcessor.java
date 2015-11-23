@@ -2,7 +2,7 @@ package com.github.brooth.metacode.apt;
 
 import com.github.brooth.metacode.observer.Observer;
 import com.github.brooth.metacode.observer.ObserverHandler;
-import com.github.brooth.metacode.observer.ObserverServant;
+import com.github.brooth.metacode.observer.ObserverController;
 import com.github.brooth.metacode.observer.Observers;
 import com.squareup.javapoet.*;
 
@@ -18,9 +18,9 @@ import java.util.List;
  * @author khalidov
  * @version $Id$
  */
-public class ObserverMetaProcessor extends SimpleProcessor {
+public class ObserverProcessor extends SimpleProcessor {
 
-    public ObserverMetaProcessor() {
+    public ObserverProcessor() {
         super(Observer.class);
     }
 
@@ -29,7 +29,7 @@ public class ObserverMetaProcessor extends SimpleProcessor {
         MetacodeContext context = ctx.metacodeContext;
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
-                ClassName.get(ObserverServant.ObserverMetacode.class), masterClassName));
+                ClassName.get(ObserverController.ObserverMetacode.class), masterClassName));
         ClassName handlerClassName = ClassName.get(ObserverHandler.class);
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyObservers")

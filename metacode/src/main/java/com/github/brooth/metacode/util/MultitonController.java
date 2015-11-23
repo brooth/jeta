@@ -1,6 +1,6 @@
 package com.github.brooth.metacode.util;
 
-import com.github.brooth.metacode.MasterClassServant;
+import com.github.brooth.metacode.MasterClassController;
 import com.github.brooth.metacode.MasterMetacode;
 import com.github.brooth.metacode.metasitory.ClassForNameMetasitory;
 import com.github.brooth.metacode.metasitory.Criteria;
@@ -10,15 +10,15 @@ import com.google.common.collect.Iterables;
 /**
  *
  */
-public class MultitonServant<M, K> extends MasterClassServant<M, MasterMetacode> {
+public class MultitonController<M, K> extends MasterClassController<M, MasterMetacode> {
 
     protected Class<K> keyClass;
 
-    public MultitonServant(Class<? extends M> masterClass, Class<K> keyClass) {
+    public MultitonController(Class<? extends M> masterClass, Class<K> keyClass) {
         this(new ClassForNameMetasitory(), masterClass, keyClass);
     }
 
-    public MultitonServant(Metasitory metasitory, Class<? extends M> masterClass, Class<K> keyClass) {
+    public MultitonController(Metasitory metasitory, Class<? extends M> masterClass, Class<K> keyClass) {
         super(metasitory, masterClass);
         this.keyClass = keyClass;
     }

@@ -1,6 +1,6 @@
 package com.github.brooth.metacode.apt;
 
-import com.github.brooth.metacode.observer.ObservableServant;
+import com.github.brooth.metacode.observer.ObservableController;
 import com.github.brooth.metacode.observer.Subject;
 import com.squareup.javapoet.*;
 
@@ -13,9 +13,9 @@ import java.util.WeakHashMap;
 /**
  *
  */
-public class ObservableMetaProcessor extends SimpleProcessor {
+public class ObservableProcessor extends SimpleProcessor {
 
-    public ObservableMetaProcessor() {
+    public ObservableProcessor() {
         super(Subject.class);
     }
 
@@ -24,7 +24,7 @@ public class ObservableMetaProcessor extends SimpleProcessor {
         MetacodeContext context = ctx.metacodeContext;
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
-                ClassName.get(ObservableServant.ObservableMetacode.class), masterClassName));
+                ClassName.get(ObservableController.ObservableMetacode.class), masterClassName));
 
         MethodSpec.Builder applyMethodSpecBuilder = MethodSpec.methodBuilder("applyObservable")
                 .addModifiers(Modifier.PUBLIC)

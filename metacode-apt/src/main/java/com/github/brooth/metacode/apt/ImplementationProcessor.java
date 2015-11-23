@@ -1,7 +1,7 @@
 package com.github.brooth.metacode.apt;
 
 import javax.annotation.processing.*;
-import com.github.brooth.metacode.util.ImplementationServant;
+import com.github.brooth.metacode.util.ImplementationController;
 import com.github.brooth.metacode.util.Implementation;
 import com.squareup.javapoet.TypeSpec;
 

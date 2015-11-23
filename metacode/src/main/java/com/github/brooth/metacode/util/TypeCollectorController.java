@@ -1,6 +1,6 @@
 package com.github.brooth.metacode.util;
 
-import com.github.brooth.metacode.MasterClassServant;
+import com.github.brooth.metacode.MasterClassController;
 import com.github.brooth.metacode.MasterMetacode;
 import com.github.brooth.metacode.metasitory.Metasitory;
 
@@ -11,9 +11,9 @@ import java.util.List;
 /**
  *
  */
-public class TypeCollectorServant extends MasterClassServant<Object, TypeCollectorServant.TypeCollectorMetacode> {
+public class TypeCollectorController extends MasterClassController<Object, TypeCollectorController.TypeCollectorMetacode> {
 
-    protected TypeCollectorServant(Metasitory metasitory, Class<?> masterClass) {
+    protected TypeCollectorController(Metasitory metasitory, Class<?> masterClass) {
         super(metasitory, masterClass);
     }
 

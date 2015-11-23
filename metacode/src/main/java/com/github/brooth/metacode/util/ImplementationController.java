@@ -13,12 +13,12 @@ import java.util.List;
 /**
  *
  */
-public class ImplementationServant<I> {
+public class ImplementationController<I> {
 
     protected List<MasterMetacode> metacodes;
     protected Class<I> of;
 
-    public ImplementationServant(Metasitory metasitory, Class<I> of) {
+    public ImplementationController(Metasitory metasitory, Class<I> of) {
         this.of = of;
         searchMetacodes(metasitory);
     }

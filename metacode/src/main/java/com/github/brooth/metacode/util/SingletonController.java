@@ -1,6 +1,6 @@
 package com.github.brooth.metacode.util;
 
-import com.github.brooth.metacode.MasterClassServant;
+import com.github.brooth.metacode.MasterClassController;
 import com.github.brooth.metacode.MasterMetacode;
 import com.github.brooth.metacode.metasitory.ClassForNameMetasitory;
 import com.github.brooth.metacode.metasitory.Criteria;
@@ -10,13 +10,13 @@ import com.google.common.collect.Iterables;
 /**
  *
  */
-public class SingletonServant<M> extends MasterClassServant<M, MasterMetacode> {
+public class SingletonController<M> extends MasterClassController<M, MasterMetacode> {
 
-    public SingletonServant(Class<? extends M> masterClass) {
+    public SingletonController(Class<? extends M> masterClass) {
         this(new ClassForNameMetasitory(), masterClass);
     }
 
-    public SingletonServant(Metasitory metasitory, Class<? extends M> masterClass) {
+    public SingletonController(Metasitory metasitory, Class<? extends M> masterClass) {
         super(metasitory, masterClass);
     }
 

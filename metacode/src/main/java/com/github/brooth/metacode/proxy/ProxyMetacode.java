@@ -1,7 +1,7 @@
 package com.github.brooth.metacode.proxy;
 
 import com.github.brooth.metacode.MasterMetacode;
-import com.github.brooth.metacode.MasterServant;
+import com.github.brooth.metacode.MasterController;
 import com.github.brooth.metacode.metasitory.Metasitory;
 
 /**

@@ -2,7 +2,7 @@ package com.github.brooth.metacode.apt;
 
 import com.github.brooth.metacode.log.Log;
 import javax.annotation.processing.*;
-import com.github.brooth.metacode.log.LogServant;
+import com.github.brooth.metacode.log.LogController;
 import com.squareup.javapoet.TypeSpec;
 
 /**

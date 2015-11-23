@@ -1,7 +1,7 @@
 package com.github.brooth.metacode.metasitory;
 
 import com.github.brooth.metacode.MasterMetacode;
-import com.github.brooth.metacode.util.MultitonServant;
+import com.github.brooth.metacode.util.MultitonController;
 import com.github.brooth.metacode.util.Multiton;
 
 import javax.tools.Diagnostic;

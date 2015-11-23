@@ -21,9 +21,9 @@ import java.util.Set;
  * @author khalidov
  * @version $Id$
  */
-public class ProxyMetaProcessor extends SimpleProcessor {
+public class ProxyProcessor extends SimpleProcessor {
 
-    public ProxyMetaProcessor() {
+    public ProxyProcessor() {
         super(Proxy.class);
     }
 
@@ -83,7 +83,7 @@ public class ProxyMetaProcessor extends SimpleProcessor {
 
             for (ExecutableElement method : toImplementMethods) {
                 TypeMirror[] params = new TypeMirror[method.getParameters().size()];
-                String[] values = new String[params.lenght];
+                String[] values = new String[params.length];
                 int pi = 0;
                 for (VariableElement param : method.getParameters()) {
                     params[pi] = param.asType();

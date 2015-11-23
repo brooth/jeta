@@ -1,15 +1,15 @@
 package com.github.brooth.metacode.validate;
 
 import com.github.brooth.metacode.MasterMetacode;
-import com.github.brooth.metacode.MasterServant;
+import com.github.brooth.metacode.MasterController;
 import com.github.brooth.metacode.metasitory.Metasitory;
 
 /**
  *
  */
-public class ValidationServant extends MasterServant<Object, ValidationServant.ValidatorMetacode<Object>> {
+public class ValidationController extends MasterController<Object, ValidationController.ValidatorMetacode<Object>> {
 
-    public ValidationServant(Metasitory metasitory, Object master) {
+    public ValidationController(Metasitory metasitory, Object master) {
         super(metasitory, master, Validate.class);
     }
 

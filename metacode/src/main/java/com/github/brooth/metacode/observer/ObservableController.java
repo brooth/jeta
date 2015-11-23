@@ -1,21 +1,21 @@
 package com.github.brooth.metacode.observer;
 
 import com.github.brooth.metacode.MasterMetacode;
-import com.github.brooth.metacode.MasterServant;
+import com.github.brooth.metacode.MasterController;
 import com.github.brooth.metacode.metasitory.Metasitory;
 
 /**
  * @author khalidov
  * @version $Id$
  */
-public class ObservableServant<M> extends MasterServant<M, ObservableServant.ObservableMetacode<M>> {
+public class ObservableController<M> extends MasterController<M, ObservableController.ObservableMetacode<M>> {
 
-    public ObservableServant(Metasitory metasitory, M master) {
+    public ObservableController(Metasitory metasitory, M master) {
         super(metasitory, master);
     }
 
     public void createObservable() {
-        for (ObservableServant.ObservableMetacode<M> observable : metacodes)
+        for (ObservableController.ObservableMetacode<M> observable : metacodes)
             observable.applyObservable(master);
     }
 

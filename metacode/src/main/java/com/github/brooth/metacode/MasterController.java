@@ -5,16 +5,16 @@ import com.github.brooth.metacode.metasitory.Metasitory;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
-public abstract class MasterServant<M, C extends MasterMetacode> extends MasterClassServant<M, C> {
+public abstract class MasterController<M, C extends MasterMetacode> extends MasterClassController<M, C> {
 
     protected M master;
 
-    protected MasterServant(Metasitory metasitory, M master) {
+    protected MasterController(Metasitory metasitory, M master) {
         this(metasitory, master, null);
     }
 
     @SuppressWarnings("unchecked")
-    public MasterServant(Metasitory metasitory, M master, @Nullable Class<? extends Annotation> annotationClass) {
+    public MasterController(Metasitory metasitory, M master, @Nullable Class<? extends Annotation> annotationClass) {
         super(metasitory, (Class<? extends M>) master.getClass(), annotationClass);
         this.master = master;
     }

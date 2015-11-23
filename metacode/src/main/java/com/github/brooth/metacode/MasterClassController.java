@@ -11,19 +11,19 @@ import java.util.List;
  * @param <M>
  * @param <C>
  */
-public abstract class MasterClassServant<M, C extends MasterMetacode> {
+public abstract class MasterClassController<M, C extends MasterMetacode> {
 
     protected Class<? extends M> masterClass;
     protected List<C> metacodes;
     @Nullable
     protected Class<? extends Annotation> annotationClass;
 
-    protected MasterClassServant(Metasitory metasitory, Class<? extends M> masterClass) {
+    protected MasterClassController(Metasitory metasitory, Class<? extends M> masterClass) {
         this.masterClass = masterClass;
         searchMetacodes(metasitory);
     }
 
-    public MasterClassServant(Metasitory metasitory, Class<? extends M> masterClass, @Nullable Class<? extends Annotation> annotationClass) {
+    public MasterClassController(Metasitory metasitory, Class<? extends M> masterClass, @Nullable Class<? extends Annotation> annotationClass) {
         this(metasitory, masterClass);
         this.annotationClass = annotationClass;
     }
