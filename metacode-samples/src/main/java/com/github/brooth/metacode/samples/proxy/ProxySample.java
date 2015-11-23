@@ -1,5 +1,9 @@
 package com.github.brooth.metacode.samples.proxy;
 
+import com.github.brooth.metacode.proxy.AbstractProxy;
+import com.github.brooth.metacode.proxy.Proxy;
+import com.github.brooth.metacode.samples.MetaHelper;
+
 /**
  *
  */
@@ -7,26 +11,35 @@ public class ProxySample {
 
     public interface Ping {
         void setUri(String uri);
+        String getUti();
         int execute();
     }
-        
+
     public static class PingImpl implements Ping {
         private String uri;
-        
+
+        @Override
         public void setUri(String uri) {
             this.uri = uri;
         }
 
-        public int execute() {                
+        @Override
+        public String getUti() {
+            return uri;
+        }
+
+        @Override
+        public int execute() {
             long ts = System.currentTimeMillis();
             //...
-            return (int) System.currentTimeMillis() - ts;
+            return (int) (System.currentTimeMillis() - ts);
         }
     }
 
-    public abstract class FakePing implements Ping, AbstractProxy<Ping> {
+    public static abstract class FakePing implements Ping, AbstractProxy<Ping> {
+        @Override
         public int execute() {
-            return 42;                
+            return 42;
         }
     }
 
@@ -38,33 +51,16 @@ public class ProxySample {
             this.ping = ping;
         }
 
-        public void ping() {
+        public void test() {
             MetaHelper.createProxy(this, ping);
-            System.out.println("ping result:  " + ping.execute());
+            System.out.println(String.format("'%s' pinged in %dms", ping.getUti(), ping.execute()));
         }
     }
 
     public static void main(String[] args) {
         Ping googlePing = new PingImpl();
         googlePing.setUri("http://google.com");
-        PingTest test = new PingTest(googlePing);
-        test.ping();
-    }
-}
-
-public class PingTest_Metacode {
-    public void applyProxy(PingTest master, final Object real) {
-        if(real == master.ping) {
-            master.ping = new FakePing() {
-                protected Ping real() {
-                    return real;
-                }
-    
-                public setUri(String uri) {
-                    real().setUri(uri);
-                }
-            }
-        }
+        new PingTest(googlePing).test();
     }
 }
 

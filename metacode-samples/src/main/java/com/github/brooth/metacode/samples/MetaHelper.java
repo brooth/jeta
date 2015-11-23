@@ -2,12 +2,12 @@ package com.github.brooth.metacode.samples;
 
 import com.github.brooth.metacode.observer.ObservableServant;
 import com.github.brooth.metacode.observer.ObserverServant;
+import com.github.brooth.metacode.proxy.ProxyMetaController;
 import com.github.brooth.metacode.pubsub.Message;
 import com.github.brooth.metacode.pubsub.SubscriptionHandler;
 import com.github.brooth.metacode.metasitory.HashMapMetasitory;
 import com.github.brooth.metacode.metasitory.Metasitory;
 import com.github.brooth.metacode.observer.ObserverHandler;
-import com.github.brooth.metacode.samples.validate.ValidatorSample;
 import com.github.brooth.metacode.util.ImplementationServant;
 import com.github.brooth.metacode.validate.ValidationServant;
 
@@ -56,5 +56,9 @@ public class MetaHelper {
 
     public static void validate(Object master) {
         new ValidationServant(getInstance().metasitory, master).validate();
+    }
+
+    public static void createProxy(Object master, Object real) {
+        new ProxyMetaController(getInstance().metasitory, master).createProxy(real);
     }
 }

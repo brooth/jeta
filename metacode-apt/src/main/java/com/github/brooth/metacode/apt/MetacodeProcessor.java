@@ -54,8 +54,9 @@ public class MetacodeProcessor extends AbstractProcessor {
         this.env = processingEnv;
         this.elementUtils = processingEnv.getElementUtils();
 
-        processors.add(new ObservableProcessor());
-        processors.add(new ObserverProcessor());
+        processors.add(new ObservableMetaProcessor());
+        processors.add(new ObserverMetaProcessor());
+        processors.add(new ProxyMetaProcessor());
     }
 
     @Override

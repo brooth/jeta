@@ -13,9 +13,9 @@ import java.util.WeakHashMap;
 /**
  *
  */
-public class ObservableProcessor extends SimpleProcessor {
+public class ObservableMetaProcessor extends SimpleProcessor {
 
-    public ObservableProcessor() {
+    public ObservableMetaProcessor() {
         super(Subject.class);
     }
 

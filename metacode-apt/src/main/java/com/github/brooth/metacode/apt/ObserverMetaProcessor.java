@@ -18,9 +18,9 @@ import java.util.List;
  * @author khalidov
  * @version $Id$
  */
-public class ObserverProcessor extends SimpleProcessor {
+public class ObserverMetaProcessor extends SimpleProcessor {
 
-    public ObserverProcessor() {
+    public ObserverMetaProcessor() {
         super(Observer.class);
     }
 
