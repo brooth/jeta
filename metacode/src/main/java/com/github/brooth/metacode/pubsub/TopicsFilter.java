@@ -3,8 +3,7 @@ package com.github.brooth.metacode.pubsub;
 import java.util.Objects;
 
 /**
- * @author khalidov
- * @version $Id$
+ * 
  */
 public class TopicsFilter implements Filter {
 

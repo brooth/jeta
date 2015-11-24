@@ -4,8 +4,7 @@ import com.github.brooth.metacode.observer.ObserverHandler;
 import com.github.brooth.metacode.observer.Observers;
 
 /**
- * @author khalidov
- * @version $Id$
+ * 
  */
 public class SubscriptionHandler {
 

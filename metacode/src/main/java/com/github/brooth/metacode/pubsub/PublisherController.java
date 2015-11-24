@@ -4,8 +4,7 @@ import com.github.brooth.metacode.MasterController;
 import com.github.brooth.metacode.metasitory.Metasitory;
 
 /**
- * @author khalidov
- * @version $Id$
+ * 
  */
 public class PublisherController<M> extends MasterController<M, PublisherMetacode<M>> {
 

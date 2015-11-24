@@ -4,8 +4,7 @@ import com.github.brooth.metacode.MasterController;
 import com.github.brooth.metacode.metasitory.Metasitory;
 
 /**
- * @author khalidov
- * @version $Id$
+ * 
  */
 public class ProxyController extends MasterController<Object, ProxyMetacode<Object>> {
 

@@ -6,9 +6,8 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
-* @author khalidov
-* @version $Id$
-*/
+ * 
+ */
 public interface TypeCollectorMetacode extends MasterMetacode {
     List<Class> getTypeCollection(Class<? extends Annotation> clazz);
 }

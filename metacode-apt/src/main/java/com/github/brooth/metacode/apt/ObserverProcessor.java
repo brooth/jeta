@@ -14,8 +14,7 @@ import javax.lang.model.element.VariableElement;
 import java.util.List;
 
 /**
- * @author khalidov
- * @version $Id$
+ * 
  */
 public class ObserverProcessor extends SimpleProcessor {
 

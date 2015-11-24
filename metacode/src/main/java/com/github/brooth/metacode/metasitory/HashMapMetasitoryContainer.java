@@ -6,8 +6,7 @@ import javax.inject.Provider;
 import java.util.Map;
 
 /**
- * @author khalidov
- * @version $Id$
+ * 
  */
 public interface HashMapMetasitoryContainer {
 

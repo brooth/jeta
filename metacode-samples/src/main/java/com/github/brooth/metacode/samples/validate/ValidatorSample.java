@@ -6,8 +6,7 @@ import com.github.brooth.metacode.validate.IsNotNull;
 import com.github.brooth.metacode.validate.Validate;
 
 /**
- * @author khalidov
- * @version $Id$
+ * 
  */
 public class ValidatorSample {
 
@@ -16,9 +15,9 @@ public class ValidatorSample {
         public String name;
         @Validate(IsNotEmpty.class)
         public String[] degrees;
-        @Validate(expression = "age > 18")
+        @Validate(expression = "%m.age > 18")
         public int age;
-        @Validate(expression = "age - 18 >= experience", expressionError = "too high experience")
+        @Validate(expression = "%m.age - 18 >= %m.experience", expressionError = "too high experience")
         public int experience;
 
         public HireAction(String name, String[] degrees, int age, int experience) {

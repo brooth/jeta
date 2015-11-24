@@ -11,8 +11,7 @@ import javax.lang.model.util.Elements;
 import java.util.List;
 
 /**
- * @author khalidov
- * @version $Id$
+ * 
  */
 public class MetacodeUtils {
 

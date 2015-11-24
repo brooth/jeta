@@ -3,8 +3,7 @@ package com.github.brooth.metacode.pubsub;
 import javax.annotation.Nullable;
 
 /**
- * @author khalidov
- * @version $Id$
+ * 
  */
 public class BaseMessage implements Message {
 

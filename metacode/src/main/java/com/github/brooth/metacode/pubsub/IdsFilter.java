@@ -1,8 +1,7 @@
 package com.github.brooth.metacode.pubsub;
 
 /**
- * @author khalidov
- * @version $Id$
+ * 
  */
 public class IdsFilter implements Filter {
 
