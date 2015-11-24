@@ -35,7 +35,8 @@ public class ObserverProcessor extends SimpleProcessor {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(handlerClassName)
                 .addParameter(masterClassName, "master", Modifier.FINAL)
-                .addParameter(Object.class, "observable");
+                .addParameter(Object.class, "observable")
+                .addParameter(Class.class, "observableClass");
 
         for (Element element : ctx.elements) {
             final Observer annotation = element.getAnnotation(Observer.class);
@@ -70,7 +71,7 @@ public class ObserverProcessor extends SimpleProcessor {
                     .build();
 
             methodBuilder
-                    .beginControlFlow("if (observable.getClass() == $T.class)", observableTypeName)
+                    .beginControlFlow("if ($T.class == observableClass)", observableTypeName)
                     .addStatement("$T handler = new $T()", handlerClassName, handlerClassName)
                     .addStatement("// hash of $S", eventTypeName.toString())
                     .addStatement("handler.add($T.class, $T.class,\n$T.$L(($T) observable).\nregister($L))",

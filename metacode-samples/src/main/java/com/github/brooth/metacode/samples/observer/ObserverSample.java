@@ -56,17 +56,12 @@ public class ObserverSample {
         protected void onCompleteEvent(AsyncRequest.CompleteEvent e) {
             System.out.print(String.format("request complete: [%s] %s",
                 Thread.currentThread().getName(), e.getStatus()));
-        }
-
-        protected void close() {
-			if(handler != null)
-            	handler.unregisterAll();
+            handler.unregisterAll();
         }
     }
 
     public static void main(String[] args) {
         RequestWindow window = new RequestWindow();
         window.doRequest();
-        window.close();
     }
 }

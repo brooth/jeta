@@ -7,5 +7,5 @@ import com.github.brooth.metacode.MasterMetacode;
 * @version $Id$
 */
 public interface ObserverMetacode<M> extends MasterMetacode<M> {
-    public ObserverHandler applyObservers(M master, Object observable);
+    public ObserverHandler applyObservers(M master, Object observable, Class observableClass);
 }
