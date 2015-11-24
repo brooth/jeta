@@ -46,7 +46,7 @@ public class ObservableProcessor extends SimpleProcessor {
             String eventTypeStr = observersTypeName.toString();
             int i = eventTypeStr.indexOf('<');
             if (i == -1)
-                throw new IllegalArgumentException("Not valid @Subject usage, define event type as generic");
+                throw new IllegalArgumentException("Not valid @Subject usage, define event type as generic of Observers");
 
             eventTypeStr = eventTypeStr.substring(i + 1, eventTypeStr.lastIndexOf('>'));
             String methodHashName = ("getObservers" + eventTypeStr.hashCode()).replace("-", "N");

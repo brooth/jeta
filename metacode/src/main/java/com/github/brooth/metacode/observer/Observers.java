@@ -8,7 +8,7 @@ import java.util.List;
  *
  * @param <E>
  */
-public final class Observers<E> {
+public class Observers<E> {
 
     private final List<EventObserver<E>> observers =
             Collections.synchronizedList(new ArrayList<EventObserver<E>>());

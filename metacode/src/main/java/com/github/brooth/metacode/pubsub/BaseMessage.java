@@ -23,6 +23,10 @@ public class BaseMessage implements Message {
         this.topic = topic;
     }
 
+    public BaseMessage(String topic) {
+        this.topic = topic;
+    }
+
     @Override
     public int getId() {
         return id;

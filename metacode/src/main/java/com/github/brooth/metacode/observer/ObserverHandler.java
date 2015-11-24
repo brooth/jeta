@@ -9,9 +9,9 @@ import java.util.Map;
 /**
  * Not thread-safe
  */
-public final class ObserverHandler {
+public class ObserverHandler {
 
-    private final Table<Class, Class, Observers.Handler> handlers = HashBasedTable.create();
+    protected final Table<Class, Class, Observers.Handler> handlers = HashBasedTable.create();
 
     /**
      * used by metacode to add @see ObserverHandler record

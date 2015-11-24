@@ -1,9 +1,6 @@
 package com.github.brooth.metacode.samples.pubsub;
 
-import com.github.brooth.metacode.pubsub.BaseMessage;
-import com.github.brooth.metacode.pubsub.Publisher;
-import com.github.brooth.metacode.pubsub.Subscribe;
-import com.github.brooth.metacode.pubsub.SubscriptionHandler;
+import com.github.brooth.metacode.pubsub.*;
 import com.github.brooth.metacode.samples.MetaHelper;
 
 /**
@@ -14,16 +11,21 @@ public class PublishSubscribeSample {
     /**
      * Publisher
      */
-    @Publisher(AlarmManager.AlertMessage.class)
     public static class AlarmManager {
+        @Publish
+        protected Subscribers<AlertMessage> subscribers;
 
-        public void alarm(String type) {
-            MetaHelper.publishMessage(AlarmManager.class, new AlertMessage(type));
+        public AlarmManager() {
+            MetaHelper.createPublisher(this);
+        }
+
+        public void alarm(String msg) {
+            subscribers.notify(new AlertMessage(msg));
         }
 
         public static class AlertMessage extends BaseMessage {
-            private AlertMessage(String type) {
-                super(42, type);
+            private AlertMessage(String msg) {
+                super(msg);
             }
         }
     }
