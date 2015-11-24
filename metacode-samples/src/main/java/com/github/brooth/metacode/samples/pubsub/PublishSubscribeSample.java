@@ -42,12 +42,12 @@ public class PublishSubscribeSample {
 
         @Subscribe(AlarmManager.class)
         protected void alert(AlarmManager.AlertMessage alert) {
-            handler.unregisterAll();
             quit(alert.getTopic());
         }
 
         private void quit(String reason) {
             System.err.println(reason + " I'm quitting!");
+            handler.unregisterAll();
         }
     }
 

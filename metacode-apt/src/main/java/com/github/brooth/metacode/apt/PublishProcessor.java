@@ -30,12 +30,19 @@ public class PublishProcessor extends SimpleProcessor {
                 .addParameter(masterClassName, "master");
 
         for (Element element : ctx.elements) {
-            TypeName subscribersTypeName = TypeName.get(element.asType());
             String fieldName = element.getSimpleName().toString();
-            FieldSpec observersField = FieldSpec.builder(subscribersTypeName, fieldName)
+
+            String monitorFiledName = fieldName + "_MONITOR";
+            builder.addField(FieldSpec.builder(Object.class, monitorFiledName)
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                    .initializer("new Object()")
+                    .build());
+
+            TypeName subscribersTypeName = TypeName.get(element.asType());
+            FieldSpec subscribersFieldSpec = FieldSpec.builder(subscribersTypeName, fieldName)
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                     .build();
-            builder.addField(observersField);
+            builder.addField(subscribersFieldSpec);
 
             String eventTypeStr = subscribersTypeName.toString();
             int i = eventTypeStr.indexOf('<');
@@ -50,7 +57,11 @@ public class PublishProcessor extends SimpleProcessor {
                     .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                     .returns(subscribersTypeName)
                     .beginControlFlow("if ($L == null)", fieldName)
+                    .beginControlFlow("synchronized ($L)", monitorFiledName)
+                    .beginControlFlow("if ($L == null)", fieldName)
                     .addStatement("$L = new $T()", fieldName, subscribersTypeName)
+                    .endControlFlow()
+                    .endControlFlow()
                     .endControlFlow()
                     .addStatement("return $L", fieldName)
                     .build();

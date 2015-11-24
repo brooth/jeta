@@ -32,11 +32,17 @@ public class ObservableProcessor extends SimpleProcessor {
                 .addParameter(masterClassName, "master");
 
         for (Element element : ctx.elements) {
+            String fieldName = element.getSimpleName().toString();
+
+            String monitorFiledName = fieldName + "_MONITOR";
+            builder.addField(FieldSpec.builder(Object.class, monitorFiledName)
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                    .initializer("new Object()")
+                    .build());
+
             TypeName observersTypeName = TypeName.get(element.asType());
             TypeName mapTypeName = ParameterizedTypeName.get(ClassName.get(Map.class),
                     masterClassName, observersTypeName);
-
-            String fieldName = element.getSimpleName().toString();
             FieldSpec observersField = FieldSpec.builder(mapTypeName, fieldName)
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
                     .initializer("new $T<>()", WeakHashMap.class)
@@ -58,8 +64,12 @@ public class ObservableProcessor extends SimpleProcessor {
                     .addParameter(masterClassName, "master")
                     .addStatement("$T result = $L.get(master)", observersTypeName, fieldName)
                     .beginControlFlow("if (result == null)")
+                    .beginControlFlow("synchronized ($L)", monitorFiledName)
+                    .beginControlFlow("if (!$L.containsKey(master))", fieldName)
                     .addStatement("result = new $T()", observersTypeName)
                     .addStatement("$L.put(master, result)", fieldName)
+                    .endControlFlow()
+                    .endControlFlow()
                     .endControlFlow()
                     .addStatement("return result")
                     .build();
