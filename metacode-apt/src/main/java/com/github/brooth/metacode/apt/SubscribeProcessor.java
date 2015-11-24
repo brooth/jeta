@@ -1,9 +1,8 @@
 package com.github.brooth.metacode.apt;
 
 import com.github.brooth.metacode.observer.EventObserver;
-import com.github.brooth.metacode.pubsub.Subscribe;
-import com.github.brooth.metacode.pubsub.SubscriberMetacode;
-import com.github.brooth.metacode.pubsub.SubscriptionHandler;
+import com.github.brooth.metacode.pubsub.*;
+import com.google.common.base.Joiner;
 import com.squareup.javapoet.*;
 
 import javax.annotation.processing.RoundEnvironment;
@@ -57,17 +56,59 @@ public class SubscribeProcessor extends SimpleProcessor {
             String methodHashName = ("getSubscribers" +
                     eventTypeName.toString().hashCode()).replace("-", "N");
 
+            MethodSpec.Builder onEventMethodBuilder = MethodSpec.methodBuilder("onEvent")
+                    .addAnnotation(Override.class)
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(eventTypeName, "event")
+                    .returns(void.class);
+
+            // IdsFilter
+            if (annotation.ids().length > 0) {
+                String[] ids = new String[annotation.ids().length];
+                for (int i = 0; i < ids.length; i++)
+                    ids[i] = String.valueOf(annotation.ids()[i]);
+
+                onEventMethodBuilder
+                        .beginControlFlow("if(!(new $T($L).accepts(null, null, event)))",
+                                TypeName.get(IdsFilter.class), Joiner.on(", ").join(ids))
+                        .addStatement("return")
+                        .endControlFlow();
+            }
+
+            // TopicsFilter
+            if (annotation.topics().length > 0) {
+                onEventMethodBuilder
+                        .beginControlFlow("if(!(new $T($L).accepts(null, null, event)))",
+                                TypeName.get(TopicsFilter.class), '"' + Joiner.on("\", \"").join(annotation.topics()) + '"')
+                        .addStatement("return")
+                        .endControlFlow();
+            }
+
+            // Filters
+            String onEventMethodNameStr = element.getSimpleName().toString();
+            List<String> filters = MetacodeUtils.extractClassesNames(new Runnable() {
+                @Override
+                public void run() {
+                    annotation.filters();
+                }
+            });
+
+            for (String filter : filters) {
+                onEventMethodBuilder
+                        .beginControlFlow("if(!(new $T().accepts(master, \"$L\", event)))",
+                                ClassName.bestGuess(filter), onEventMethodNameStr)
+                        .addStatement("return")
+                        .endControlFlow();
+            }
+
+            MethodSpec onEventMethodSpec = onEventMethodBuilder
+                    .addStatement("master.$N(event)", onEventMethodNameStr)
+                    .build();
+
             TypeSpec eventObserverTypeSpec = TypeSpec.anonymousClassBuilder("")
                     .addSuperinterface(ParameterizedTypeName.get(
                             ClassName.get(EventObserver.class), eventTypeName))
-                    .addMethod(MethodSpec.methodBuilder("onEvent")
-                            .addAnnotation(Override.class)
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(eventTypeName, "event")
-                            .returns(void.class)
-                            .addStatement("// todo: filters")
-                            .addStatement("master.$N(event)", element.getSimpleName().toString())
-                            .build())
+                    .addMethod(onEventMethodSpec)
                     .build();
 
             methodBuilder

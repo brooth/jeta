@@ -1,9 +1,14 @@
 package com.github.brooth.metacode.apt;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypesException;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import java.util.List;
 
 /**
  * @author khalidov
@@ -38,6 +43,21 @@ public class MetacodeUtils {
 
         } catch (MirroredTypesException e) {
             return e.getTypeMirrors().get(0).toString();
+        }
+    }
+
+    public static List<String> extractClassesNames(Runnable invoke) {
+        try {
+            invoke.run();
+            throw new IllegalArgumentException("invoke doesn't throws MirroredTypesException");
+
+        } catch (MirroredTypesException e) {
+            return Lists.transform(e.getTypeMirrors(), new Function<TypeMirror, String>() {
+                @Override
+                public String apply(TypeMirror input) {
+                    return input.toString();
+                }
+            });
         }
     }
 }
