@@ -15,7 +15,6 @@ public class ObserverSample {
      * Observable
      */
     public static class AsyncRequest extends Thread {
-
         @Subject
         protected Observers<CompleteEvent> observers;
 
@@ -45,7 +44,6 @@ public class ObserverSample {
      * Observer
      */
     public static class RequestWindow {
-
         private ObserverHandler handler;
 
         public void doRequest() {

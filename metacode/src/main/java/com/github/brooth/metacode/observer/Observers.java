@@ -1,24 +1,20 @@
 package com.github.brooth.metacode.observer;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- *
  * @param <E>
  */
 public class Observers<E> {
 
-    private final List<EventObserver<E>> observers =
-            Collections.synchronizedList(new ArrayList<EventObserver<E>>());
+    private final List<EventObserver<E>> observers = new CopyOnWriteArrayList<>();
 
     public int notify(E event) {
-        synchronized (observers) {
-            for (EventObserver<E> observer : observers)
-                observer.onEvent(event);
-            return observers.size();
-        }
+        int result = observers.size();
+        for (EventObserver<E> observer : observers)
+            observer.onEvent(event);
+        return result;
     }
 
     public int notifyAndClear(E event) {
@@ -45,8 +41,7 @@ public class Observers<E> {
     }
 
     /**
-     *
-     * @param <E>
+     * @param <E> event type
      */
     public static final class Handler<E> {
         private List<EventObserver<E>> observers;
@@ -60,13 +55,5 @@ public class Observers<E> {
         public boolean unregister() {
             return observers.remove(observer);
         }
-    }
-
-    /**
-     *
-     * @param <E>
-     */
-    public interface EventObserver<E> {
-        void onEvent(E event);
     }
 }

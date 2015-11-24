@@ -58,6 +58,7 @@ public class MetacodeProcessor extends AbstractProcessor {
         processors.add(new ObserverProcessor());
         processors.add(new ProxyProcessor());
         processors.add(new PublishProcessor());
+        processors.add(new SubscribeProcessor());
     }
 
     @Override

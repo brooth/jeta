@@ -1,9 +1,9 @@
 package com.github.brooth.metacode.apt;
 
 import com.github.brooth.metacode.observer.EventObserver;
-import com.github.brooth.metacode.observer.Observer;
-import com.github.brooth.metacode.observer.ObserverHandler;
-import com.github.brooth.metacode.observer.ObserverMetacode;
+import com.github.brooth.metacode.pubsub.Subscribe;
+import com.github.brooth.metacode.pubsub.SubscriberMetacode;
+import com.github.brooth.metacode.pubsub.SubscriptionHandler;
 import com.squareup.javapoet.*;
 
 import javax.annotation.processing.RoundEnvironment;
@@ -17,10 +17,10 @@ import java.util.List;
  * @author khalidov
  * @version $Id$
  */
-public class ObserverProcessor extends SimpleProcessor {
+public class SubscribeProcessor extends SimpleProcessor {
 
-    public ObserverProcessor() {
-        super(Observer.class);
+    public SubscribeProcessor() {
+        super(Subscribe.class);
     }
 
     @Override
@@ -28,33 +28,33 @@ public class ObserverProcessor extends SimpleProcessor {
         MetacodeContext context = ctx.metacodeContext;
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
-                ClassName.get(ObserverMetacode.class), masterClassName));
-        ClassName handlerClassName = ClassName.get(ObserverHandler.class);
+                ClassName.get(SubscriberMetacode.class), masterClassName));
+        ClassName handlerClassName = ClassName.get(SubscriptionHandler.class);
 
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyObservers")
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applySubscribers")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(handlerClassName)
                 .addParameter(masterClassName, "master", Modifier.FINAL)
-                .addParameter(Object.class, "observable");
+                .addStatement("$T handler = new $T()", handlerClassName, handlerClassName);
 
         for (Element element : ctx.elements) {
-            final Observer annotation = element.getAnnotation(Observer.class);
-            String observableClass = MetacodeUtils.extractClassName(new Runnable() {
+            final Subscribe annotation = element.getAnnotation(Subscribe.class);
+            String publisherClass = MetacodeUtils.extractClassName(new Runnable() {
                 @Override
                 public void run() {
                     annotation.value();
                 }
             });
-            ClassName observableTypeName = ClassName.bestGuess(observableClass);
+            ClassName observableTypeName = ClassName.bestGuess(publisherClass);
             ClassName metacodeTypeName = ClassName.bestGuess(MetacodeUtils.
-                    getMetacodeOf(ctx.env.getElementUtils(), observableClass));
+                    getMetacodeOf(ctx.env.getElementUtils(), publisherClass));
 
             List<? extends VariableElement> params = ((ExecutableElement) element).getParameters();
             if (params.size() != 1)
-                throw new IllegalArgumentException("Observer method must have one parameter (event)");
+                throw new IllegalArgumentException("Subscriber method must have one parameter (event)");
             TypeName eventTypeName = TypeName.get(params.get(0).asType());
 
-            String methodHashName = ("getObservers" +
+            String methodHashName = ("getSubscribers" +
                     eventTypeName.toString().hashCode()).replace("-", "N");
 
             TypeSpec eventObserverTypeSpec = TypeSpec.anonymousClassBuilder("")
@@ -65,21 +65,17 @@ public class ObserverProcessor extends SimpleProcessor {
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(eventTypeName, "event")
                             .returns(void.class)
+                            .addStatement("// todo: filters")
                             .addStatement("master.$N(event)", element.getSimpleName().toString())
                             .build())
                     .build();
 
             methodBuilder
-                    .beginControlFlow("if (observable.getClass() == $T.class)", observableTypeName)
-                    .addStatement("$T handler = new $T()", handlerClassName, handlerClassName)
                     .addStatement("// hash of $S", eventTypeName.toString())
-                    .addStatement("handler.add($T.class, $T.class,\n$T.$L(($T) observable).\nregister($L))",
-                            observableTypeName, eventTypeName, metacodeTypeName, methodHashName,
-                            observableTypeName, eventObserverTypeSpec)
-                    .addStatement("return handler")
-                    .endControlFlow();
+                    .addStatement("handler.add($T.class, $T.class,\n$T.$L().\nregister($L))",
+                            observableTypeName, eventTypeName, metacodeTypeName, methodHashName, eventObserverTypeSpec);
         }
-        methodBuilder.addStatement("throw new IllegalArgumentException(\"Not an observer of \" + observable.getClass())");
+        methodBuilder.addStatement("return handler");
         builder.addMethod(methodBuilder.build());
 
         return false;

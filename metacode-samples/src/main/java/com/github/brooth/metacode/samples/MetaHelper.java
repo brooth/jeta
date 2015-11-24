@@ -6,8 +6,8 @@ import com.github.brooth.metacode.observer.ObservableController;
 import com.github.brooth.metacode.observer.ObserverController;
 import com.github.brooth.metacode.observer.ObserverHandler;
 import com.github.brooth.metacode.proxy.ProxyController;
-import com.github.brooth.metacode.pubsub.Message;
 import com.github.brooth.metacode.pubsub.PublisherController;
+import com.github.brooth.metacode.pubsub.SubscriberController;
 import com.github.brooth.metacode.pubsub.SubscriptionHandler;
 import com.github.brooth.metacode.util.ImplementationController;
 import com.github.brooth.metacode.validate.ValidationController;
@@ -39,16 +39,12 @@ public class MetaHelper {
         return getImplementationController(of).getImplementation();
     }
 
-    public static void publishMessage(Class<?> masterClass, Message msg) {
-
-    }
-
-    public static SubscriptionHandler registerSubscriber(Object subscriber) {
-        return null;
-    }
-
     public static <M> void createPublisher(M master) {
         new PublisherController<>(getInstance().metasitory, master).createPublisher();
+    }
+
+    public static <M> SubscriptionHandler registerSubscriber(M master) {
+        return new SubscriberController<>(getInstance().metasitory, master).registerSubscriber();
     }
 
     public static <M> void createObservable(M master) {
