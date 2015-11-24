@@ -19,19 +19,19 @@ public class SubscriptionHandler {
         handler.add(other.handler);
     }
 
-    public boolean unregister(Class eventClass, Class publisherClass) {
+    public int unregister(Class eventClass, Class publisherClass) {
         return handler.unregister(eventClass, publisherClass);
     }
 
-    public boolean unregister(Class eventClass) {
+    public int unregister(Class eventClass) {
         return handler.unregister(eventClass);
     }
 
-    public boolean unregisterAll(Class publisherClass) {
+    public int unregisterAll(Class publisherClass) {
         return handler.unregisterAll(publisherClass);
     }
 
-    public void unregisterAll() {
-        handler.unregisterAll();
+    public int unregisterAll() {
+        return handler.unregisterAll();
     }
 }

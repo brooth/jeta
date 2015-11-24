@@ -8,7 +8,7 @@ import com.github.brooth.metacode.samples.MetaHelper;
  */
 public class PublishSubscribeSample {
 
-    static class NoFilter implements Filter {
+    static class NeverFilter implements Filter {
         @Override
         public boolean accepts(Object master, String methodName, Message msg) {
             return false;
@@ -65,9 +65,9 @@ public class PublishSubscribeSample {
             quit();
         }
 
-        @Subscribe(value = AlarmManager.class, filters = {NoFilter.class})
+        @Subscribe(value = AlarmManager.class, filters = {NeverFilter.class})
         protected void onApocalypse(AlarmManager.AlertMessage alert) {
-            throw new IllegalStateException("Why god, why?");
+            throw new IllegalStateException("Why God? Why?");
         }
 
         private void quit() {
@@ -80,5 +80,6 @@ public class PublishSubscribeSample {
         AlarmManager alarmManager = new AlarmManager();
         alarmManager.info("Have a good day :)");
         alarmManager.alarm("The village is on fire!");
+        alarmManager.alarm("Zombies!");
     }
 }

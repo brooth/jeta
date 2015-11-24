@@ -1,23 +1,35 @@
 package com.github.brooth.metacode.observer;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Not thread-safe
  */
 public class ObserverHandler {
 
-    protected final Table<Class, Class, Observers.Handler> handlers = HashBasedTable.create();
+    private static class Record {
+        Class row;
+        Class column;
+        Observers.Handler handler;
+
+        Record(Class row, Class column, Observers.Handler handler){
+            this.row = row;
+            this.column = column;
+            this.handler = handler;
+        }
+    }
+
+    protected final List<Record> handlers = new ArrayList<>();
 
     /**
-     * used by metacode to add @see ObserverHandler record
-     */
+     * used by metacode 
+    */
     public void add(Class observableClass, Class eventClass, Observers.Handler handler) {
-        handlers.put(observableClass, eventClass, handler);
+        handlers.add(new Record(observableClass, eventClass, handler));
     }
 
     /**
@@ -26,7 +38,7 @@ public class ObserverHandler {
      * @param other @ObserverHandler of another event/observable
      */
     public void add(ObserverHandler other) {
-        handlers.putAll(other.handlers);
+        handlers.addAll(other.handlers);
     }
 
     /**
@@ -34,68 +46,75 @@ public class ObserverHandler {
      *
      * @param eventClass      event class unregister from
      * @param observableClass observable class
-     * @return true if unregistered
+     * @return number of unregistered events
      */
-    public boolean unregister(Class eventClass, Class observableClass) {
-        Observers.Handler handler = handlers.get(observableClass, eventClass);
-        if (handler != null) {
-            handlers.remove(observableClass, eventClass);
-            return handler.unregister();
+    public int unregister(Class eventClass, Class observableClass) {
+        int result = 0;
+        Iterator<Record> records = handlers.iterator();
+        while(records.hasNext()) {
+            Record record = records.next();
+            if(record.row == observableClass && record.column == eventClass) {
+                record.handler.unregister();
+                records.remove();
+                result++;
+            }
         }
 
-        return false;
+        return result;
     }
 
     /**
      * unregister from an event (all events if it is fired by many observables)
      *
      * @param eventClass event class unregister from
-     * @return true if there is at least one observable for given event
+     * @return number of unregistered events
      */
-    public boolean unregister(Class eventClass) {
-        Map<Class, Observers.Handler> column = handlers.column(eventClass);
-
-        if (column != null) {
-            Iterator<Class> events = column.keySet().iterator();
-            while (events.hasNext()) {
-                Class event = events.next();
-                column.get(event).unregister();
-                events.remove();
+    public int unregister(Class eventClass) {
+        int result = 0;
+        Iterator<Record> records = handlers.iterator();
+        while(records.hasNext()) {
+            Record record = records.next();
+            if(record.column == eventClass) {
+                record.handler.unregister();
+                records.remove();
+                result++;
             }
         }
 
-        return false;
+        return result;
     }
 
     /**
      * unregister from all the event of a given observable
      *
      * @param observableClass observable class to unregister all event from
-     * @return true if there is at least one event for given observable
+     * @return number of unregistered events
      */
-    public boolean unregisterAll(Class observableClass) {
-        Map<Class, Observers.Handler> row = handlers.row(observableClass);
-        if (row != null) {
-            Iterator<Class> observables = row.keySet().iterator();
-            while (observables.hasNext()) {
-                Class observable = observables.next();
-                row.get(observable).unregister();
-                observables.remove();
+    public int unregisterAll(Class observableClass) {
+        int result = 0;
+        Iterator<Record> records = handlers.iterator();
+        while(records.hasNext()) {
+            Record record = records.next();
+            if(record.row == observableClass) {
+                record.handler.unregister();
+                records.remove();
+                result++;
             }
-
-            return true;
         }
 
-        return false;
+        return result;
     }
 
     /**
      * unregister from all the events of all observables
+     * @return number of unregistered events
      */
-    public void unregisterAll() {
-        for (Observers.Handler handler : handlers.values())
-            handler.unregister();
+    public int unregisterAll() {
+        for (Record record : handlers)
+            record.handler.unregister();
 
+        int result = handlers.size();
         handlers.clear();
+        return result;
     }
 }
