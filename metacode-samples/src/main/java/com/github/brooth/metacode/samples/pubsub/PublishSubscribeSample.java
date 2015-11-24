@@ -45,6 +45,9 @@ public class PublishSubscribeSample {
      * Subscriber
      */
     public static class PanicAtTheDisco {
+        final int MIN_ALARM_ID = 3;
+        final String MIN_ALARM_FILTER = "%m.MIN_ALARM_ID <= %e.getId()";
+
         private SubscriptionHandler handler;
 
         public PanicAtTheDisco() {
@@ -53,12 +56,13 @@ public class PublishSubscribeSample {
 
         @Subscribe(value = AlarmManager.class, ids = 1)
         protected void onInfo(AlarmManager.AlertMessage alert) {
-            System.out.println("Info: " + alert.getTopic());
+            System.out.println("Info: '" + alert.getTopic() + "'");
         }
 
-        @Subscribe(value = AlarmManager.class, ids = 3)
+        @Subscribe(value = AlarmManager.class, filterExpression = MIN_ALARM_FILTER)
         protected void onAlarm(AlarmManager.AlertMessage alert) {
-            quit(alert.getTopic());
+            System.err.println("Error: '" + alert.getTopic() + "'. I'm quitting!");
+            quit();
         }
 
         @Subscribe(value = AlarmManager.class, filters = {NoFilter.class})
@@ -66,8 +70,7 @@ public class PublishSubscribeSample {
             throw new IllegalStateException("Why god, why?");
         }
 
-        private void quit(String reason) {
-            System.err.print(reason + " I'm quitting!");
+        private void quit() {
             handler.unregisterAll();
         }
     }
@@ -75,7 +78,7 @@ public class PublishSubscribeSample {
     public static void main(String[] args) {
         new PanicAtTheDisco();
         AlarmManager alarmManager = new AlarmManager();
-        alarmManager.info("good day :)");
+        alarmManager.info("Have a good day :)");
         alarmManager.alarm("The village is on fire!");
     }
 }

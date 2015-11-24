@@ -62,6 +62,18 @@ public class SubscribeProcessor extends SimpleProcessor {
                     .addParameter(eventTypeName, "event")
                     .returns(void.class);
 
+            // FilterExpression
+            if (!annotation.filterExpression().isEmpty()) {
+                String expression = annotation.filterExpression()
+                        .replaceAll("%m", "master")
+                        .replaceAll("%e", "event");
+
+                onEventMethodBuilder
+                        .beginControlFlow("if(!($L))", expression)
+                        .addStatement("return")
+                        .endControlFlow();
+            }
+
             // IdsFilter
             if (annotation.ids().length > 0) {
                 String[] ids = new String[annotation.ids().length];
