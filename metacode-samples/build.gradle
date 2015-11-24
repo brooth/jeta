@@ -16,7 +16,7 @@ apply plugin: 'java'
 apply plugin: "net.ltgt.apt"
 apply plugin: 'application'
 
-mainClassName = 'com.github.brooth.metacode.samples.proxy.ProxySample'
+mainClassName = 'com.github.brooth.metacode.samples.observer.ObserverSample'
 
 repositories {
     mavenLocal()

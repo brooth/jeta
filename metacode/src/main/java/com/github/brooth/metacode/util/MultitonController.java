@@ -38,7 +38,4 @@ public class MultitonController<M, K> extends MasterClassController<M, MasterMet
         return instance;
     }
 
-    public interface MultitonMetacode<M, K> extends MasterMetacode<M> {
-        M getInstance(K key);
-    }
 }

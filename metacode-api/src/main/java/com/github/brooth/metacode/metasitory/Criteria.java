@@ -1,10 +1,9 @@
 package com.github.brooth.metacode.metasitory;
 
+import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 /**
  *

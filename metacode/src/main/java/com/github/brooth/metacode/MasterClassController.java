@@ -8,8 +8,8 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
- * @param <M>
- * @param <C>
+ * @param <M> master's class
+ * @param <C> metacode extension
  */
 public abstract class MasterClassController<M, C extends MasterMetacode> {
 

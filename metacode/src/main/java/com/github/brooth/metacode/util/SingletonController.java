@@ -35,7 +35,4 @@ public class SingletonController<M> extends MasterClassController<M, MasterMetac
         return instance;
     }
 
-    public interface SingletonMetacode<M> extends MasterMetacode<M> {
-        M getInstance();
-    }
 }

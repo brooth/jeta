@@ -4,7 +4,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.util.Elements;
-import java.lang.annotation.Annotation;
 
 /**
  * @author khalidov

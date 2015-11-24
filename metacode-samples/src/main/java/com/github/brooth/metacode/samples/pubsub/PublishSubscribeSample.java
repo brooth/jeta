@@ -1,6 +1,9 @@
 package com.github.brooth.metacode.samples.pubsub;
 
-import com.github.brooth.metacode.pubsub.*;
+import com.github.brooth.metacode.pubsub.BaseMessage;
+import com.github.brooth.metacode.pubsub.Publisher;
+import com.github.brooth.metacode.pubsub.Subscribe;
+import com.github.brooth.metacode.pubsub.SubscriptionHandler;
 import com.github.brooth.metacode.samples.MetaHelper;
 
 /**

@@ -2,14 +2,11 @@ package com.github.brooth.metacode.apt;
 
 import com.squareup.javapoet.TypeSpec;
 
-import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 public interface Processor {

@@ -1,7 +1,6 @@
 package com.github.brooth.metacode.util;
 
 import com.github.brooth.metacode.MasterClassController;
-import com.github.brooth.metacode.MasterMetacode;
 import com.github.brooth.metacode.metasitory.Metasitory;
 
 import java.lang.annotation.Annotation;
@@ -11,7 +10,7 @@ import java.util.List;
 /**
  *
  */
-public class TypeCollectorController extends MasterClassController<Object, TypeCollectorController.TypeCollectorMetacode> {
+public class TypeCollectorController extends MasterClassController<Object, TypeCollectorMetacode> {
 
     protected TypeCollectorController(Metasitory metasitory, Class<?> masterClass) {
         super(metasitory, masterClass);
@@ -27,7 +26,4 @@ public class TypeCollectorController extends MasterClassController<Object, TypeC
         return result;
     }
 
-    public interface TypeCollectorMetacode extends MasterMetacode {
-        List<Class> getTypeCollection(Class<? extends Annotation> clazz);
-    }
 }

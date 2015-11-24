@@ -1,15 +1,11 @@
 package com.github.brooth.metacode.metasitory;
 
 import com.github.brooth.metacode.MasterMetacode;
-import com.github.brooth.metacode.util.MultitonController;
-import com.github.brooth.metacode.util.Multiton;
 
-import javax.tools.Diagnostic;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.LinkedHashMap;
 
 public class HashMapMetasitory implements Metasitory {
 

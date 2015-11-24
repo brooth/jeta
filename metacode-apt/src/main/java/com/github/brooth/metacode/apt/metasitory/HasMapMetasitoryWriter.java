@@ -3,15 +3,13 @@ package com.github.brooth.metacode.apt.metasitory;
 import com.github.brooth.metacode.apt.MetacodeContext;
 import com.github.brooth.metacode.apt.MetacodeUtils;
 import com.github.brooth.metacode.metasitory.HashMapMetasitoryContainer;
-import com.github.brooth.metacode.observer.Observers;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.squareup.javapoet.*;
 
-import javax.annotation.Nullable;
-import javax.annotation.processing.*;
-import javax.inject.Provider;
+import javax.annotation.processing.Messager;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;

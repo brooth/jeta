@@ -1,6 +1,5 @@
 package com.github.brooth.metacode.log;
 
-import com.github.brooth.metacode.MasterMetacode;
 import com.github.brooth.metacode.MasterController;
 import com.github.brooth.metacode.metasitory.Metasitory;
 
@@ -9,7 +8,7 @@ import javax.inject.Provider;
 /**
  *
  */
-public class LogController extends MasterController<Object, LogController.LogMetacode> {
+public class LogController extends MasterController<Object, LogMetacode> {
 
     public LogController(Metasitory metasitory, Object master) {
         super(metasitory, master, Log.class);
@@ -20,7 +19,4 @@ public class LogController extends MasterController<Object, LogController.LogMet
             metacode.apply(master, loggerProvider);
     }
 
-    public interface LogMetacode extends MasterMetacode<Object> {
-        public void apply(Object master, Provider<?> loggerProvider);
-    }
 }

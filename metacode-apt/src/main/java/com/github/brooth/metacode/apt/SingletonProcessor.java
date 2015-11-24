@@ -1,8 +1,9 @@
 package com.github.brooth.metacode.apt;
 
-import javax.annotation.processing.*;
 import com.github.brooth.metacode.util.Singleton;
 import com.squareup.javapoet.TypeSpec;
+
+import javax.annotation.processing.RoundEnvironment;
 
 /**
  * 

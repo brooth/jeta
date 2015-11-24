@@ -43,7 +43,4 @@ public class ImplementationController<I> {
         });
     }
 
-    public interface ImplementationMetacode extends MasterMetacode {
-        <I> I getImplementation(Class<I> of);
-    }
 }

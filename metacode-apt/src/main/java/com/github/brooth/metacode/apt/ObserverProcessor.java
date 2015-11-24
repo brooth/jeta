@@ -1,8 +1,8 @@
 package com.github.brooth.metacode.apt;
 
 import com.github.brooth.metacode.observer.Observer;
-import com.github.brooth.metacode.observer.ObserverHandler;
 import com.github.brooth.metacode.observer.ObserverController;
+import com.github.brooth.metacode.observer.ObserverHandler;
 import com.github.brooth.metacode.observer.Observers;
 import com.squareup.javapoet.*;
 
