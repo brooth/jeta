@@ -11,6 +11,9 @@ import com.github.brooth.metacode.pubsub.SubscriberController;
 import com.github.brooth.metacode.pubsub.SubscriptionHandler;
 import com.github.brooth.metacode.util.ImplementationController;
 import com.github.brooth.metacode.validate.ValidationController;
+import com.github.brooth.metacode.validate.ValidationException;
+
+import java.util.Set;
 
 /**
  *
@@ -55,8 +58,12 @@ public class MetaHelper {
         return new ObserverController<>(getInstance().metasitory, observer).registerObserver(observable);
     }
 
-    public static void validate(Object master) {
+    public static void validate(Object master) throws ValidationException {
         new ValidationController(getInstance().metasitory, master).validate();
+    }
+
+    public static Set<String> validateSafe(Object master) {
+        return new ValidationController(getInstance().metasitory, master).validateSafe();
     }
 
     public static void createProxy(Object master, Object real) {

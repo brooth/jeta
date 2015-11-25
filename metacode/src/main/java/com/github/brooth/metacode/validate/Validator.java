@@ -1,8 +1,10 @@
 package com.github.brooth.metacode.validate;
 
+import java.util.Set;
+
 /**
  *
  */
-public interface Validator {
-    void validate(Object object, String fieldName) throws ValidationException;
+public interface Validator extends IValidator {
+    void validate(Object object, String fieldName, Set<String> errors);
 }
