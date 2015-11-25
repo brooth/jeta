@@ -10,16 +10,16 @@ import java.util.Set;
  */
 public class ValidatorSample {
 
-    @MetacodeValidator(
+    @MetaValidator(
             emitExpression = "%m.age > 18",
-            emitError = "too young"
+            emitError = "Too young"
     )
     public interface AgeValidator extends IValidator {
     }
 
-    @MetacodeValidator(
+    @MetaValidator(
             emitExpression = "%m.age - 18 >= %m.experience",
-            emitError = "too high experience"
+            emitError = "%m.experience years of experience is too high for age of %m.age"
     )
     public interface ExperienceValidator extends IValidator {
     }
@@ -44,6 +44,7 @@ public class ValidatorSample {
         public void execute() {
             MetaHelper.validate(this);
             //...
+            System.out.println(name + ", see you monday!");
         }
 
         public Set<String> isAppropriate() {
@@ -55,8 +56,11 @@ public class ValidatorSample {
         new HireAction("John Smith", 45, 15, "Master Chef").execute();
 
         Set<String> incompatibilities = new HireAction(null, 17, 15).isAppropriate();
-        for (String incompatibility : incompatibilities) {
-            System.err.println(incompatibility);
+        if(incompatibilities.size() > 0) {
+            System.out.println("Oops, ");
+            for (String incompatibility : incompatibilities) {
+                System.out.print(incompatibility);
+            }
         }
     }
 }

@@ -1,10 +1,9 @@
 package com.github.brooth.metacode.validate;
 
 /**
- * @author khalidov
- * @version $Id$
+ *
  */
-public @interface MetacodeValidator {
+public @interface MetaValidator {
     String emitExpression();
 
     String emitError();

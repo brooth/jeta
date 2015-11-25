@@ -1,6 +1,6 @@
 package com.github.brooth.metacode.apt;
 
-import com.github.brooth.metacode.validate.MetacodeValidator;
+import com.github.brooth.metacode.validate.MetaValidator;
 import com.github.brooth.metacode.validate.Validate;
 import com.github.brooth.metacode.validate.ValidatorMetacode;
 import com.squareup.javapoet.*;
@@ -65,15 +65,15 @@ public class ValidateProcessor extends SimpleProcessor {
 
                     // MetacodeValidator
                 } else {
-                    MetacodeValidator metacodeValidator = validatorTypeElement.getAnnotation(MetacodeValidator.class);
-                    if (metacodeValidator == null)
+                    MetaValidator metaValidator = validatorTypeElement.getAnnotation(MetaValidator.class);
+                    if (metaValidator == null)
                         throw new IllegalArgumentException("Not valid IValidator usage. '" + validatorClassNameStr
                                 + "' must be annotated with @MetacodeValidator or extend Validator");
 
-                    String expression = metacodeValidator.emitExpression().replaceAll("%m", "master");
-                    String error = metacodeValidator.emitError().replaceAll("%m", "master");
+                    String expression = metaValidator.emitExpression().replaceAll("%m", "master");
+                    String error = metaValidator.emitError().replaceAll("%m([a-zA-Z0-9_.]*)", "\" + master$1 + \"");
                     methodBuilder.beginControlFlow("if(!($L)) ", expression)
-                            .addStatement("errors.add($S)", error)
+                            .addStatement("errors.add(\"$L\")", error)
                             .endControlFlow();
                 }
             }
