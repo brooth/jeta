@@ -206,8 +206,6 @@ public class MetacodeProcessor extends AbstractProcessor {
                             logger.debug("    masterPackage         - " + context.masterPackage);
                             logger.debug("    masterSimpleName      - " + context.masterSimpleName);
                             logger.debug("    masterCanonicalName   - " + context.masterCanonicalName);
-                            logger.debug("    masterFlatName        - " + context.masterFlatName);
-                            logger.debug("    sourceCanonicalName   - " + context.sourceCanonicalName);
                             logger.debug("    metacodeSimpleName    - " + context.metacodeSimpleName);
                             logger.debug("    metacodeCanonicalName - " + context.metacodeCanonicalName);
                         }
@@ -238,16 +236,12 @@ public class MetacodeProcessor extends AbstractProcessor {
         private final String masterSimpleName;
         private final String metacodeSimpleName;
         private final String metacodeCanonicalName;
-        private final String masterFlatName;
-        private final String sourceCanonicalName;
         private final Set<Class<? extends Annotation>> metacodeAnnotations;
 
         public MetacodeContextImpl(Elements elementUtils, TypeElement masterTypeElement) {
             masterPackage = elementUtils.getPackageOf(masterTypeElement).getQualifiedName().toString();
             masterCanonicalName = masterTypeElement.toString();
             masterSimpleName = masterTypeElement.getSimpleName().toString();
-            sourceCanonicalName = MetacodeUtils.getSourceTypeElement(masterTypeElement).toString();
-            masterFlatName = masterPackage + "." + masterCanonicalName.replace(masterPackage + ".", "").replaceAll("\\.", "\\$");
             metacodeCanonicalName = MetacodeUtils.getMetacodeOf(elementUtils, masterCanonicalName);
             int i = metacodeCanonicalName.lastIndexOf('.');
             metacodeSimpleName = i >= 0 ? metacodeCanonicalName.substring(i + 1) : metacodeCanonicalName;
@@ -267,16 +261,6 @@ public class MetacodeProcessor extends AbstractProcessor {
         @Override
         public String getMasterSimpleName() {
             return masterSimpleName;
-        }
-
-        @Override
-        public String getMasterFlatName() {
-            return masterFlatName;
-        }
-
-        @Override
-        public String getSourceCanonicalName() {
-            return sourceCanonicalName;
         }
 
         @Override

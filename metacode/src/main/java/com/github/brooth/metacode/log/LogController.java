@@ -3,7 +3,7 @@ package com.github.brooth.metacode.log;
 import com.github.brooth.metacode.MasterController;
 import com.github.brooth.metacode.metasitory.Metasitory;
 
-import javax.inject.Provider;
+import com.github.brooth.metacode.util.Provider;
 
 /**
  *

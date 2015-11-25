@@ -16,7 +16,7 @@ import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
-import java.util.LinkedHashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 /**
@@ -48,7 +48,7 @@ public class HasMapMetasitoryWriter implements MetasitoryWriter {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
                 .addStatement("$T<$T, $T> result = new $T<>()", mapClassName, classTypeName, contextTypeName,
-                        TypeName.get(LinkedHashMap.class))
+                        TypeName.get(IdentityHashMap.class))
                 .returns(ParameterizedTypeName.get(mapClassName, classTypeName, contextTypeName));
     }
 
@@ -66,7 +66,7 @@ public class HasMapMetasitoryWriter implements MetasitoryWriter {
         methodBuilder.addCode("result.put($L.class,\n" +
                         "\tnew $T(\n" +
                         "\t\t$L.class,\n" +
-                        "\t\tnew javax.inject.Provider<$L>() {\n" +
+                        "\t\tnew com.github.brooth.metacode.util.Provider<$L>() {\n" +
                         "\t\t\tpublic $L get() {\n" +
                         "\t\t\t\treturn new $L();\n" +
                         "\t\t}},\n" +

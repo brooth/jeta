@@ -2,7 +2,7 @@ package com.github.brooth.metacode.metasitory;
 
 import com.github.brooth.metacode.MasterMetacode;
 
-import javax.inject.Provider;
+import com.github.brooth.metacode.util.Provider;
 import java.util.Map;
 
 /**

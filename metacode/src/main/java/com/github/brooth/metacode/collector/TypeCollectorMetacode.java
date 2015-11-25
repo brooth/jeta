@@ -1,4 +1,4 @@
-package com.github.brooth.metacode.util;
+package com.github.brooth.metacode.collector;
 
 import com.github.brooth.metacode.MasterMetacode;
 

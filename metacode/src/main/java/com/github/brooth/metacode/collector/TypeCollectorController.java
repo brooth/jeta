@@ -1,4 +1,4 @@
-package com.github.brooth.metacode.util;
+package com.github.brooth.metacode.collector;
 
 import com.github.brooth.metacode.MasterClassController;
 import com.github.brooth.metacode.metasitory.Metasitory;
@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class TypeCollectorController extends MasterClassController<Object, TypeCollectorMetacode> {
 
-    protected TypeCollectorController(Metasitory metasitory, Class<?> masterClass) {
+    public TypeCollectorController(Metasitory metasitory, Class<?> masterClass) {
         super(metasitory, masterClass);
     }
 
@@ -25,5 +25,4 @@ public class TypeCollectorController extends MasterClassController<Object, TypeC
 
         return result;
     }
-
 }

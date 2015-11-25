@@ -2,7 +2,7 @@ package com.github.brooth.metacode.log;
 
 import com.github.brooth.metacode.MasterMetacode;
 
-import javax.inject.Provider;
+import com.github.brooth.metacode.util.Provider;
 
 /**
  * 

@@ -22,16 +22,5 @@ public interface MetacodeContext {
      */
     public String getMasterSimpleName();
 
-    /*
-     * com.example.app.Foo$Boo
-     */
-    public String getMasterFlatName();
-
-    /*
-     * com.example.app.Foo
-     */
-    public String getSourceCanonicalName();
-
     public Set<Class<? extends Annotation>> metacodeAnnotations();
-
 }   

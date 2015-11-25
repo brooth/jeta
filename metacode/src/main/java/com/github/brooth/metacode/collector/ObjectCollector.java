@@ -1,4 +1,4 @@
-package com.github.brooth.metacode.util;
+package com.github.brooth.metacode.collector;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
  *
  */
 @Target(ElementType.TYPE)
-public @interface TypeCollector {
+public @interface ObjectCollector {
     Class<? extends Annotation>[] value();
+    String staticConstructior() default "";
 }

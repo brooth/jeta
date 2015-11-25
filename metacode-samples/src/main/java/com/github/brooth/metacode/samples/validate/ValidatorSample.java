@@ -62,6 +62,5 @@ public class ValidatorSample {
                 System.out.println(incompatibility);
             }
         }
-        new HireAction(null, 17, 15).execute();
     }
 }

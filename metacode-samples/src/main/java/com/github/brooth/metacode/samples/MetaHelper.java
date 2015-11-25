@@ -10,9 +10,12 @@ import com.github.brooth.metacode.pubsub.PublisherController;
 import com.github.brooth.metacode.pubsub.SubscriberController;
 import com.github.brooth.metacode.pubsub.SubscriptionHandler;
 import com.github.brooth.metacode.util.ImplementationController;
+import com.github.brooth.metacode.collector.*;
 import com.github.brooth.metacode.validate.ValidationController;
 import com.github.brooth.metacode.validate.ValidationException;
 
+import java.lang.annotation.Annotation;
+import com.github.brooth.metacode.util.Provider;
 import java.util.List;
 
 /**
@@ -68,5 +71,13 @@ public class MetaHelper {
 
     public static void createProxy(Object master, Object real) {
         new ProxyController(getInstance().metasitory, master).createProxy(real);
+    }
+
+    public static List<Class> collectTypes(Class masterClass, Class<? extends Annotation> annotationClass) {
+        return new TypeCollectorController(getInstance().metasitory, masterClass).getTypes(annotationClass);
+    }
+
+    public static List<Provider<?>> collectObjects(Class masterClass, Class<? extends Annotation> annotationClass) {
+        return new ObjectCollectorController(getInstance().metasitory, masterClass).getObjects(annotationClass);
     }
 }
