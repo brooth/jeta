@@ -2,7 +2,7 @@ package com.github.brooth.metacode.validate;
 
 import com.google.common.base.Joiner;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  *
@@ -13,8 +13,8 @@ public class ValidationException extends RuntimeException {
         super(msg);
     }
 
-    public ValidationException(Set<String> errors) {
-		super(Joiner.on(", ").join(errors));
+    public ValidationException(List<String> errors) {
+		super(Joiner.on("; ").join(errors));
     }
 }
 

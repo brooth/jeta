@@ -1,10 +1,10 @@
 package com.github.brooth.metacode.validate;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  *
  */
-public interface Validator extends IValidator {
-    void validate(Object object, String fieldName, Set<String> errors);
+public interface Validator {
+    void validate(Object object, String fieldName, List<String> errors);
 }

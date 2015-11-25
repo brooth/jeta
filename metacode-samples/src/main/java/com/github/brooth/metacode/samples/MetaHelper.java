@@ -13,7 +13,7 @@ import com.github.brooth.metacode.util.ImplementationController;
 import com.github.brooth.metacode.validate.ValidationController;
 import com.github.brooth.metacode.validate.ValidationException;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  *
@@ -62,7 +62,7 @@ public class MetaHelper {
         new ValidationController(getInstance().metasitory, master).validate();
     }
 
-    public static Set<String> validateSafe(Object master) {
+    public static List<String> validateSafe(Object master) {
         return new ValidationController(getInstance().metasitory, master).validateSafe();
     }
 

@@ -3,7 +3,7 @@ package com.github.brooth.metacode.samples.validate;
 import com.github.brooth.metacode.samples.MetaHelper;
 import com.github.brooth.metacode.validate.*;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  *
@@ -14,14 +14,14 @@ public class ValidatorSample {
             emitExpression = "%m.age > 18",
             emitError = "Too young"
     )
-    public interface AgeValidator extends IValidator {
+    public interface AgeValidator extends Validator {
     }
 
     @MetaValidator(
             emitExpression = "%m.age - 18 >= %m.experience",
-            emitError = "%m.experience years of experience is too high for age of %m.age"
+            emitError = "%m.experience years of experience is too high for the age of %m.age"
     )
-    public interface ExperienceValidator extends IValidator {
+    public interface ExperienceValidator extends Validator {
     }
 
     public static class HireAction {
@@ -47,7 +47,7 @@ public class ValidatorSample {
             System.out.println(name + ", see you monday!");
         }
 
-        public Set<String> isAppropriate() {
+        public List<String> isAppropriate() {
             return MetaHelper.validateSafe(this);
         }
     }
@@ -55,12 +55,13 @@ public class ValidatorSample {
     public static void main(String[] args) {
         new HireAction("John Smith", 45, 15, "Master Chef").execute();
 
-        Set<String> incompatibilities = new HireAction(null, 17, 15).isAppropriate();
+        List<String> incompatibilities = new HireAction(null, 17, 15).isAppropriate();
         if(incompatibilities.size() > 0) {
             System.out.println("Oops, ");
             for (String incompatibility : incompatibilities) {
-                System.out.print(incompatibility);
+                System.out.println(incompatibility);
             }
         }
+        new HireAction(null, 17, 15).execute();
     }
 }

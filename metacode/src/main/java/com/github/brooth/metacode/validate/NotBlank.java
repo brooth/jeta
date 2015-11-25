@@ -1,6 +1,6 @@
 package com.github.brooth.metacode.validate;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  *
@@ -8,7 +8,7 @@ import java.util.Set;
 public class NotBlank implements Validator {
 
     @Override
-    public void validate(Object object, String fieldName, Set<String> errors) {
+    public void validate(Object object, String fieldName, List<String> errors) {
         boolean result;
         if (object == null) {
             result = true;

@@ -9,12 +9,13 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.List;
 
 /**
  *
@@ -32,14 +33,14 @@ public class ValidateProcessor extends SimpleProcessor {
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(ValidatorMetacode.class), masterClassName));
 
-        ParameterizedTypeName setTypeName = ParameterizedTypeName.get(ClassName.get(Set.class), ClassName.get(String.class));
-        ParameterizedTypeName hashSetTypeName = ParameterizedTypeName.get(ClassName.get(HashSet.class), ClassName.get(String.class));
+        ParameterizedTypeName listTypeName = ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(String.class));
+        ParameterizedTypeName arrayListTypeName = ParameterizedTypeName.get(ClassName.get(ArrayList.class), ClassName.get(String.class));
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyValidation")
                 .addModifiers(Modifier.PUBLIC)
-                .returns(setTypeName)
+                .returns(listTypeName)
                 .addParameter(masterClassName, "master", Modifier.FINAL)
-                .addStatement("$T errors = new $T()", setTypeName, hashSetTypeName);
+                .addStatement("$T errors = new $T()", listTypeName, arrayListTypeName);
 
         Types typeUtils = ctx.env.getTypeUtils();
         Elements elementUtils = ctx.env.getElementUtils();
@@ -57,9 +58,8 @@ public class ValidateProcessor extends SimpleProcessor {
             for (String validatorClassNameStr : validators) {
                 TypeElement validatorTypeElement = elementUtils.getTypeElement(validatorClassNameStr);
                 TypeMirror validatorTypeMirror = validatorTypeElement.asType();
-                // Object Validator
-                if (typeUtils.isAssignable(validatorTypeMirror,
-                        elementUtils.getTypeElement("com.github.brooth.metacode.validate.Validator").asType())) {
+                // Class Validator
+                if (validatorTypeElement.getKind() == ElementKind.CLASS) {
                     methodBuilder.addStatement("new $T().validate(master.$L, $S, errors)",
                             TypeName.get(validatorTypeMirror), fieldNameStr, fieldNameStr);
 
@@ -67,8 +67,9 @@ public class ValidateProcessor extends SimpleProcessor {
                 } else {
                     MetaValidator metaValidator = validatorTypeElement.getAnnotation(MetaValidator.class);
                     if (metaValidator == null)
-                        throw new IllegalArgumentException("Not valid IValidator usage. '" + validatorClassNameStr
-                                + "' must be annotated with @MetacodeValidator or extend com.github.brooth.metacode.validate.Validator");
+                        throw new IllegalArgumentException("Not valid Validator usage. '" + validatorClassNameStr
+                                + "' must be implementation of com.github.brooth.metacode.validate.Validator"
+                                + " or interface annotated with com.github.brooth.metacode.validate.MetacodeValidator");
 
                     String expression = metaValidator.emitExpression().replaceAll("%m", "master");
                     String error = metaValidator.emitError().replaceAll("%m([a-zA-Z0-9_.]*)", "\" + master$1 + \"");

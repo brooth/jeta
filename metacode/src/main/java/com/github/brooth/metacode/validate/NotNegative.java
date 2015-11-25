@@ -1,6 +1,6 @@
 package com.github.brooth.metacode.validate;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * 
@@ -8,7 +8,9 @@ import java.util.Set;
 public class NotNegative implements Validator {
 
     @Override
-    public void validate(Object object, String name, Set<String> errors) {
+    public void validate(Object object, String name, List<String> errors) {
+        if(object == null)
+            throw new NullPointerException("Object is null");
         if(!(object instanceof Number))
             throw new ValidationException("Can't check '" + object.getClass().getCanonicalName() + "' is negative");
 

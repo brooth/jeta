@@ -99,10 +99,7 @@ public class SubscribeProcessor extends SimpleProcessor {
             });
             for (String filter : filters) {
                 TypeElement filterTypeElement = elementUtils.getTypeElement(filter);
-                TypeMirror filterTypeMirror = filterTypeElement.asType();
-
-                if (typeUtils.isAssignable(filterTypeMirror,
-                        elementUtils.getTypeElement("com.github.brooth.metacode.pubsub.Filter").asType())) {
+                if (filterTypeElement.getKind() == ElementKind.CLASS) {
                     onEventMethodBuilder
                             .beginControlFlow("if(!(new $T().accepts(master, \"$L\", event)))",
                                     ClassName.bestGuess(filter), onEventMethodNameStr)
@@ -112,7 +109,9 @@ public class SubscribeProcessor extends SimpleProcessor {
                 } else {
                     MetaFilter metaFilter = filterTypeElement.getAnnotation(MetaFilter.class);
                     if (metaFilter == null)
-                        throw new IllegalArgumentException("Not valid IFilter usage. '" + filter);
+                        throw new IllegalArgumentException("Not valid Filter usage. '" + filter
+                                + "' must be implementation of com.github.brooth.metacode.pubsub.Filter"
+                                + " or interface annotated with com.github.brooth.metacode.pubsub.MetaFilter");
 
                     String expression = metaFilter.emitExpression()
                             .replaceAll("%m", "master")

@@ -1,7 +1,8 @@
 package com.github.brooth.metacode.validate;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Collection;
-import java.util.Set;
 
 /**
  *
@@ -9,7 +10,7 @@ import java.util.Set;
 public class NotEmpty implements Validator {
 
     @Override
-    public void validate(Object object, String name, Set<String> errors) {
+    public void validate(Object object, String name, List<String> errors) {
         boolean result;
         if (object == null) {
             result = true;
@@ -22,6 +23,9 @@ public class NotEmpty implements Validator {
 
         } else if ((object instanceof Collection)) {
             result = ((Collection) object).isEmpty();
+
+        } else if ((object instanceof Map)) {
+            result = ((Map) object).isEmpty();
 
         } else {
             throw new ValidationException("Can't check '" + object.getClass().getCanonicalName() + "' is empty");

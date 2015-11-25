@@ -7,7 +7,7 @@ public @interface Subscribe {
 
     Class<?>[] value();
 
-    Class<? extends IFilter>[] filters() default {};
+    Class<? extends Filter>[] filters() default {};
 
     int[] ids() default {};
 

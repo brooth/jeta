@@ -3,8 +3,8 @@ package com.github.brooth.metacode.validate;
 import com.github.brooth.metacode.MasterController;
 import com.github.brooth.metacode.metasitory.Metasitory;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -16,13 +16,13 @@ public class ValidationController extends MasterController<Object, ValidatorMeta
     }
 
     public void validate() throws ValidationException {
-        Set<String> errors = validateSafe();
+        List<String> errors = validateSafe();
         if (!errors.isEmpty())
             throw new ValidationException(errors);
     }
 
-    public Set<String> validateSafe() {
-        Set<String> errors = new HashSet<>();
+    public List<String> validateSafe() {
+        List<String> errors = new ArrayList<>();
         for (ValidatorMetacode<Object> metacode : metacodes)
             errors.addAll(metacode.applyValidation(master));
 
