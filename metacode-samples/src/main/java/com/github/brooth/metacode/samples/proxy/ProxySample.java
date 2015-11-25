@@ -11,7 +11,7 @@ public class ProxySample {
 
     public interface Ping {
         void setUri(String uri);
-        String getUti();
+        String getUri();
         int execute();
     }
 
@@ -24,27 +24,32 @@ public class ProxySample {
         }
 
         @Override
-        public String getUti() {
+        public String getUri() {
             return uri;
         }
 
         @Override
         public int execute() {
             long ts = System.currentTimeMillis();
-            //...
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                //
+            }
             return (int) (System.currentTimeMillis() - ts);
         }
     }
 
-    public static abstract class FakePing implements Ping, AbstractProxy<Ping> {
+    //@MetaEntity support
+    public static abstract class FixTheTruth implements Ping, AbstractProxy<Ping> {
         @Override
         public int execute() {
-            return 42;
+            return real().execute() / 2;
         }
     }
 
     public static class PingTest {
-        @Proxy(FakePing.class)
+        @Proxy(FixTheTruth.class)
         protected Ping ping;
 
         public PingTest(Ping ping) {
@@ -53,7 +58,7 @@ public class ProxySample {
 
         public void test() {
             MetaHelper.createProxy(this, ping);
-            System.out.println(String.format("ping '%s'...", ping.getUti()));
+            System.out.println(String.format("ping '%s'...", ping.getUri()));
             System.out.println(String.format("done in %dms", ping.execute()));
         }
     }

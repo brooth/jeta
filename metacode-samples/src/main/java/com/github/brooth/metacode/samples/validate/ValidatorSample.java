@@ -12,14 +12,14 @@ public class ValidatorSample {
 
     @MetaValidator(
             emitExpression = "%m.age > 18",
-            emitError = "Too young"
+            emitError = "Too young" // %{I18n.get(\"TOO_YOUNG\")}
     )
     public interface AgeValidator extends Validator {
     }
 
     @MetaValidator(
             emitExpression = "%m.age - 18 >= %m.experience",
-            emitError = "%m.experience years of experience is too high for the age of %m.age"
+            emitError = "%m.experience years of experience is too high for the age of %m.age" // %m.getAge(); 
     )
     public interface ExperienceValidator extends Validator {
     }

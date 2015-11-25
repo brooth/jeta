@@ -19,7 +19,8 @@ import com.github.brooth.metacode.util.Provider;
 import java.util.List;
 
 /**
- *
+ * No reflection, no problems...
+ * org.metacode?
  */
 public class MetaHelper {
 

@@ -30,6 +30,7 @@ public class CollectorSample {
         }
     }
 
+    //@MetaEntity support
     @Handler
     public class HandlerTwo implements IHandler {
         @Override
