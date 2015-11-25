@@ -2,6 +2,7 @@ package com.github.brooth.metacode.apt;
 
 import com.github.brooth.metacode.pubsub.Publish;
 import com.github.brooth.metacode.pubsub.PublisherMetacode;
+import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.*;
 
 import javax.annotation.processing.RoundEnvironment;
@@ -50,10 +51,12 @@ public class PublishProcessor extends SimpleProcessor {
                 throw new IllegalArgumentException("Not valid @Publish usage, define event type as generic of Subscribers");
 
             eventTypeStr = eventTypeStr.substring(i + 1, eventTypeStr.lastIndexOf('>'));
-            String methodHashName = ("getSubscribers" + eventTypeStr.hashCode()).replace("-", "N");
+            String methodHashName = "get" +
+                    CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL,
+                            CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, eventTypeStr)
+                                    .replaceAll("\\.", "_")) + "Subscribers";
 
             MethodSpec getObserversMethodSpec = MethodSpec.methodBuilder(methodHashName)
-                    .addJavadoc("hash of $S\n", eventTypeStr)
                     .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                     .returns(subscribersTypeName)
                     .beginControlFlow("if ($L == null)", fieldName)

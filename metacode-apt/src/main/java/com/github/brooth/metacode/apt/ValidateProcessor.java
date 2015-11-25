@@ -68,7 +68,7 @@ public class ValidateProcessor extends SimpleProcessor {
                     MetaValidator metaValidator = validatorTypeElement.getAnnotation(MetaValidator.class);
                     if (metaValidator == null)
                         throw new IllegalArgumentException("Not valid IValidator usage. '" + validatorClassNameStr
-                                + "' must be annotated with @MetacodeValidator or extend Validator");
+                                + "' must be annotated with @MetacodeValidator or extend com.github.brooth.metacode.validate.Validator");
 
                     String expression = metaValidator.emitExpression().replaceAll("%m", "master");
                     String error = metaValidator.emitError().replaceAll("%m([a-zA-Z0-9_.]*)", "\" + master$1 + \"");

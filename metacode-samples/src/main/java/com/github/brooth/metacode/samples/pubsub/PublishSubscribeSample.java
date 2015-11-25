@@ -45,8 +45,12 @@ public class PublishSubscribeSample {
      * Subscriber
      */
     public static class PanicAtTheDisco {
+
         final int MIN_ALARM_ID = 3;
-        final String MIN_ALARM_FILTER = "%m.MIN_ALARM_ID <= %e.getId()";
+
+        @MetaFilter(emitExpression = "%m.MIN_ALARM_ID <= %e.getId()")
+        static interface MinAlarmIdFilter extends IFilter {
+        }
 
         private SubscriptionHandler handler;
 
@@ -59,9 +63,9 @@ public class PublishSubscribeSample {
             System.out.println("Info: '" + alert.getTopic() + "'");
         }
 
-        @Subscribe(value = AlarmManager.class, filterExpression = MIN_ALARM_FILTER)
+        @Subscribe(value = AlarmManager.class, filters = MinAlarmIdFilter.class)
         protected void onAlarm(AlarmManager.AlertMessage alert) {
-            System.err.println("Error: '" + alert.getTopic() + "'. I'm quitting!");
+            System.out.println("Error: '" + alert.getTopic() + "'. I quit!");
             quit();
         }
 
@@ -80,6 +84,6 @@ public class PublishSubscribeSample {
         AlarmManager alarmManager = new AlarmManager();
         alarmManager.info("Have a good day :)");
         alarmManager.alarm("The village is on fire!");
-        alarmManager.alarm("Zombies!");
+        alarmManager.alarm("Zombie!");
     }
 }

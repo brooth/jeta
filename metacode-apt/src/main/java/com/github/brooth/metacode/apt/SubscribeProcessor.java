@@ -2,18 +2,19 @@ package com.github.brooth.metacode.apt;
 
 import com.github.brooth.metacode.observer.EventObserver;
 import com.github.brooth.metacode.pubsub.*;
+import com.google.common.base.CaseFormat;
 import com.google.common.base.Joiner;
 import com.squareup.javapoet.*;
 
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.util.List;
 
 /**
- * 
+ *
  */
 public class SubscribeProcessor extends SimpleProcessor {
 
@@ -35,6 +36,9 @@ public class SubscribeProcessor extends SimpleProcessor {
                 .addParameter(masterClassName, "master", Modifier.FINAL)
                 .addStatement("$T handler = new $T()", handlerClassName, handlerClassName);
 
+        Types typeUtils = ctx.env.getTypeUtils();
+        Elements elementUtils = ctx.env.getElementUtils();
+
         for (Element element : ctx.elements) {
             final Subscribe annotation = element.getAnnotation(Subscribe.class);
             String publisherClass = MetacodeUtils.extractClassName(new Runnable() {
@@ -52,26 +56,17 @@ public class SubscribeProcessor extends SimpleProcessor {
                 throw new IllegalArgumentException("Subscriber method must have one parameter (event)");
             TypeName eventTypeName = TypeName.get(params.get(0).asType());
 
-            String methodHashName = ("getSubscribers" +
-                    eventTypeName.toString().hashCode()).replace("-", "N");
+
+            String methodHashName = "get" +
+                    CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL,
+                            CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, eventTypeName.toString())
+                                    .replaceAll("\\.", "_")) + "Subscribers";
 
             MethodSpec.Builder onEventMethodBuilder = MethodSpec.methodBuilder("onEvent")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(eventTypeName, "event")
                     .returns(void.class);
-
-            // FilterExpression
-            if (!annotation.filterExpression().isEmpty()) {
-                String expression = annotation.filterExpression()
-                        .replaceAll("%m", "master")
-                        .replaceAll("%e", "event");
-
-                onEventMethodBuilder
-                        .beginControlFlow("if(!($L))", expression)
-                        .addStatement("return")
-                        .endControlFlow();
-            }
 
             // IdsFilter
             if (annotation.ids().length > 0) {
@@ -85,7 +80,6 @@ public class SubscribeProcessor extends SimpleProcessor {
                         .addStatement("return")
                         .endControlFlow();
             }
-
             // TopicsFilter
             if (annotation.topics().length > 0) {
                 onEventMethodBuilder
@@ -103,13 +97,32 @@ public class SubscribeProcessor extends SimpleProcessor {
                     annotation.filters();
                 }
             });
-
             for (String filter : filters) {
-                onEventMethodBuilder
-                        .beginControlFlow("if(!(new $T().accepts(master, \"$L\", event)))",
-                                ClassName.bestGuess(filter), onEventMethodNameStr)
-                        .addStatement("return")
-                        .endControlFlow();
+                TypeElement filterTypeElement = elementUtils.getTypeElement(filter);
+                TypeMirror filterTypeMirror = filterTypeElement.asType();
+
+                if (typeUtils.isAssignable(filterTypeMirror,
+                        elementUtils.getTypeElement("com.github.brooth.metacode.pubsub.Filter").asType())) {
+                    onEventMethodBuilder
+                            .beginControlFlow("if(!(new $T().accepts(master, \"$L\", event)))",
+                                    ClassName.bestGuess(filter), onEventMethodNameStr)
+                            .addStatement("return")
+                            .endControlFlow();
+
+                } else {
+                    MetaFilter metaFilter = filterTypeElement.getAnnotation(MetaFilter.class);
+                    if (metaFilter == null)
+                        throw new IllegalArgumentException("Not valid IFilter usage. '" + filter);
+
+                    String expression = metaFilter.emitExpression()
+                            .replaceAll("%m", "master")
+                            .replaceAll("%e", "event");
+
+                    onEventMethodBuilder
+                            .beginControlFlow("if(!($L))", expression)
+                            .addStatement("return")
+                            .endControlFlow();
+                }
             }
 
             MethodSpec onEventMethodSpec = onEventMethodBuilder
@@ -122,11 +135,10 @@ public class SubscribeProcessor extends SimpleProcessor {
                     .addMethod(onEventMethodSpec)
                     .build();
 
-            methodBuilder
-                    .addStatement("// hash of $S", eventTypeName.toString())
-                    .addStatement("handler.add($T.class, $T.class,\n$T.$L().\nregister($L))",
+            methodBuilder.addStatement("handler.add($T.class, $T.class,\n$T.$L().\nregister($L))",
                             observableTypeName, eventTypeName, metacodeTypeName, methodHashName, eventObserverTypeSpec);
         }
+
         methodBuilder.addStatement("return handler");
         builder.addMethod(methodBuilder.build());
 

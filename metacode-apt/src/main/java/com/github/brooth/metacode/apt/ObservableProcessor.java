@@ -2,6 +2,7 @@ package com.github.brooth.metacode.apt;
 
 import com.github.brooth.metacode.observer.ObservableMetacode;
 import com.github.brooth.metacode.observer.Subject;
+import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.*;
 
 import javax.annotation.processing.RoundEnvironment;
@@ -55,10 +56,12 @@ public class ObservableProcessor extends SimpleProcessor {
                 throw new IllegalArgumentException("Not valid @Subject usage, define event type as generic of Observers");
 
             eventTypeStr = eventTypeStr.substring(i + 1, eventTypeStr.lastIndexOf('>'));
-            String methodHashName = ("getObservers" + eventTypeStr.hashCode()).replace("-", "N");
+            String methodHashName = "get" +
+                    CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL,
+                            CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, eventTypeStr)
+                                    .replaceAll("\\.", "_")) + "Observers";
 
             MethodSpec getObserversMethodSpec = MethodSpec.methodBuilder(methodHashName)
-                    .addJavadoc("hash of $S\n", eventTypeStr)
                     .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
                     .returns(observersTypeName)
                     .addParameter(masterClassName, "master")

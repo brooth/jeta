@@ -1,19 +1,17 @@
 package com.github.brooth.metacode.pubsub;
 
 /**
- *  
+ *
  */
 public @interface Subscribe {
 
-	Class<?>[] value();
+    Class<?>[] value();
 
-	Class<? extends Filter>[] filters() default {};
+    Class<? extends IFilter>[] filters() default {};
 
-	int[] ids() default {};
+    int[] ids() default {};
 
-	String[] topics() default {};
+    String[] topics() default {};
 
-    String filterExpression() default "";
-
-	int priority() default 0;
+    int priority() default 0;
 }
