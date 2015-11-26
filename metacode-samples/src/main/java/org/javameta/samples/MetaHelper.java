@@ -29,6 +29,8 @@ import org.javameta.pubsub.SubscriberController;
 import org.javameta.pubsub.SubscriptionHandler;
 import org.javameta.util.ImplementationController;
 import org.javameta.util.Provider;
+import org.javameta.log.NamedLogger;
+import org.javameta.log.LogController;
 import org.javameta.validate.ValidationController;
 import org.javameta.validate.ValidationException;
 
@@ -99,5 +101,9 @@ public class MetaHelper {
 
     public static List<Provider<?>> collectObjects(Class masterClass, Class<? extends Annotation> annotationClass) {
         return new ObjectCollectorController(getInstance().metasitory, masterClass).getObjects(annotationClass);
+    }
+
+    public static void createLogger(Object master, Provider<? extends NamedLogger> provider) {
+        new LogController(getInstance().metasitory, master).createLogger(provider);    
     }
 }

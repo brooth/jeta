@@ -29,9 +29,9 @@ public class LogController extends MasterController<Object, LogMetacode> {
         super(metasitory, master, Log.class);
     }
 
-    public void apply(Provider<?> loggerProvider) {
+    public void createLogger(Provider<? extends NamedLogger> loggerProvider) {
         for (LogMetacode metacode : metacodes)
-            metacode.apply(master, loggerProvider);
+            metacode.applyLogger(master, loggerProvider);
     }
 
 }

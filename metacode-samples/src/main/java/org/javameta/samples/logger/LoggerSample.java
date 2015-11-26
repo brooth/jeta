@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-package org.javameta.apt.processors;
+package org.javameta.samples.logger;
 
-import com.squareup.javapoet.TypeSpec;
-import org.javameta.apt.ProcessorContext;
+import org.javameta.samples.MetaHelper;
 import org.javameta.log.Log;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-
 /**
- *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class LogProcessor extends SimpleProcessor {
+public class LoggerSample {
+    @Log
+    Logger logger;
 
-    public LogProcessor() {
-        super(Log.class);
+    public LoggerSample() {
+        MetaHelper.createLogger(this, LoggerProvider.getInstance());
     }
 
-    @Override
-    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
-        // todo: ProcessorEnviroment and builder only
-        return false;
+    public void logAway() {
+        logger.debug("Hello Jeta!");
+    }
+
+    public static void main(String[] args) {
+        new LoggerSample().logAway();
     }
 }
