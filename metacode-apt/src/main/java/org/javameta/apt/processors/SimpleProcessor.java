@@ -10,6 +10,9 @@ import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Set;
 
+/**
+ * @author Oleg Khalidov (brooth@gmail.com)
+ */
 public abstract class SimpleProcessor implements Processor {
 
     protected Class<? extends Annotation> annotation;

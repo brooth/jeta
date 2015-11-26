@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ImplementationController<I> {
 

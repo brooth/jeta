@@ -5,7 +5,7 @@ import org.javameta.proxy.Proxy;
 import org.javameta.samples.MetaHelper;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ProxySample {
 
@@ -15,7 +15,7 @@ public class ProxySample {
         int execute();
     }
 
-    public static class PingEmu implements Ping {
+    public static class PingEmulator implements Ping {
         private String uri;
 
         @Override
@@ -63,7 +63,7 @@ public class ProxySample {
     }
 
     public static void main(String[] args) {
-        Ping googlePing = new PingEmu();
+        Ping googlePing = new PingEmulator();
         googlePing.setUri("http://google.com");
         new PingTest(googlePing).test();
     }

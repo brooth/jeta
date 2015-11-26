@@ -1,7 +1,7 @@
 package org.javameta.pubsub;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public @interface Subscribe {
 

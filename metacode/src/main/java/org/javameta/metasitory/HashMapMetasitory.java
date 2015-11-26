@@ -9,6 +9,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Support ordering through containers. So, items from first container go first
+ *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class HashMapMetasitory implements Metasitory {
 

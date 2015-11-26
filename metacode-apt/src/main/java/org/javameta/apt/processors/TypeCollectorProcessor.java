@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class TypeCollectorProcessor extends SimpleProcessor {
 

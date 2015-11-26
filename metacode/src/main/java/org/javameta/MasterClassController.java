@@ -10,6 +10,8 @@ import java.util.List;
 /**
  * @param <M> master's class
  * @param <C> metacode extension
+ *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public abstract class MasterClassController<M, C> {
 

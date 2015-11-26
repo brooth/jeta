@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ClassForNameMetasitory implements Metasitory {
 

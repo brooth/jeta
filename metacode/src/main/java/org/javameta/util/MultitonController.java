@@ -8,7 +8,7 @@ import org.javameta.metasitory.Criteria;
 import org.javameta.metasitory.Metasitory;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class MultitonController<M, K> extends MasterClassController<M, MasterMetacode> {
 

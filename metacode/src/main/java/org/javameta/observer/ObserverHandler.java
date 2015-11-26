@@ -6,6 +6,8 @@ import java.util.List;
 
 /**
  * Not thread-safe
+ *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ObserverHandler {
 

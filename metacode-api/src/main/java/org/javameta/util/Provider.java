@@ -1,8 +1,7 @@
 package org.javameta.util;
 
 /**
- *
- * @param <T>
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface Provider<T> {
     public T get(); 

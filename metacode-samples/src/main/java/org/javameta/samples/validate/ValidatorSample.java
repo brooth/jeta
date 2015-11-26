@@ -6,7 +6,7 @@ import org.javameta.validate.*;
 import java.util.List;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ValidatorSample {
 
@@ -14,15 +14,13 @@ public class ValidatorSample {
             emitExpression = "$m.age > 18",
             emitError = "${I18n.get(\"TOO_YOUNG\", \"en\")}"
     )
-    public interface AgeValidator extends Validator {
-    }
+    public interface AgeValidator extends Validator {}
 
     @MetaValidator(
             emitExpression = "$m.age - 18 >= $m.experience",
             emitError = "${$m.experience} years of experience is too high for the age of ${$m.experience}"
     )
-    public interface ExperienceValidator extends Validator {
-    }
+    public interface ExperienceValidator extends Validator {}
 
     public static class HireAction {
         @Validate(NotBlank.class)
@@ -43,7 +41,6 @@ public class ValidatorSample {
 
         public void execute() {
             MetaHelper.validate(this);
-            //...
             System.out.println(name + ", see you monday!");
         }
 

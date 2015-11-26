@@ -13,7 +13,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class PublishProcessor extends SimpleProcessor {
 

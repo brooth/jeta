@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ValidationController extends MasterController<Object, ValidatorMetacode<Object>> {
 

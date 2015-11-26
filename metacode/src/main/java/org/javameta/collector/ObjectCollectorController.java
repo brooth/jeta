@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ObjectCollectorController extends MasterClassController<Object, ObjectCollectorMetacode> {
 

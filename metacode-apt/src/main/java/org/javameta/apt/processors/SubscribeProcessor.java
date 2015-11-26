@@ -17,7 +17,7 @@ import javax.lang.model.util.Types;
 import java.util.List;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class SubscribeProcessor extends SimpleProcessor {
 

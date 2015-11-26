@@ -5,6 +5,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @param <E>
+ *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class Observers<E> {
 

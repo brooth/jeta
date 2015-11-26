@@ -8,7 +8,7 @@ import org.javameta.util.Provider;
 import java.util.List;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class CollectorSample {
 

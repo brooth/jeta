@@ -4,7 +4,7 @@ import org.javameta.MasterController;
 import org.javameta.metasitory.Metasitory;
 
 /**
- * 
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class PublisherController<M> extends MasterController<M, PublisherMetacode<M>> {
 

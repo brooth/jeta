@@ -4,16 +4,19 @@ import org.javameta.pubsub.*;
 import org.javameta.samples.MetaHelper;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class PublishSubscribeSample {
 
-    static class NeverFilter implements Filter {
+    static class Never implements Filter {
         @Override
         public boolean accepts(Object master, String methodName, Message msg) {
             return false;
         }
     }
+
+    @MetaFilter(emitExpression = "$m.MIN_ALARM_ID <= $e.getId()")
+    static interface MinAlarmIdFilter extends Filter { }
 
     /**
      * Publisher
@@ -45,12 +48,7 @@ public class PublishSubscribeSample {
      * Subscriber
      */
     public static class PanicAtTheDisco {
-
         final int MIN_ALARM_ID = 3;
-
-        @MetaFilter(emitExpression = "$m.MIN_ALARM_ID <= $e.getId()")
-        static interface MinAlarmIdFilter extends Filter {
-        }
 
         private SubscriptionHandler handler;
 
@@ -69,7 +67,7 @@ public class PublishSubscribeSample {
             quit();
         }
 
-        @Subscribe(value = AlarmManager.class, filters = {NeverFilter.class})
+        @Subscribe(value = AlarmManager.class, filters = Never.class)
         protected void onApocalypse(AlarmManager.AlertMessage alert) {
             throw new IllegalStateException("Why God? Why?");
         }

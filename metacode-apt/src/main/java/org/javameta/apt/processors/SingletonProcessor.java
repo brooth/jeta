@@ -8,7 +8,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 
 /**
- * 
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class SingletonProcessor extends SimpleProcessor {
 

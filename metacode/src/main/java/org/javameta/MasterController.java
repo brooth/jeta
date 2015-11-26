@@ -5,6 +5,9 @@ import org.javameta.metasitory.Metasitory;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
+/**
+ * @author Oleg Khalidov (brooth@gmail.com)
+ */
 public abstract class MasterController<M, C> extends MasterClassController<M, C> {
 
     protected M master;

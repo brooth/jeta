@@ -1,8 +1,7 @@
 package org.javameta.samples.validate;
 
 /**
- * @author khalidov
- * @version $Id$
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class I18n {
 

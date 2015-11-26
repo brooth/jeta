@@ -7,7 +7,7 @@ import org.javameta.observer.Subject;
 import org.javameta.samples.MetaHelper;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ObserverSample {
 

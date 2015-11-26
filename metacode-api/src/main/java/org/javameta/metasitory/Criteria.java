@@ -7,6 +7,8 @@ import java.util.Set;
 
 /**
  * Used to search metacodes in a metasitory
+ *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public final class Criteria {
     /**

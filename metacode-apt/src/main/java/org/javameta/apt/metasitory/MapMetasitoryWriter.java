@@ -21,6 +21,8 @@ import java.util.Map;
 
 /**
  * jetaMapMetasitoryPackage=com.example             - metasitory package
+ *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class MapMetasitoryWriter implements MetasitoryWriter {
 

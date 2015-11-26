@@ -5,7 +5,7 @@ import com.google.common.base.Joiner;
 import java.util.List;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ValidationException extends RuntimeException {
 

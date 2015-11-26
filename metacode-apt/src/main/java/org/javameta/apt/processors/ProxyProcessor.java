@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ProxyProcessor extends SimpleProcessor {
 

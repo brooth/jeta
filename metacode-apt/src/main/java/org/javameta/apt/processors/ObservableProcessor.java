@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ObservableProcessor extends SimpleProcessor {
 

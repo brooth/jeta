@@ -22,6 +22,8 @@ import java.util.List;
 /**
  * No reflection, no problems...
  * Feel the power of javax.annotation.processing
+ *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class MetaHelper {
 

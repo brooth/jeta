@@ -6,7 +6,7 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface ObjectCollectorMetacode {
     List<Provider<?>> getObjectCollection(Class<? extends Annotation> annotation);

@@ -4,7 +4,7 @@ import org.javameta.observer.ObserverHandler;
 import org.javameta.observer.Observers;
 
 /**
- * 
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class SubscriptionHandler {
 

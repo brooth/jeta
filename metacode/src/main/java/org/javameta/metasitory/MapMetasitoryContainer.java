@@ -6,7 +6,7 @@ import org.javameta.util.Provider;
 import java.util.Map;
 
 /**
- * 
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface MapMetasitoryContainer {
 

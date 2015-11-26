@@ -27,6 +27,8 @@ import java.util.*;
  * jetaMetasitory=com.example.MyMetasitory       - set metasitory
  * jetaAdd={com.example.apt.MyCustomProcessor}   - add processor
  * jetaExclude={Inject.*, LogProcessor}          - exclude processors
+ *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_7)

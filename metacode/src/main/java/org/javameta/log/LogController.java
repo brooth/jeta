@@ -5,7 +5,7 @@ import org.javameta.metasitory.Metasitory;
 import org.javameta.util.Provider;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class LogController extends MasterController<Object, LogMetacode> {
 

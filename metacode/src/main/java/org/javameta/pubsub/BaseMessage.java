@@ -3,7 +3,7 @@ package org.javameta.pubsub;
 import javax.annotation.Nullable;
 
 /**
- * 
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class BaseMessage implements Message {
 

@@ -11,7 +11,7 @@ import javax.lang.model.util.Elements;
 import java.util.List;
 
 /**
- * 
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class MetacodeUtils {
 

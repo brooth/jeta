@@ -9,6 +9,8 @@ import javax.annotation.processing.RoundEnvironment;
 
 /**
  * -AmcLoggerMethodFormat="setName(\"%s\")"
+ *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class LogProcessor extends SimpleProcessor {
 

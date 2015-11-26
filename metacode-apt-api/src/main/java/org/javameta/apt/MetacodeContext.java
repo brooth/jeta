@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 /**
- *
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface MetacodeContext {
     /*
