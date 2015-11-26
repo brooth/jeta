@@ -55,6 +55,7 @@ public class ValidateProcessor extends SimpleProcessor {
         ParameterizedTypeName arrayListTypeName = ParameterizedTypeName.get(ClassName.get(ArrayList.class), ClassName.get(String.class));
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyValidation")
+                .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(listTypeName)
                 .addParameter(masterClassName, "master", Modifier.FINAL)

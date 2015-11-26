@@ -50,6 +50,7 @@ public class ProxyProcessor extends SimpleProcessor {
                 ClassName.get(ProxyMetacode.class), masterClassName));
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyProxy")
+                .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(void.class)
                 .addParameter(masterClassName, "master")

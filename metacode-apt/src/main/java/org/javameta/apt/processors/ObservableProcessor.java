@@ -47,6 +47,7 @@ public class ObservableProcessor extends SimpleProcessor {
                 ClassName.get(ObservableMetacode.class), masterClassName));
 
         MethodSpec.Builder applyMethodSpecBuilder = MethodSpec.methodBuilder("applyObservable")
+                .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(void.class)
                 .addParameter(masterClassName, "master");

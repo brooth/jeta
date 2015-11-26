@@ -51,6 +51,7 @@ import java.util.List;
         ClassName handlerClassName = ClassName.get(ObserverHandler.class);
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyObservers")
+                .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(handlerClassName)
                 .addParameter(masterClassName, "master", Modifier.FINAL)

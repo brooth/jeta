@@ -61,11 +61,11 @@ public class ValidatorSample {
         }
 
         public void checkIsAppropriate() {
-            List<String> incompatibilities = MetaHelper.validateSafe(this);
-            if (incompatibilities.size() > 0) {
+            List<String> errors = MetaHelper.validateSafe(this);
+            if (errors.size() > 0) {
                 System.out.println("Oops, ");
-                for (String incompatibility : incompatibilities) {
-                    System.out.println(incompatibility);
+                for (String error : errors) {
+                    System.out.println(error);
                 }
             }
         }

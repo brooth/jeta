@@ -46,6 +46,7 @@ public class CollectorSample {
 
     @MyAction
     public static class ActionTwo implements Action {
+        @MyAction
         @Override
         public String execute() {
             return "two";

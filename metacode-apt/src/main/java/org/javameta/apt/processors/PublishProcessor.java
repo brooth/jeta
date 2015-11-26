@@ -45,6 +45,7 @@ public class PublishProcessor extends SimpleProcessor {
                 ClassName.get(PublisherMetacode.class), masterClassName));
 
         MethodSpec.Builder applyMethodSpecBuilder = MethodSpec.methodBuilder("applyPublisher")
+                .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(void.class)
                 .addParameter(masterClassName, "master");

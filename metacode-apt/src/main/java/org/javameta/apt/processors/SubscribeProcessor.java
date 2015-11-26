@@ -50,6 +50,7 @@ public class SubscribeProcessor extends SimpleProcessor {
         ClassName handlerClassName = ClassName.get(SubscriptionHandler.class);
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applySubscribers")
+                .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(handlerClassName)
                 .addParameter(masterClassName, "master", Modifier.FINAL)

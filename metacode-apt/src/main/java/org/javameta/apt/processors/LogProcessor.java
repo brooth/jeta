@@ -24,7 +24,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 
 /**
- * -AmcLoggerMethodFormat="setName(\"%s\")"
+ * -AjetaLoggerMethodFormat="setName(\"%s\")"
  *
  * @author Oleg Khalidov (brooth@gmail.com)
  */

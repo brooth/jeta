@@ -32,6 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.FluentIterable;
+import com.google.common.base.Function;
+
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
@@ -68,6 +71,14 @@ public class ObjectCollectorProcessor extends SimpleProcessor {
         for (String annotationStr : annotationsStr) {
             Set<? extends Element> annotatedElements =
                     roundEnv.getElementsAnnotatedWith(env.getElementUtils().getTypeElement(annotationStr));
+
+            annotatedElements = FluentIterable.from(annotatedElements)
+                    .transform(new Function<Element, Element>() {
+                        @Override
+                        public Element apply(Element input) {
+                            return MetacodeUtils.typeElementOf(input);
+                        }
+                    }).toSet();
 
             methodBuilder
                     .beginControlFlow("if(annotation == $L.class)", annotationStr)
