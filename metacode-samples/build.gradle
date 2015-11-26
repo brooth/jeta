@@ -29,5 +29,7 @@ dependencies {
 }
 
 tasks.withType(JavaCompile) { task ->
-    task.options.compilerArgs.add('-AmcMetasitoryPackage=org.javameta.samples')
+    def args = task.options.compilerArgs
+    args << '-AjetaDebug=true'
+    args << '-AjetaMapMetasitoryPackage=org.javameta.samples'
 }

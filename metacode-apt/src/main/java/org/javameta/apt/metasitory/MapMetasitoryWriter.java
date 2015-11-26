@@ -20,8 +20,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 /**
- * -AmcMetasitoryPackage=com.example             - metasitory package
- * -AmcSuperMetasitoryPackage=com.example        - super metasitory package. ???
+ * jetaMapMetasitoryPackage=com.example             - metasitory package
  */
 public class MapMetasitoryWriter implements MetasitoryWriter {
 
@@ -71,7 +70,7 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
                         "\t\t\t\treturn new $L();\n" +
                         "\t\t}},\n" +
                         "\t\tnew Class[] {$L\n\t\t}));\n",
-                master, TypeName.get(MapMetasitoryContainer.Context.class),  master, metacode, metacode, metacode, annotations);
+                master, TypeName.get(MapMetasitoryContainer.Context.class), master, metacode, metacode, metacode, annotations);
     }
 
     @Override
@@ -88,11 +87,11 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
         JavaFile javaFile = JavaFile.builder(metasitoryPackage, typeBuilder.build()).build();
         Writer out = null;
         try {
-			String fileName = metasitoryPackage.isEmpty() ? 
-				"MetasitoryContainer" : metasitoryPackage + ".MetasitoryContainer";
-        	messager.printMessage(Diagnostic.Kind.NOTE, "writing metasitory to " + fileName);
-            
-			JavaFileObject sourceFile = env.getFiler().createSourceFile(fileName);
+            String fileName = metasitoryPackage.isEmpty() ?
+                    "MetasitoryContainer" : metasitoryPackage + ".MetasitoryContainer";
+            messager.printMessage(Diagnostic.Kind.NOTE, "writing metasitory to " + fileName);
+
+            JavaFileObject sourceFile = env.getFiler().createSourceFile(fileName);
             out = sourceFile.openWriter();
             javaFile.writeTo(out);
             out.close();

@@ -41,7 +41,7 @@ public class CollectorSample {
         public void collect() {
             List<Class> handlers = MetaHelper.collectTypes(getClass(), MyAction.class);
             for (Class handlerClass : handlers) {
-                System.out.println("handler: " + handlerClass.getCanonicalName());
+                System.out.println("action class: " + handlerClass.getCanonicalName());
             }
         }
     }
@@ -51,7 +51,7 @@ public class CollectorSample {
         public void collect() {
             List<Provider<?>> handlers = MetaHelper.collectObjects(getClass(), MyAction.class);
             for (Provider<?> provider : handlers) {
-                System.out.println("handler result: " + ((Action) provider.get()).execute());
+                System.out.println("action result: " + ((Action) provider.get()).execute());
             }
         }
     }

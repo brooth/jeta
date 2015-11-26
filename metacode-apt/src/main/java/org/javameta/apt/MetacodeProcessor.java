@@ -1,5 +1,6 @@
 package org.javameta.apt;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.squareup.javapoet.*;
@@ -22,9 +23,10 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
- * -AmcAdd={com.example.apt.MyCustomProcessor}   - add processor
- * -AmcExclude={Inject.*, LogProcessor}          - exclude processors
- * -AmcMetasitory=com.example.MyMetasitory       - set metasitory
+ * jetaDebug=true                                - debug output
+ * jetaMetasitory=com.example.MyMetasitory       - set metasitory
+ * jetaAdd={com.example.apt.MyCustomProcessor}   - add processor
+ * jetaExclude={Inject.*, LogProcessor}          - exclude processors
  */
 @SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
@@ -47,13 +49,13 @@ public class MetacodeProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        logger = new Messager();
-        logger.messager = processingEnv.getMessager();
-        logger.debug = true;
-        logger.debug("init");
-
         this.env = processingEnv;
         this.elementUtils = processingEnv.getElementUtils();
+
+        logger = new Messager();
+        logger.messager = processingEnv.getMessager();
+        logger.debug = Boolean.parseBoolean(Optional.fromNullable(env.getOptions().get("jetaDebug")).or("false"));
+        logger.debug("init");
 
         processors.add(new ObservableProcessor());
         processors.add(new ObserverProcessor());
