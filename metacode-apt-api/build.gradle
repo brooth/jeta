@@ -1,4 +1,4 @@
-group = 'com.github.brooth.metacode'
+group = 'org.javameta'
 version = '0.1-SNAPSHOT'
 
 apply plugin: 'java'

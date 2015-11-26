@@ -1,1 +1,1 @@
-com.github.brooth.metacode.apt.MetacodeProcessor
+org.javameta.apt.MetacodeProcessor
