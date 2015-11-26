@@ -1,4 +1,5 @@
-Javameta or simply Jeta
+Jeta
+====
 
 
 in progress...
