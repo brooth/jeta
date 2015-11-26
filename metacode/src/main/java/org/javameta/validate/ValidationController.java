@@ -28,5 +28,4 @@ public class ValidationController extends MasterController<Object, ValidatorMeta
 
         return errors;
     }
-
 }

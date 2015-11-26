@@ -16,7 +16,7 @@ apply plugin: 'java'
 apply plugin: "net.ltgt.apt"
 apply plugin: 'application'
 
-mainClassName = 'org.javameta.samples.proxy.ProxySample'
+mainClassName = 'org.javameta.samples.validate.ValidatorSample'
 
 repositories {
     mavenLocal()

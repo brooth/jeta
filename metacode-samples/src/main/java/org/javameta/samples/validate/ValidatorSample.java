@@ -11,15 +11,15 @@ import java.util.List;
 public class ValidatorSample {
 
     @MetaValidator(
-            emitExpression = "%m.age > 18",
-            emitError = "Too young" // %{I18n.get(\"TOO_YOUNG\")}
+            emitExpression = "$m.age > 18",
+            emitError = "${I18n.get(\"TOO_YOUNG\", \"en\")}"
     )
     public interface AgeValidator extends Validator {
     }
 
     @MetaValidator(
-            emitExpression = "%m.age - 18 >= %m.experience",
-            emitError = "%m.experience years of experience is too high for the age of %m.age" // %m.getAge(); 
+            emitExpression = "$m.age - 18 >= $m.experience",
+            emitError = "${$m.experience} years of experience is too high for the age of ${$m.experience}"
     )
     public interface ExperienceValidator extends Validator {
     }
@@ -56,7 +56,7 @@ public class ValidatorSample {
         new HireAction("John Smith", 45, 15, "Master Chef").execute();
 
         List<String> incompatibilities = new HireAction(null, 17, 15).isAppropriate();
-        if(incompatibilities.size() > 0) {
+        if (incompatibilities.size() > 0) {
             System.out.println("Oops, ");
             for (String incompatibility : incompatibilities) {
                 System.out.println(incompatibility);

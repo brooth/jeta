@@ -15,7 +15,7 @@ public class ProxySample {
         int execute();
     }
 
-    public static class PingImpl implements Ping {
+    public static class PingEmu implements Ping {
         private String uri;
 
         @Override
@@ -40,7 +40,6 @@ public class ProxySample {
         }
     }
 
-    //@MetaEntity support
     public static abstract class FixTheTruth implements Ping, AbstractProxy<Ping> {
         @Override
         public int execute() {
@@ -64,7 +63,7 @@ public class ProxySample {
     }
 
     public static void main(String[] args) {
-        Ping googlePing = new PingImpl();
+        Ping googlePing = new PingEmu();
         googlePing.setUri("http://google.com");
         new PingTest(googlePing).test();
     }

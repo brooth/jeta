@@ -113,8 +113,8 @@ public class SubscribeProcessor extends SimpleProcessor {
                                 + " or interface annotated with MetaFilter");
 
                     String expression = metaFilter.emitExpression()
-                            .replaceAll("%m", "master")
-                            .replaceAll("%e", "event");
+                            .replaceAll("\\$m", "master")
+                            .replaceAll("\\$e", "event");
 
                     onEventMethodBuilder
                             .beginControlFlow("if(!($L))", expression)

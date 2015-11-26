@@ -12,7 +12,6 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,9 +40,7 @@ public class ValidateProcessor extends SimpleProcessor {
                 .addParameter(masterClassName, "master", Modifier.FINAL)
                 .addStatement("$T errors = new $T()", listTypeName, arrayListTypeName);
 
-        Types typeUtils = ctx.env.getTypeUtils();
         Elements elementUtils = ctx.env.getElementUtils();
-
         for (Element element : ctx.elements) {
             String fieldNameStr = element.getSimpleName().toString();
 
@@ -70,8 +67,11 @@ public class ValidateProcessor extends SimpleProcessor {
                                 + "' must be implementation of Validator"
                                 + " or interface annotated with org.javameta.validate.MetacodeValidator");
 
-                    String expression = metaValidator.emitExpression().replaceAll("%m", "master");
-                    String error = metaValidator.emitError().replaceAll("%m([a-zA-Z0-9_.]*)", "\" + master$1 + \"");
+                    String expression = metaValidator.emitExpression().replaceAll("\\$m", "master");
+                    String error = metaValidator.emitError()
+                            .replaceAll("\\$m", "master")
+                            .replaceAll("\\$\\{([^}]*)}", "\" + $1 + \"");
+
                     methodBuilder.beginControlFlow("if(!($L)) ", expression)
                             .addStatement("errors.add(\"$L\")", error)
                             .endControlFlow();

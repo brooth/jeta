@@ -48,7 +48,7 @@ public class PublishSubscribeSample {
 
         final int MIN_ALARM_ID = 3;
 
-        @MetaFilter(emitExpression = "%m.MIN_ALARM_ID <= %e.getId()")
+        @MetaFilter(emitExpression = "$m.MIN_ALARM_ID <= $e.getId()")
         static interface MinAlarmIdFilter extends Filter {
         }
 
