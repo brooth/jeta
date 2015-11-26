@@ -7,6 +7,7 @@ import org.javameta.observer.Observer;
 import org.javameta.observer.ObserverHandler;
 import org.javameta.observer.ObserverMetacode;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -24,7 +25,7 @@ public class ObserverProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
+    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
         MetacodeContext context = ctx.metacodeContext;
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
@@ -48,7 +49,7 @@ public class ObserverProcessor extends SimpleProcessor {
             });
             ClassName observableTypeName = ClassName.bestGuess(observableClass);
             ClassName metacodeTypeName = ClassName.bestGuess(MetacodeUtils.
-                    getMetacodeOf(ctx.env.getElementUtils(), observableClass));
+                    getMetacodeOf(env.getElementUtils(), observableClass));
 
             List<? extends VariableElement> params = ((ExecutableElement) element).getParameters();
             if (params.size() != 1)

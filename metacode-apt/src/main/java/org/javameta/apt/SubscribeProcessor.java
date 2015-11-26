@@ -6,6 +6,7 @@ import com.squareup.javapoet.*;
 import org.javameta.observer.EventObserver;
 import org.javameta.pubsub.*;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.util.Elements;
@@ -22,7 +23,7 @@ public class SubscribeProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
+    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
         MetacodeContext context = ctx.metacodeContext;
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
@@ -35,8 +36,8 @@ public class SubscribeProcessor extends SimpleProcessor {
                 .addParameter(masterClassName, "master", Modifier.FINAL)
                 .addStatement("$T handler = new $T()", handlerClassName, handlerClassName);
 
-        Types typeUtils = ctx.env.getTypeUtils();
-        Elements elementUtils = ctx.env.getElementUtils();
+        Types typeUtils = env.getTypeUtils();
+        Elements elementUtils = env.getElementUtils();
 
         for (Element element : ctx.elements) {
             final Subscribe annotation = element.getAnnotation(Subscribe.class);
@@ -48,7 +49,7 @@ public class SubscribeProcessor extends SimpleProcessor {
             });
             ClassName observableTypeName = ClassName.bestGuess(publisherClass);
             ClassName metacodeTypeName = ClassName.bestGuess(MetacodeUtils.
-                    getMetacodeOf(ctx.env.getElementUtils(), publisherClass));
+                    getMetacodeOf(env.getElementUtils(), publisherClass));
 
             List<? extends VariableElement> params = ((ExecutableElement) element).getParameters();
             if (params.size() != 1)

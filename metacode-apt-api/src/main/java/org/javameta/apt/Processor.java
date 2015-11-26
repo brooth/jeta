@@ -14,7 +14,7 @@ public interface Processor {
     /*
      * @return true if next round is needed
      */
-    boolean process(RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round);
+    boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round);
 
     /*
      * Tell to MetacodeProcessor the annotations, it should collect elements with.
@@ -35,7 +35,7 @@ public interface Processor {
     public boolean forceOverwriteMetacode();
     
 	/**
-	 * return true if current round's set of annotations is needed in the next round 
+	 * return true if current rounds set of annotations is needed in the next round
 	 */
 	public boolean needReclaim();
 }

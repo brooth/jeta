@@ -47,20 +47,19 @@ public class ValidatorSample {
             System.out.println(name + ", see you monday!");
         }
 
-        public List<String> isAppropriate() {
-            return MetaHelper.validateSafe(this);
+        public void checkIsAppropriate() {
+            List<String> incompatibilities = MetaHelper.validateSafe(this);
+            if (incompatibilities.size() > 0) {
+                System.out.println("Oops, ");
+                for (String incompatibility : incompatibilities) {
+                    System.out.println(incompatibility);
+                }
+            }
         }
     }
 
     public static void main(String[] args) {
         new HireAction("John Smith", 45, 15, "Master Chef").execute();
-
-        List<String> incompatibilities = new HireAction(null, 17, 15).isAppropriate();
-        if (incompatibilities.size() > 0) {
-            System.out.println("Oops, ");
-            for (String incompatibility : incompatibilities) {
-                System.out.println(incompatibility);
-            }
-        }
+        new HireAction(null, 17, 15).checkIsAppropriate();
     }
 }

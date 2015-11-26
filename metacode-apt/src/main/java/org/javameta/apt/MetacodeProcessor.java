@@ -4,7 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.squareup.javapoet.*;
 import org.javameta.MasterMetacode;
-import org.javameta.apt.metasitory.HasMapMetasitoryWriter;
+import org.javameta.apt.metasitory.MapMetasitoryWriter;
 import org.javameta.apt.metasitory.MetasitoryWriter;
 
 import javax.annotation.processing.*;
@@ -73,7 +73,7 @@ public class MetacodeProcessor extends AbstractProcessor {
 
         if (!metacodeContextList.isEmpty()) {
             if (round == 1) {
-                metasitoryWriter = new HasMapMetasitoryWriter();
+                metasitoryWriter = new MapMetasitoryWriter();
                 metasitoryWriter.open(env);
                 generateMetaTypeBuilders();
             }
@@ -128,7 +128,7 @@ public class MetacodeProcessor extends AbstractProcessor {
                 logger.debug("processing " + context.metacodeCanonicalName +
                         " with " + processor.getClass().getSimpleName());
 
-                if (!processor.process(roundEnv, processorContext, context.builder, round))
+                if (!processor.process(processingEnv, roundEnv, processorContext, context.builder, round))
                     processorContextIterator.remove();
 
                 if (processor.needReclaim())
@@ -214,7 +214,6 @@ public class MetacodeProcessor extends AbstractProcessor {
                         ProcessorContext processorContext = context.processorContextMap.get(processor);
                         if (processorContext == null) {
                             processorContext = new ProcessorContext();
-                            processorContext.env = env;
                             processorContext.metacodeContext = context;
                             processorContext.elements = new ArrayList<>();
                             processorContext.logger = logger;

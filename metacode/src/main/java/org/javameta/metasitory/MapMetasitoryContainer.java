@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * 
  */
-public interface HashMapMetasitoryContainer {
+public interface MapMetasitoryContainer {
 
     public Map<Class, Context> get();
 

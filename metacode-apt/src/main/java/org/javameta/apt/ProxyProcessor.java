@@ -7,6 +7,7 @@ import com.squareup.javapoet.*;
 import org.javameta.proxy.Proxy;
 import org.javameta.proxy.ProxyMetacode;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
@@ -23,7 +24,7 @@ public class ProxyProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
+    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
         MetacodeContext context = ctx.metacodeContext;
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
@@ -45,7 +46,7 @@ public class ProxyProcessor extends SimpleProcessor {
                     annotation.value();
                 }
             });
-            TypeElement proxyTypeElement = ctx.env.getElementUtils().getTypeElement(proxyClassNameStr);
+            TypeElement proxyTypeElement = env.getElementUtils().getTypeElement(proxyClassNameStr);
             ClassName proxyClassName = ClassName.bestGuess(proxyClassNameStr);
 
             TypeSpec.Builder proxyTypeSpecBuilder = TypeSpec.anonymousClassBuilder("")
@@ -57,7 +58,7 @@ public class ProxyProcessor extends SimpleProcessor {
                             .addStatement("return ($T) real", realClassName)
                             .build());
 
-            TypeElement realTypeElement = (TypeElement) ctx.env.getTypeUtils().asElement(element.asType());
+            TypeElement realTypeElement = (TypeElement) env.getTypeUtils().asElement(element.asType());
             Set<ExecutableElement> toImplementMethods = new HashSet<>();
             for (Element subElement : ((TypeElement) realTypeElement).getEnclosedElements()) {
                 if (subElement.getKind() == ElementKind.METHOD)

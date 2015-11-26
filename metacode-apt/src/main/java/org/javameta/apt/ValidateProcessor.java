@@ -5,6 +5,7 @@ import org.javameta.validate.MetaValidator;
 import org.javameta.validate.Validate;
 import org.javameta.validate.ValidatorMetacode;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -25,7 +26,7 @@ public class ValidateProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
+    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
         MetacodeContext context = ctx.metacodeContext;
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
@@ -40,7 +41,7 @@ public class ValidateProcessor extends SimpleProcessor {
                 .addParameter(masterClassName, "master", Modifier.FINAL)
                 .addStatement("$T errors = new $T()", listTypeName, arrayListTypeName);
 
-        Elements elementUtils = ctx.env.getElementUtils();
+        Elements elementUtils = env.getElementUtils();
         for (Element element : ctx.elements) {
             String fieldNameStr = element.getSimpleName().toString();
 

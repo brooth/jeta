@@ -6,7 +6,7 @@ import com.google.common.collect.Iterables;
 import com.squareup.javapoet.*;
 import org.javameta.apt.MetacodeContext;
 import org.javameta.apt.MetacodeUtils;
-import org.javameta.metasitory.HashMapMetasitoryContainer;
+import org.javameta.metasitory.MapMetasitoryContainer;
 
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -23,7 +23,7 @@ import java.util.Map;
  * -AmcMetasitoryPackage=com.example             - metasitory package
  * -AmcSuperMetasitoryPackage=com.example        - super metasitory package. ???
  */
-public class HasMapMetasitoryWriter implements MetasitoryWriter {
+public class MapMetasitoryWriter implements MetasitoryWriter {
 
     protected ProcessingEnvironment env;
     protected Messager messager;
@@ -38,11 +38,11 @@ public class HasMapMetasitoryWriter implements MetasitoryWriter {
 
         typeBuilder = TypeSpec.classBuilder("MetasitoryContainer")
                 .addModifiers(Modifier.PUBLIC)
-                .addSuperinterface(TypeName.get(HashMapMetasitoryContainer.class));
+                .addSuperinterface(TypeName.get(MapMetasitoryContainer.class));
 
         ClassName mapClassName = ClassName.get(Map.class);
         TypeName classTypeName = TypeName.get(Class.class);
-        TypeName contextTypeName = TypeName.get(HashMapMetasitoryContainer.Context.class);
+        TypeName contextTypeName = TypeName.get(MapMetasitoryContainer.Context.class);
 
         methodBuilder = MethodSpec.methodBuilder("get")
                 .addModifiers(Modifier.PUBLIC)
@@ -71,7 +71,7 @@ public class HasMapMetasitoryWriter implements MetasitoryWriter {
                         "\t\t\t\treturn new $L();\n" +
                         "\t\t}},\n" +
                         "\t\tnew Class[] {$L\n\t\t}));\n",
-                master, TypeName.get(HashMapMetasitoryContainer.Context.class),  master, metacode, metacode, metacode, annotations);
+                master, TypeName.get(MapMetasitoryContainer.Context.class),  master, metacode, metacode, metacode, annotations);
     }
 
     @Override
