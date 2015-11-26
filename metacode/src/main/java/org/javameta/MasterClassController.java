@@ -11,7 +11,7 @@ import java.util.List;
  * @param <M> master's class
  * @param <C> metacode extension
  */
-public abstract class MasterClassController<M, C extends MasterMetacode> {
+public abstract class MasterClassController<M, C> {
 
     protected Class<? extends M> masterClass;
     protected List<C> metacodes;

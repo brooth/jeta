@@ -19,5 +19,4 @@ public class SubscriberController<M> extends MasterController<M, SubscriberMetac
 
         return handler;
     }
-
 }

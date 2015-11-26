@@ -1,9 +1,12 @@
-package org.javameta.apt;
+package org.javameta.apt.processors;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.squareup.javapoet.*;
+import org.javameta.apt.MetacodeContext;
+import org.javameta.apt.MetacodeUtils;
+import org.javameta.apt.ProcessorContext;
 import org.javameta.proxy.Proxy;
 import org.javameta.proxy.ProxyMetacode;
 

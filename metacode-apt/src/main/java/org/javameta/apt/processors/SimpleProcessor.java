@@ -1,4 +1,7 @@
-package org.javameta.apt;
+package org.javameta.apt.processors;
+
+import org.javameta.apt.MetacodeUtils;
+import org.javameta.apt.Processor;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -22,7 +25,7 @@ public abstract class SimpleProcessor implements Processor {
 
     @Override
     public Set<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element) {
-        return Collections.singleton(MetacodeUtils.typeOf(element));
+        return Collections.singleton(MetacodeUtils.typeElementOf(element));
     }
 
     @Override

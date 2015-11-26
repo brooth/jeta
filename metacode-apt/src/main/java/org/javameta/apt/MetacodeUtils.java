@@ -22,7 +22,7 @@ public class MetacodeUtils {
                 .replaceAll("\\.", "_") + MetacodeProcessor.METACODE_CLASS_POSTFIX;
     }
 
-    public static TypeElement getSourceTypeElement(Element element) {
+    public static TypeElement sourceElementOf(Element element) {
         Element sourceElement = element;
         while (sourceElement.getEnclosingElement() != null && sourceElement.getEnclosingElement().getKind().isClass()) {
             sourceElement = sourceElement.getEnclosingElement();
@@ -30,7 +30,7 @@ public class MetacodeUtils {
         return (TypeElement) sourceElement;
     }
 
-    public static TypeElement typeOf(Element element) {
+    public static TypeElement typeElementOf(Element element) {
         return element.getKind().isClass() || element.getKind().isInterface()
                 ? (TypeElement) element : (TypeElement) element.getEnclosingElement();
     }

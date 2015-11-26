@@ -6,6 +6,7 @@ import com.squareup.javapoet.*;
 import org.javameta.MasterMetacode;
 import org.javameta.apt.metasitory.MapMetasitoryWriter;
 import org.javameta.apt.metasitory.MetasitoryWriter;
+import org.javameta.apt.processors.*;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -60,6 +61,8 @@ public class MetacodeProcessor extends AbstractProcessor {
         processors.add(new PublishProcessor());
         processors.add(new SubscribeProcessor());
         processors.add(new ValidateProcessor());
+        processors.add(new TypeCollectorProcessor());
+        processors.add(new ObjectCollectorProcessor());
     }
 
     @Override
@@ -103,9 +106,9 @@ public class MetacodeProcessor extends AbstractProcessor {
                             ClassName.get(MasterMetacode.class), masterClassName));
 
             builder.addMethod(MethodSpec.methodBuilder("getMasterClass")
+                    .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
-                    .returns(ParameterizedTypeName.get(
-                            ClassName.get(Class.class), masterClassName))
+                    .returns(ParameterizedTypeName.get(ClassName.get(Class.class), masterClassName))
                     .addStatement("return $T.class", masterClassName)
                     .build());
 

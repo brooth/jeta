@@ -21,7 +21,7 @@ public class CollectorSample {
     }
 
     @MyAction
-    public class ActionOne implements Action {
+    public static class ActionOne implements Action {
         @Override
         public String execute() {
             return "one";
@@ -29,7 +29,7 @@ public class CollectorSample {
     }
 
     @MyAction
-    public class ActionTwo implements Action {
+    public static class ActionTwo implements Action {
         @Override
         public String execute() {
             return "two";

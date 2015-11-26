@@ -1,7 +1,9 @@
-package org.javameta.apt;
+package org.javameta.apt.processors;
 
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.*;
+import org.javameta.apt.MetacodeContext;
+import org.javameta.apt.ProcessorContext;
 import org.javameta.observer.ObservableMetacode;
 import org.javameta.observer.Subject;
 
@@ -47,7 +49,8 @@ public class ObservableProcessor extends SimpleProcessor {
                     masterClassName, observersTypeName);
             FieldSpec observersField = FieldSpec.builder(mapTypeName, fieldName)
                     .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
-                    .initializer("new $T<>()", WeakHashMap.class)
+                    .initializer("new $T()", ParameterizedTypeName.get(ClassName.get(WeakHashMap.class),
+                            masterClassName, observersTypeName))
                     .build();
             builder.addField(observersField);
 

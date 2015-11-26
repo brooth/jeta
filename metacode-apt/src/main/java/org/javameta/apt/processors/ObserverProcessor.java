@@ -1,7 +1,10 @@
-package org.javameta.apt;
+package org.javameta.apt.processors;
 
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.*;
+import org.javameta.apt.MetacodeContext;
+import org.javameta.apt.MetacodeUtils;
+import org.javameta.apt.ProcessorContext;
 import org.javameta.observer.EventObserver;
 import org.javameta.observer.Observer;
 import org.javameta.observer.ObserverHandler;

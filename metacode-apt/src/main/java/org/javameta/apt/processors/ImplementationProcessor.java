@@ -1,6 +1,7 @@
-package org.javameta.apt;
+package org.javameta.apt.processors;
 
 import com.squareup.javapoet.TypeSpec;
+import org.javameta.apt.ProcessorContext;
 import org.javameta.util.Implementation;
 
 import javax.annotation.processing.ProcessingEnvironment;

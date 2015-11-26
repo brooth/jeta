@@ -47,19 +47,19 @@ public class MetaHelper {
         return getImplementationController(of).getImplementation();
     }
 
-    public static <M> void createPublisher(M master) {
+    public static void createPublisher(Object master) {
         new PublisherController<>(getInstance().metasitory, master).createPublisher();
     }
 
-    public static <M> SubscriptionHandler registerSubscriber(M master) {
+    public static SubscriptionHandler registerSubscriber(Object master) {
         return new SubscriberController<>(getInstance().metasitory, master).registerSubscriber();
     }
 
-    public static <M> void createObservable(M master) {
+    public static void createObservable(Object master) {
         new ObservableController<>(getInstance().metasitory, master).createObservable();
     }
 
-    public static <M> ObserverHandler registerObserver(M observer, Object observable) {
+    public static ObserverHandler registerObserver(Object observer, Object observable) {
         return new ObserverController<>(getInstance().metasitory, observer).registerObserver(observable);
     }
 

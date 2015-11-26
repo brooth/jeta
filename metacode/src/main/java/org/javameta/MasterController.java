@@ -5,7 +5,7 @@ import org.javameta.metasitory.Metasitory;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 
-public abstract class MasterController<M, C extends MasterMetacode> extends MasterClassController<M, C> {
+public abstract class MasterController<M, C> extends MasterClassController<M, C> {
 
     protected M master;
 

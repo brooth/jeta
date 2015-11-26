@@ -1,6 +1,9 @@
-package org.javameta.apt;
+package org.javameta.apt.processors;
 
 import com.squareup.javapoet.*;
+import org.javameta.apt.MetacodeContext;
+import org.javameta.apt.MetacodeUtils;
+import org.javameta.apt.ProcessorContext;
 import org.javameta.validate.MetaValidator;
 import org.javameta.validate.Validate;
 import org.javameta.validate.ValidatorMetacode;

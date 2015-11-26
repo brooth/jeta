@@ -1,10 +1,8 @@
 package org.javameta.util;
 
-import org.javameta.MasterMetacode;
-
 /**
  * 
  */
-public interface ImplementationMetacode extends MasterMetacode {
+public interface ImplementationMetacode {
     <I> I getImplementation(Class<I> of);
 }
