@@ -45,6 +45,7 @@ public class MetacodeProcessor extends AbstractProcessor {
 
     private int round = 0;
     private int blankRounds = 0;
+    private long ts;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -72,6 +73,7 @@ public class MetacodeProcessor extends AbstractProcessor {
         logger.debug("processing. round: " + (++round));
 
         if (round == 1) {
+            ts = System.currentTimeMillis();
             metacodeContextList.clear();
             assembleMetacodeContextList(roundEnv);
         }
@@ -89,6 +91,9 @@ public class MetacodeProcessor extends AbstractProcessor {
         if (round > 1 && blankRounds == 0) {
             metasitoryWriter.close();
         }
+
+        if (blankRounds == 1 && logger.debug)
+            logger.debug(String.format("done in %dms", System.currentTimeMillis() - ts));
 
         blankRounds++;
         return true;

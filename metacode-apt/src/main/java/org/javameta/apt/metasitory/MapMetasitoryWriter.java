@@ -75,9 +75,9 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
 
     @Override
     public void close() {
-        String metasitoryPackage = env.getOptions().get("mcMetasitoryPackage");
+        String metasitoryPackage = env.getOptions().get("jetaMapMetasitoryPackage");
         if (metasitoryPackage == null) {
-            messager.printMessage(Diagnostic.Kind.WARNING, "mcMetasitoryPackage not present. used root package");
+            messager.printMessage(Diagnostic.Kind.WARNING, "jetaMapMetasitoryPackage not present. root package is used");
             metasitoryPackage = "";
         }
 
