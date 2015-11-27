@@ -20,7 +20,7 @@ import org.javameta.collector.ObjectCollectorController;
 import org.javameta.collector.TypeCollectorController;
 import org.javameta.log.LogController;
 import org.javameta.log.NamedLogger;
-import org.javameta.metasitory.HashMapMetasitory;
+import org.javameta.metasitory.MapMetasitory;
 import org.javameta.metasitory.Metasitory;
 import org.javameta.observer.ObservableController;
 import org.javameta.observer.ObserverController;
@@ -58,7 +58,7 @@ public class MetaHelper {
     }
 
     private MetaHelper(String metaPackage) {
-        metasitory = new HashMapMetasitory(metaPackage);
+        metasitory = new MapMetasitory(metaPackage);
     }
 
     public static <I> ImplementationController<I> getImplementationController(Class<I> of) {

@@ -126,7 +126,7 @@ public class MetacodeProcessor extends AbstractProcessor {
         logger.debug("generating meta type builders");
 
         for (MetacodeContextImpl context : metacodeContextList) {
-            logger.debug("    *" + context.metacodeCanonicalName);
+            logger.debug("    + " + context.metacodeCanonicalName);
 
             ClassName masterClassName = ClassName.get(context.masterElement);
             TypeSpec.Builder builder = TypeSpec.classBuilder(context.metacodeSimpleName)
@@ -238,8 +238,8 @@ public class MetacodeProcessor extends AbstractProcessor {
                             context = new MetacodeContextImpl(elementUtils, masterTypeElement);
                             metacodeContextList.add(context);
 
-                            logger.debug("    *masterCanonicalName   - " + context.masterElement.toString());
-                            logger.debug("    *metacodeCanonicalName - " + context.metacodeCanonicalName);
+                            logger.debug("    masterCanonicalName   - " + context.masterElement.toString());
+                            logger.debug("    metacodeCanonicalName - " + context.metacodeCanonicalName);
                         }
                         context.metacodeAnnotations().add(annotation);
 

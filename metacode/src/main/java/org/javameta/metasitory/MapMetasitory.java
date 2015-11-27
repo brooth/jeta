@@ -32,13 +32,13 @@ import java.util.Map;
  *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class HashMapMetasitory implements Metasitory {
+public class MapMetasitory implements Metasitory {
 
     public static final int SUPPORTED_CRITERIA_VERSION = 1;
 
     private Map<Class, MapMetasitoryContainer.Context> meta;
 
-    public HashMapMetasitory(String metaPackage) {
+    public MapMetasitory(String metaPackage) {
         loadContainer(metaPackage);
     }
 

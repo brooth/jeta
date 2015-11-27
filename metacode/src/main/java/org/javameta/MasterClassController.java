@@ -21,7 +21,7 @@ import org.javameta.metasitory.Metasitory;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * @param <M> master's class
@@ -32,7 +32,7 @@ import java.util.List;
 public abstract class MasterClassController<M, C> {
 
     protected Class<? extends M> masterClass;
-    protected List<C> metacodes;
+    protected Collection<C> metacodes;
     @Nullable
     protected Class<? extends Annotation> annotationClass;
 
@@ -48,7 +48,7 @@ public abstract class MasterClassController<M, C> {
 
     @SuppressWarnings("unchecked")
     protected void searchMetacodes(Metasitory metasitory) {
-        this.metacodes = (List<C>) metasitory.search(criteria());
+        this.metacodes = (Collection<C>) metasitory.search(criteria());
     }
 
     protected Criteria criteria() {

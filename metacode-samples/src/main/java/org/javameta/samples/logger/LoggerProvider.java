@@ -21,7 +21,6 @@ import org.javameta.util.Provider;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-//@Singleton
 public class LoggerProvider implements Provider<Logger> {
 
     private static LoggerProvider instance = new LoggerProvider();
