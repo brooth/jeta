@@ -87,4 +87,8 @@ public class ImplementationController<I> {
             }
         });
     }
+
+    public boolean hasImplementation() {
+        return !metacodes.isEmpty();
+    }
 }
