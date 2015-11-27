@@ -23,4 +23,6 @@ public @interface Implementation {
     Class value();
 
     String staticConstructor() default "";
+
+    int priority() default 0;
 }

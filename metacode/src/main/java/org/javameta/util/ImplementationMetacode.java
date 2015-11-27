@@ -23,4 +23,6 @@ public interface ImplementationMetacode<I> {
     I getImplementation();
 
     Class<I> getImplementationOf();
+
+    int getImplementationPriority();
 }

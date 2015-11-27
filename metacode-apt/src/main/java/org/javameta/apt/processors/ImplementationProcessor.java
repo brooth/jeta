@@ -58,20 +58,27 @@ public class ImplementationProcessor extends SimpleProcessor {
         else
             initStr = "$T." + initStr + "()";
 
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getImplementation")
+        builder.addMethod(MethodSpec.methodBuilder("getImplementation")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(implOfClassName)
-                .addStatement("return " + initStr, ClassName.bestGuess(env.metacodeContext().getMasterCanonicalName()));
-        builder.addMethod(methodBuilder.build());
+                .addStatement("return " + initStr, ClassName.bestGuess(env.metacodeContext().getMasterCanonicalName()))
+                .build());
 
-        MethodSpec.Builder ofMethodBuilder = MethodSpec.methodBuilder("getImplementationOf")
+        builder.addMethod(MethodSpec.methodBuilder("getImplementationOf")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(
                         ClassName.get(Class.class), implOfClassName))
-                .addStatement("return $T.class", implOfClassName);
-        builder.addMethod(ofMethodBuilder.build());
+                .addStatement("return $T.class", implOfClassName)
+                .build());
+
+        builder.addMethod(MethodSpec.methodBuilder("getImplementationPriority")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(int.class)
+                .addStatement("return $L", annotation.priority())
+                .build());
 
         return false;
     }

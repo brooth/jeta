@@ -25,8 +25,8 @@ import org.javameta.MasterMetacode;
 import org.javameta.metasitory.Criteria;
 import org.javameta.metasitory.Metasitory;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Comparator;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -52,22 +52,29 @@ public class ImplementationController<I> {
                     public ImplementationMetacode<I> apply(MasterMetacode input) {
                         return (ImplementationMetacode<I>) input;
                     }
-                }).filter(new Predicate<ImplementationMetacode>() {
+                })
+                .filter(new Predicate<ImplementationMetacode>() {
                     @Override
                     public boolean apply(ImplementationMetacode input) {
                         return input.getImplementationOf() == of;
                     }
-                }).toList();
+                })
+                .toSortedList(new Comparator<ImplementationMetacode<I>>() {
+                    @Override
+                    public int compare(ImplementationMetacode<I> o1, ImplementationMetacode<I> o2) {
+                        return o1.getImplementationPriority() == o2.getImplementationPriority() ? 0 :
+                                o2.getImplementationPriority() - o1.getImplementationPriority();
+                    }
+                });
     }
 
-    @Nullable
     public I getImplementation() {
-        if (metacodes.size() > 1)
-            throw new IllegalStateException("More than one implementation found. Invoke getImplementations() instead.");
-
         ImplementationMetacode<I> first = Iterables.getFirst(metacodes, null);
         if (first == null)
             return null;
+
+        if (metacodes.size() > 1 && first.getImplementationPriority() == Iterables.get(metacodes, 1).getImplementationPriority())
+            throw new IllegalStateException("More that one implementation with highest priority " + first.getImplementationPriority());
 
         return first.getImplementation();
     }
