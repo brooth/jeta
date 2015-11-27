@@ -85,6 +85,8 @@ public class MetacodeProcessor extends AbstractProcessor {
         processors.add(new TypeCollectorProcessor());
         processors.add(new ObjectCollectorProcessor());
         processors.add(new LogProcessor());
+        processors.add(new SingletonProcessor());
+        processors.add(new MultitonProcessor());
     }
 
     @Override

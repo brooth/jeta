@@ -18,6 +18,8 @@ package org.javameta.samples;
 
 import org.javameta.collector.ObjectCollectorController;
 import org.javameta.collector.TypeCollectorController;
+import org.javameta.log.LogController;
+import org.javameta.log.NamedLogger;
 import org.javameta.metasitory.HashMapMetasitory;
 import org.javameta.metasitory.Metasitory;
 import org.javameta.observer.ObservableController;
@@ -28,9 +30,9 @@ import org.javameta.pubsub.PublisherController;
 import org.javameta.pubsub.SubscriberController;
 import org.javameta.pubsub.SubscriptionHandler;
 import org.javameta.util.ImplementationController;
+import org.javameta.util.MultitonController;
 import org.javameta.util.Provider;
-import org.javameta.log.NamedLogger;
-import org.javameta.log.LogController;
+import org.javameta.util.SingletonController;
 import org.javameta.validate.ValidationController;
 import org.javameta.validate.ValidationException;
 
@@ -59,11 +61,11 @@ public class MetaHelper {
         metasitory = new HashMapMetasitory(metaPackage);
     }
 
-    public <I> ImplementationController<I> getImplementationController(Class<I> of) {
-        return new ImplementationController<>(metasitory, of);
+    public static <I> ImplementationController<I> getImplementationController(Class<I> of) {
+        return new ImplementationController<>(getInstance().metasitory, of);
     }
 
-    public <I> I getImplementation(Class<I> of) {
+    public static <I> I getImplementation(Class<I> of) {
         return getImplementationController(of).getImplementation();
     }
 
@@ -104,6 +106,14 @@ public class MetaHelper {
     }
 
     public static void createLogger(Object master, Provider<? extends NamedLogger> provider) {
-        new LogController(getInstance().metasitory, master).createLogger(provider);    
+        new LogController(getInstance().metasitory, master).createLogger(provider);
+    }
+
+    public static void createSingleton(Class<?> masterClass) {
+        new SingletonController(getInstance().metasitory, masterClass).createSingleton();
+    }
+
+    public static void createMultitonInstance(Class<?> masterClass, Object key) {
+        new MultitonController<>(getInstance().metasitory, masterClass).createInstance(key);
     }
 }

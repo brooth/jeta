@@ -64,12 +64,19 @@ public class HashMapMetasitory implements Metasitory {
         if (Criteria.VERSION > SUPPORTED_CRITERIA_VERSION)
             throw new IllegalArgumentException("Criteria version " + Criteria.VERSION + " not supported");
 
+        // todo support criteria search
         List<MasterMetacode> result = new ArrayList<>();
         for (Map<Class, MapMetasitoryContainer.Context> container : containers) {
-            // todo support criteria search
-            MapMetasitoryContainer.Context context = container.get(criteria.getMasterAssignableTo());
-            if (context != null)
+            if (criteria.getMasterEq() != null) {
+                MapMetasitoryContainer.Context context = container.get(criteria.getMasterEq());
                 result.add(context.metacodeProvider.get());
+            }
+            if (criteria.getMasterAssignableTo() != null) {
+                MapMetasitoryContainer.Context context = container.get(criteria.getMasterAssignableTo());
+                if (context != null) {
+                    result.add(context.metacodeProvider.get());
+                }
+            }
         }
 
         return result;

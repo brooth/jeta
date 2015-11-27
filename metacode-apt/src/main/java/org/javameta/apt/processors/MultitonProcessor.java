@@ -19,8 +19,8 @@ package org.javameta.apt.processors;
 import com.squareup.javapoet.*;
 import org.javameta.apt.MetacodeContext;
 import org.javameta.apt.ProcessorEnvironment;
-import org.javameta.util.Singleton;
-import org.javameta.util.SingletonMetacode;
+import org.javameta.util.Multiton;
+import org.javameta.util.MultitonMetacode;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
@@ -28,10 +28,10 @@ import javax.lang.model.element.Modifier;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class SingletonProcessor extends SimpleProcessor {
+public class MultitonProcessor extends SimpleProcessor {
 
-    public SingletonProcessor() {
-        super(Singleton.class);
+    public MultitonProcessor() {
+        super(Multiton.class);
     }
 
     @Override
@@ -39,12 +39,13 @@ public class SingletonProcessor extends SimpleProcessor {
         MetacodeContext context = env.metacodeContext();
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
-                ClassName.get(SingletonMetacode.class), masterClassName));
+                ClassName.get(MultitonMetacode.class), masterClassName));
 
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applySingleton")
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyMultiton")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .returns(void.class);
+                .returns(void.class)
+                .addParameter(TypeName.OBJECT, "key");
 
         for (Element element : env.elements()) {
             String fieldName = element.getSimpleName().toString();
@@ -55,17 +56,17 @@ public class SingletonProcessor extends SimpleProcessor {
                     .initializer("new Object()")
                     .build());
 
-            String initStr = element.getAnnotation(Singleton.class).staticConstructor();
+            String initStr = element.getAnnotation(Multiton.class).staticConstructor();
             if (initStr.isEmpty())
                 initStr = "new $T()";
             else
                 initStr = "$T." + initStr + "()";
 
             methodBuilder
-                    .beginControlFlow("if($T.$L == null)", masterClassName, fieldName)
+                    .beginControlFlow("if(!$T.$L.containsKey(key))", masterClassName, fieldName)
                     .beginControlFlow("synchronized ($L)", monitorFiledName)
-                    .beginControlFlow("if($T.$L == null)", masterClassName, fieldName)
-                    .addStatement("$T.$L = " + initStr, masterClassName, fieldName, masterClassName)
+                    .beginControlFlow("if(!$T.$L.containsKey(key))", masterClassName, fieldName)
+                    .addStatement("$T.$L.put(key, " + initStr + ")", masterClassName, fieldName, masterClassName)
                     .endControlFlow()
                     .endControlFlow()
                     .endControlFlow();

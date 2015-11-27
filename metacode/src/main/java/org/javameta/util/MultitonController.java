@@ -19,24 +19,16 @@ package org.javameta.util;
 import com.google.common.collect.Iterables;
 import org.javameta.MasterClassController;
 import org.javameta.MasterMetacode;
-import org.javameta.metasitory.ClassForNameMetasitory;
 import org.javameta.metasitory.Criteria;
 import org.javameta.metasitory.Metasitory;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MultitonController<M, K> extends MasterClassController<M, MasterMetacode> {
+public class MultitonController<M> extends MasterClassController<M, MasterMetacode> {
 
-    protected Class<K> keyClass;
-
-    public MultitonController(Class<? extends M> masterClass, Class<K> keyClass) {
-        this(new ClassForNameMetasitory(), masterClass, keyClass);
-    }
-
-    public MultitonController(Metasitory metasitory, Class<? extends M> masterClass, Class<K> keyClass) {
+    public MultitonController(Metasitory metasitory, Class<? extends M> masterClass) {
         super(metasitory, masterClass);
-        this.keyClass = keyClass;
     }
 
     @Override
@@ -44,14 +36,14 @@ public class MultitonController<M, K> extends MasterClassController<M, MasterMet
         return new Criteria.Builder().masterEq(masterClass).build();
     }
 
-    public M getInstance(K key) {
+    public void createInstance(Object key) {
+        if (metacodes.size() > 1)
+            throw new IllegalStateException("More than one metacode returned fot Criteria.masterEq");
+
         MasterMetacode multiton = Iterables.getFirst(metacodes, null);
         if (multiton == null || !(multiton instanceof MultitonMetacode))
             throw new IllegalStateException(masterClass.getCanonicalName() + " has not multiton meta code. No @Multiton annotation on it?");
 
-        @SuppressWarnings("unchecked")
-        M instance = (M) ((MultitonMetacode) multiton).getInstance(key);
-        return instance;
+        ((MultitonMetacode) multiton).applyMultiton(key);
     }
-
 }
