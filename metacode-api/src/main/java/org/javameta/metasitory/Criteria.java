@@ -35,9 +35,7 @@ public final class Criteria {
 
     private Class masterEq;
 
-    private Class masterAssignableFrom;
-
-    private Class masterAssignableTo;
+    private Class masterEqDeep;
 
     private Set<Class<? extends Annotation>> usesAny;
 
@@ -59,13 +57,8 @@ public final class Criteria {
             return this;
         }
 
-        public Builder masterAssignableFrom(Class value) {
-            criteria.masterAssignableFrom = value;
-            return this;
-        }
-
-        public Builder masterAssignableTo(Class value) {
-            criteria.masterAssignableTo = value;
+        public Builder masterEqDeep(Class value) {
+            criteria.masterEqDeep = value;
             return this;
         }
 
@@ -93,13 +86,8 @@ public final class Criteria {
     }
 
     @Nullable
-    public Class getMasterAssignableFrom() {
-        return masterAssignableFrom;
-    }
-
-    @Nullable
-    public Class getMasterAssignableTo() {
-        return masterAssignableTo;
+    public Class getMasterEqDeep() {
+        return masterEqDeep;
     }
 
     @Nullable

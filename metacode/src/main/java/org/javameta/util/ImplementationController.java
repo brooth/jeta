@@ -17,7 +17,9 @@
 package org.javameta.util;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import org.javameta.MasterMetacode;
 import org.javameta.metasitory.Criteria;
@@ -31,7 +33,7 @@ import java.util.Collection;
  */
 public class ImplementationController<I> {
 
-    protected Collection<MasterMetacode> metacodes;
+    protected Collection<ImplementationMetacode<I>> metacodes;
     protected Class<I> of;
 
     public ImplementationController(Metasitory metasitory, Class<I> of) {
@@ -39,24 +41,43 @@ public class ImplementationController<I> {
         searchMetacodes(metasitory);
     }
 
-    @SuppressWarnings("unchecked")
     protected void searchMetacodes(Metasitory metasitory) {
-        this.metacodes = metasitory.search(new Criteria.Builder().masterEq(of).build());
+        Collection<MasterMetacode> allImplementers =
+                metasitory.search(new Criteria.Builder().usesAny(Implementation.class).build());
+
+        metacodes = FluentIterable.from(allImplementers)
+                .transform(new Function<MasterMetacode, ImplementationMetacode<I>>() {
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    public ImplementationMetacode<I> apply(MasterMetacode input) {
+                        return (ImplementationMetacode<I>) input;
+                    }
+                }).filter(new Predicate<ImplementationMetacode>() {
+                    @Override
+                    public boolean apply(ImplementationMetacode input) {
+                        return input.getImplementationOf() == of;
+                    }
+                }).toList();
     }
 
     @Nullable
     public I getImplementation() {
-        MasterMetacode first = Iterables.getFirst(metacodes, null);
-        return first == null ? null : ((ImplementationMetacode) first).getImplementation(of);
+        if (metacodes.size() > 1)
+            throw new IllegalStateException("More than one implementation found. Invoke getImplementations() instead.");
+
+        ImplementationMetacode<I> first = Iterables.getFirst(metacodes, null);
+        if (first == null)
+            return null;
+
+        return first.getImplementation();
     }
 
     public Collection<I> getImplementations() {
-        return Collections2.transform(metacodes, new Function<MasterMetacode, I>() {
+        return Collections2.transform(metacodes, new Function<ImplementationMetacode<I>, I>() {
             @Override
-            public I apply(MasterMetacode input) {
-                return ((ImplementationMetacode) input).getImplementation(of);
+            public I apply(ImplementationMetacode<I> input) {
+                return input.getImplementation();
             }
         });
     }
-
 }

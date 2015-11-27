@@ -87,6 +87,7 @@ public class MetacodeProcessor extends AbstractProcessor {
         processors.add(new LogProcessor());
         processors.add(new SingletonProcessor());
         processors.add(new MultitonProcessor());
+        processors.add(new ImplementationProcessor());
     }
 
     @Override
@@ -125,7 +126,7 @@ public class MetacodeProcessor extends AbstractProcessor {
         logger.debug("generating meta type builders");
 
         for (MetacodeContextImpl context : metacodeContextList) {
-            logger.debug("    " + context.metacodeCanonicalName);
+            logger.debug("    *" + context.metacodeCanonicalName);
 
             ClassName masterClassName = ClassName.bestGuess(context.masterCanonicalName);
 
@@ -237,11 +238,11 @@ public class MetacodeProcessor extends AbstractProcessor {
                             context = new MetacodeContextImpl(elementUtils, masterTypeElement);
                             metacodeContextList.add(context);
 
-                            logger.debug("    masterPackage         - " + context.masterPackage);
-                            logger.debug("    masterSimpleName      - " + context.masterSimpleName);
-                            logger.debug("    masterCanonicalName   - " + context.masterCanonicalName);
-                            logger.debug("    metacodeSimpleName    - " + context.metacodeSimpleName);
-                            logger.debug("    metacodeCanonicalName - " + context.metacodeCanonicalName);
+                            logger.debug("    *masterPackage         - " + context.masterPackage);
+                            logger.debug("    *masterSimpleName      - " + context.masterSimpleName);
+                            logger.debug("    *masterCanonicalName   - " + context.masterCanonicalName);
+                            logger.debug("    *metacodeSimpleName    - " + context.metacodeSimpleName);
+                            logger.debug("    *metacodeCanonicalName - " + context.metacodeCanonicalName);
                         }
                         context.metacodeAnnotations().add(annotation);
 

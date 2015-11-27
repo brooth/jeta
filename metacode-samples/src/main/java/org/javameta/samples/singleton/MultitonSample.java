@@ -26,6 +26,7 @@ import java.util.Map;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class MultitonSample {
+
     @Multiton
     static final Map<Object, MultitonSample> multiton = new HashMap<>();
 

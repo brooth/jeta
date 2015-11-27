@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package org.javameta.util;
+package org.javameta.samples.implementation;
+
+import org.javameta.util.Implementation;
 
 /**
- * @author Oleg Khalidov (brooth@gmail.com)
- */
-public @interface Implementation {
-    Class value();
-
-    String staticConstructor() default "";
+* @author Oleg Khalidov (brooth@gmail.com)
+*/
+@Implementation(Foo.class)
+public class FooImpl implements Foo {
+    @Override
+    public String call() {
+        return "Magic!";
+    }
 }

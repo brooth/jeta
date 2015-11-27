@@ -23,6 +23,7 @@ import org.javameta.util.Singleton;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class SingletonSample {
+
     @Singleton(staticConstructor = "newInstance")
     static SingletonSample singleton;
 

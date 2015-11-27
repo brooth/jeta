@@ -14,13 +14,26 @@
  * limitations under the License.
  */
 
-package org.javameta.util;
+package org.javameta.samples.implementation;
+
+import org.javameta.samples.MetaHelper;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public @interface Implementation {
-    Class value();
+public class ImplementationSample {
 
-    String staticConstructor() default "";
+    public static abstract class FooFactory {
+        public static Foo newInstance() {
+            Foo implementation = MetaHelper.getImplementation(Foo.class);
+            if (implementation == null)
+                throw new IllegalStateException("Foo implementation not found");
+
+            return implementation;
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(FooFactory.newInstance().call());
+    }
 }

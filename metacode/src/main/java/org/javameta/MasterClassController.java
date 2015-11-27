@@ -52,7 +52,7 @@ public abstract class MasterClassController<M, C> {
     }
 
     protected Criteria criteria() {
-        Criteria.Builder builder = new Criteria.Builder().masterAssignableTo(masterClass);
+        Criteria.Builder builder = new Criteria.Builder().masterEqDeep(masterClass);
         if (annotationClass != null)
             builder.usesAny(annotationClass);
         return builder.build();

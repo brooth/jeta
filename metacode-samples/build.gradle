@@ -32,7 +32,7 @@ apply plugin: 'java'
 apply plugin: "net.ltgt.apt"
 apply plugin: 'application'
 
-mainClassName = 'org.javameta.samples.singleton.MultitonSample'
+mainClassName = 'org.javameta.samples.implementation.ImplementationSample'
 
 repositories {
     mavenLocal()

@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package org.javameta.util;
+package org.javameta.samples.implementation;
 
 /**
- * @author Oleg Khalidov (brooth@gmail.com)
- */
-public @interface Implementation {
-    Class value();
-
-    String staticConstructor() default "";
+* @author Oleg Khalidov (brooth@gmail.com)
+*/
+public interface Foo {
+    String call();
 }

@@ -16,12 +16,16 @@
 
 package org.javameta.metasitory;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Maps;
 import org.javameta.MasterMetacode;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Support ordering through containers. So, items from first container go first
@@ -32,7 +36,7 @@ public class HashMapMetasitory implements Metasitory {
 
     public static final int SUPPORTED_CRITERIA_VERSION = 1;
 
-    private final List<Map<Class, MapMetasitoryContainer.Context>> containers = new CopyOnWriteArrayList<>();
+    private Map<Class, MapMetasitoryContainer.Context> meta;
 
     public HashMapMetasitory(String metaPackage) {
         loadContainer(metaPackage);
@@ -56,30 +60,101 @@ public class HashMapMetasitory implements Metasitory {
             throw new IllegalArgumentException("Failed to initiate class " + clazz, e);
         }
 
-        containers.add(container.get());
+        if (meta == null)
+            meta = container.get();
+        else
+            meta.putAll(container.get());
     }
 
     @Override
-    public List<MasterMetacode> search(Criteria criteria) {
+    public Collection<MasterMetacode> search(Criteria criteria) {
         if (Criteria.VERSION > SUPPORTED_CRITERIA_VERSION)
             throw new IllegalArgumentException("Criteria version " + Criteria.VERSION + " not supported");
 
-        // todo support criteria search
-        List<MasterMetacode> result = new ArrayList<>();
-        for (Map<Class, MapMetasitoryContainer.Context> container : containers) {
-            if (criteria.getMasterEq() != null) {
-                MapMetasitoryContainer.Context context = container.get(criteria.getMasterEq());
-                result.add(context.metacodeProvider.get());
+        Map<Class, MapMetasitoryContainer.Context> selection = meta;
+        selection = masterEq(selection, criteria);
+        selection = masterEqDeep(selection, criteria);
+        selection = usesAll(selection, criteria);
+        selection = usesAny(selection, criteria);
+
+        if (selection.isEmpty())
+            return Collections.emptyList();
+
+        return Collections2.transform(selection.values(), new Function<MapMetasitoryContainer.Context, MasterMetacode>() {
+            @Override
+            public MasterMetacode apply(MapMetasitoryContainer.Context input) {
+                return input.metacodeProvider.get();
             }
-            if (criteria.getMasterAssignableTo() != null) {
-                MapMetasitoryContainer.Context context = container.get(criteria.getMasterAssignableTo());
-                if (context != null) {
-                    result.add(context.metacodeProvider.get());
+        });
+    }
+
+    private Map<Class, MapMetasitoryContainer.Context> usesAny(Map<Class, MapMetasitoryContainer.Context> selection, final Criteria criteria) {
+        if (criteria.getUsesAny() == null)
+            return selection;
+
+        return Maps.filterValues(selection, new Predicate<MapMetasitoryContainer.Context>() {
+            @Override
+            public boolean apply(MapMetasitoryContainer.Context input) {
+                for (Class annotation : input.annotations) {
+                    for (Class uses : criteria.getUsesAny()) {
+                        if (annotation == uses) {
+                            return true;
+                        }
+                    }
                 }
+                return false;
             }
+        });
+    }
+
+    private Map<Class, MapMetasitoryContainer.Context> usesAll(Map<Class, MapMetasitoryContainer.Context> selection, final Criteria criteria) {
+        if (criteria.getUsesAll() == null)
+            return selection;
+        if(criteria.getUsesAll().isEmpty())
+            throw new IllegalArgumentException("criteria.useAll is empty");
+
+        return Maps.filterValues(selection, new Predicate<MapMetasitoryContainer.Context>() {
+            @Override
+            public boolean apply(MapMetasitoryContainer.Context input) {
+                for (Class need : criteria.getUsesAll()) {
+                    boolean used = false;
+                    for (Class annotation : input.annotations) {
+                        if (annotation == need) {
+                            used = true;
+                            break;
+                        }
+                    }
+                    if (!used)
+                        return false;
+                }
+                return true;
+            }
+        });
+    }
+
+    private Map<Class, MapMetasitoryContainer.Context> masterEqDeep(Map<Class, MapMetasitoryContainer.Context> selection, Criteria criteria) {
+        if (criteria.getMasterEqDeep() == null)
+            return selection;
+
+        Map<Class, MapMetasitoryContainer.Context> result = new HashMap<>();
+        Class clazz = criteria.getMasterEqDeep();
+        while (clazz != Object.class) {
+            MapMetasitoryContainer.Context context = selection.get(clazz);
+            if (context != null)
+                result.put(clazz, context);
+            clazz = clazz.getSuperclass();
         }
 
         return result;
+    }
+
+    private Map<Class, MapMetasitoryContainer.Context> masterEq(Map<Class, MapMetasitoryContainer.Context> selection, Criteria criteria) {
+        if (criteria.getMasterEq() == null)
+            return selection;
+
+        MapMetasitoryContainer.Context context = selection.get(criteria.getMasterEq());
+        return context == null ? Collections.<Class, MapMetasitoryContainer.Context>emptyMap() :
+                Collections.singletonMap(criteria.getMasterEq(), context);
     }
 }
 
