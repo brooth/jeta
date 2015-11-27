@@ -16,11 +16,11 @@
 
 package org.javameta.util;
 
-import org.javameta.MasterMetacode;
+import org.javameta.IMetacode;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface SingletonMetacode<M> extends MasterMetacode<M> {
+public interface SingletonMetacode<M> extends IMetacode<M> {
     void applySingleton();
 }

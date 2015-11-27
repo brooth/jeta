@@ -21,7 +21,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
-import org.javameta.MasterMetacode;
+import org.javameta.IMetacode;
 import org.javameta.metasitory.Criteria;
 import org.javameta.metasitory.Metasitory;
 
@@ -42,14 +42,14 @@ public class ImplementationController<I> {
     }
 
     protected void searchMetacodes(Metasitory metasitory) {
-        Collection<MasterMetacode> allImplementers =
+        Collection<IMetacode> allImplementers =
                 metasitory.search(new Criteria.Builder().usesAny(Implementation.class).build());
 
         metacodes = FluentIterable.from(allImplementers)
-                .transform(new Function<MasterMetacode, ImplementationMetacode<I>>() {
+                .transform(new Function<IMetacode, ImplementationMetacode<I>>() {
                     @SuppressWarnings("unchecked")
                     @Override
-                    public ImplementationMetacode<I> apply(MasterMetacode input) {
+                    public ImplementationMetacode<I> apply(IMetacode input) {
                         return (ImplementationMetacode<I>) input;
                     }
                 })

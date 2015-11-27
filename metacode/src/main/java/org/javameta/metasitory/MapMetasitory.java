@@ -20,7 +20,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
-import org.javameta.MasterMetacode;
+import org.javameta.IMetacode;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -67,7 +67,7 @@ public class MapMetasitory implements Metasitory {
     }
 
     @Override
-    public Collection<MasterMetacode> search(Criteria criteria) {
+    public Collection<IMetacode> search(Criteria criteria) {
         if (Criteria.VERSION > SUPPORTED_CRITERIA_VERSION)
             throw new IllegalArgumentException("Criteria version " + Criteria.VERSION + " not supported");
 
@@ -80,9 +80,9 @@ public class MapMetasitory implements Metasitory {
         if (selection.isEmpty())
             return Collections.emptyList();
 
-        return Collections2.transform(selection.values(), new Function<MapMetasitoryContainer.Context, MasterMetacode>() {
+        return Collections2.transform(selection.values(), new Function<MapMetasitoryContainer.Context, IMetacode>() {
             @Override
-            public MasterMetacode apply(MapMetasitoryContainer.Context input) {
+            public IMetacode apply(MapMetasitoryContainer.Context input) {
                 return input.metacodeProvider.get();
             }
         });

@@ -16,12 +16,12 @@
 
 package org.javameta.proxy;
 
-import org.javameta.MasterMetacode;
+import org.javameta.IMetacode;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface ProxyMetacode<M> extends MasterMetacode<M> {
+public interface ProxyMetacode<M> extends IMetacode<M> {
     void applyProxy(M master, Object real);
 }
 

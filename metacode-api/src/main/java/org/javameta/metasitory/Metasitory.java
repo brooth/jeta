@@ -16,7 +16,7 @@
 
 package org.javameta.metasitory;
 
-import org.javameta.MasterMetacode;
+import org.javameta.IMetacode;
 
 import java.util.Collection;
 
@@ -27,6 +27,6 @@ import java.util.Collection;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface Metasitory {
-	Collection<MasterMetacode> search(Criteria criteria);
+	Collection<IMetacode> search(Criteria criteria);
 }
 

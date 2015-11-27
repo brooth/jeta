@@ -16,11 +16,11 @@
 
 package org.javameta.observer;
 
-import org.javameta.MasterMetacode;
+import org.javameta.IMetacode;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface ObserverMetacode<M> extends MasterMetacode<M> {
+public interface ObserverMetacode<M> extends IMetacode<M> {
     public ObserverHandler applyObservers(M master, Object observable, Class observableClass);
 }

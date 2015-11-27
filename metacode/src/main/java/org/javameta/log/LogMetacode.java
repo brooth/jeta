@@ -16,12 +16,12 @@
 
 package org.javameta.log;
 
-import org.javameta.MasterMetacode;
+import org.javameta.IMetacode;
 import org.javameta.util.Provider;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface LogMetacode<M> extends MasterMetacode<M> {
+public interface LogMetacode<M> extends IMetacode<M> {
     public void applyLogger(M master, Provider<?> loggerProvider);
 }

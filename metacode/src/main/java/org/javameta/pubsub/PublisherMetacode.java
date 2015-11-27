@@ -16,11 +16,11 @@
 
 package org.javameta.pubsub;
 
-import org.javameta.MasterMetacode;
+import org.javameta.IMetacode;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface PublisherMetacode<M> extends MasterMetacode<M> {
+public interface PublisherMetacode<M> extends IMetacode<M> {
     void applyPublisher(M master);
 }

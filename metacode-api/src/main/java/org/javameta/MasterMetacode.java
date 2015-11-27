@@ -21,6 +21,6 @@ package org.javameta;
  *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface MasterMetacode<M> {
+public interface IMetacode<M> {
 	Class<M> getMasterClass(); 
 }

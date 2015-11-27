@@ -16,13 +16,13 @@
 
 package org.javameta.validate;
 
-import org.javameta.MasterMetacode;
+import org.javameta.IMetacode;
 
 import java.util.List;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface ValidatorMetacode<M> extends MasterMetacode<M> {
+public interface ValidatorMetacode<M> extends IMetacode<M> {
     List<String> applyValidation(M master);
 }

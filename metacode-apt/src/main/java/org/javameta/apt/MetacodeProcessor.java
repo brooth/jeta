@@ -20,7 +20,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.squareup.javapoet.*;
-import org.javameta.MasterMetacode;
+import org.javameta.IMetacode;
 import org.javameta.apt.metasitory.MapMetasitoryWriter;
 import org.javameta.apt.metasitory.MetasitoryWriter;
 import org.javameta.apt.processors.*;
@@ -132,7 +132,7 @@ public class MetacodeProcessor extends AbstractProcessor {
             TypeSpec.Builder builder = TypeSpec.classBuilder(context.metacodeSimpleName)
                     .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                     .addSuperinterface(ParameterizedTypeName.get(
-                            ClassName.get(MasterMetacode.class), masterClassName));
+                            ClassName.get(IMetacode.class), masterClassName));
 
             builder.addMethod(MethodSpec.methodBuilder("getMasterClass")
                     .addAnnotation(Override.class)
