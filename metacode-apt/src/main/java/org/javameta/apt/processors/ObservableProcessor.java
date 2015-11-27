@@ -40,7 +40,7 @@ public class ObservableProcessor extends SimpleProcessor {
     @Override
     public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
         MetacodeContext context = env.metacodeContext();
-        ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
+        ClassName masterClassName = ClassName.get(context.masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(ObservableMetacode.class), masterClassName));
 

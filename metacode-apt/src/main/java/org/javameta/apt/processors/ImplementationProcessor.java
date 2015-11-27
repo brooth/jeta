@@ -62,7 +62,7 @@ public class ImplementationProcessor extends SimpleProcessor {
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(implOfClassName)
-                .addStatement("return " + initStr, ClassName.bestGuess(env.metacodeContext().getMasterCanonicalName()))
+                .addStatement("return " + initStr, ClassName.get(env.metacodeContext().masterElement()))
                 .build());
 
         builder.addMethod(MethodSpec.methodBuilder("getImplementationOf")

@@ -128,8 +128,7 @@ public class MetacodeProcessor extends AbstractProcessor {
         for (MetacodeContextImpl context : metacodeContextList) {
             logger.debug("    *" + context.metacodeCanonicalName);
 
-            ClassName masterClassName = ClassName.bestGuess(context.masterCanonicalName);
-
+            ClassName masterClassName = ClassName.get(context.masterElement);
             TypeSpec.Builder builder = TypeSpec.classBuilder(context.metacodeSimpleName)
                     .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                     .addSuperinterface(ParameterizedTypeName.get(
@@ -171,7 +170,8 @@ public class MetacodeProcessor extends AbstractProcessor {
             }
 
             if (context.processorEnvironments.isEmpty()) {
-                JavaFile javaFile = JavaFile.builder(context.getMasterPackage(), context.builder.build()).build();
+                String pkg = env.getElementUtils().getPackageOf(context.masterElement).getQualifiedName().toString();
+                JavaFile javaFile = JavaFile.builder(pkg, context.builder.build()).build();
                 Writer out = null;
                 try {
                     JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(context.metacodeCanonicalName);
@@ -238,10 +238,7 @@ public class MetacodeProcessor extends AbstractProcessor {
                             context = new MetacodeContextImpl(elementUtils, masterTypeElement);
                             metacodeContextList.add(context);
 
-                            logger.debug("    *masterPackage         - " + context.masterPackage);
-                            logger.debug("    *masterSimpleName      - " + context.masterSimpleName);
-                            logger.debug("    *masterCanonicalName   - " + context.masterCanonicalName);
-                            logger.debug("    *metacodeSimpleName    - " + context.metacodeSimpleName);
+                            logger.debug("    *masterCanonicalName   - " + context.masterElement.toString());
                             logger.debug("    *metacodeCanonicalName - " + context.metacodeCanonicalName);
                         }
                         context.metacodeAnnotations().add(annotation);
@@ -305,36 +302,25 @@ public class MetacodeProcessor extends AbstractProcessor {
         private TypeSpec.Builder builder;
         private Map<Processor, ProcessorEnvironmentImpl> processorEnvironments = new HashMap<>();
 
-        private final String masterPackage;
-        private final String masterCanonicalName;
-        private final String masterSimpleName;
+        private final TypeElement masterElement;
+
         private final String metacodeSimpleName;
         private final String metacodeCanonicalName;
         private final Set<Class<? extends Annotation>> metacodeAnnotations;
 
-        public MetacodeContextImpl(Elements elementUtils, TypeElement masterTypeElement) {
-            masterPackage = elementUtils.getPackageOf(masterTypeElement).getQualifiedName().toString();
-            masterCanonicalName = masterTypeElement.toString();
-            masterSimpleName = masterTypeElement.getSimpleName().toString();
-            metacodeCanonicalName = MetacodeUtils.getMetacodeOf(elementUtils, masterCanonicalName);
+        public MetacodeContextImpl(Elements elementUtils, TypeElement masterElement) {
+            this.masterElement = masterElement;
+            this.metacodeAnnotations = new HashSet<>();
+
+            metacodeCanonicalName = MetacodeUtils.getMetacodeOf(elementUtils, masterElement.toString());
             int i = metacodeCanonicalName.lastIndexOf('.');
             metacodeSimpleName = i >= 0 ? metacodeCanonicalName.substring(i + 1) : metacodeCanonicalName;
-            metacodeAnnotations = new HashSet<>();
         }
 
-        @Override
-        public String getMasterPackage() {
-            return masterPackage;
-        }
 
         @Override
-        public String getMasterCanonicalName() {
-            return masterCanonicalName;
-        }
-
-        @Override
-        public String getMasterSimpleName() {
-            return masterSimpleName;
+        public TypeElement masterElement() {
+            return masterElement;
         }
 
         @Override
@@ -374,7 +360,7 @@ public class MetacodeProcessor extends AbstractProcessor {
 
         @Override
         public boolean apply(MetacodeContext input) {
-            return input.getMasterCanonicalName().equals(masterTypeElement.toString());
+            return input.masterElement().equals(masterTypeElement);
         }
     }
 }
