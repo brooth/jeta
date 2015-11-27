@@ -25,6 +25,8 @@ import org.javameta.samples.MetaHelper;
 public class LoggerSample {
     @Log
     Logger logger;
+    @Log("Jeta")
+    Logger jetaLogger;
 
     public LoggerSample() {
         MetaHelper.createLogger(this, LoggerProvider.getInstance());
@@ -32,6 +34,7 @@ public class LoggerSample {
 
     public void logAway() {
         logger.debug("Hello, Jeta!");
+        jetaLogger.debug("Hi, You!");
     }
 
     public static void main(String[] args) {

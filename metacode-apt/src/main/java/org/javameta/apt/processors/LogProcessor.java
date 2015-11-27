@@ -16,12 +16,19 @@
 
 package org.javameta.apt.processors;
 
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
+import org.javameta.apt.MetacodeContext;
+import org.javameta.apt.MetacodeUtils;
 import org.javameta.apt.ProcessorEnvironment;
 import org.javameta.log.Log;
+import org.javameta.log.LogMetacode;
+import org.javameta.log.NamedLogger;
+import org.javameta.util.Provider;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 
 /**
- *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class LogProcessor extends SimpleProcessor {
@@ -32,7 +39,35 @@ public class LogProcessor extends SimpleProcessor {
 
     @Override
     public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+        MetacodeContext context = env.metacodeContext();
+        ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
+        builder.addSuperinterface(ParameterizedTypeName.get(
+                ClassName.get(LogMetacode.class), masterClassName));
 
+        TypeName providerTypeName = ParameterizedTypeName.get(ClassName.get(Provider.class),
+                WildcardTypeName.subtypeOf(NamedLogger.class));
+
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyLogger")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(void.class)
+                .addParameter(masterClassName, "master")
+                .addParameter(providerTypeName, "provider");
+
+        for (Element element : env.elements()) {
+            String fieldName = element.getSimpleName().toString();
+            String loggerName = element.getAnnotation(Log.class).value();
+            if (loggerName.isEmpty())
+                loggerName = MetacodeUtils.typeElementOf(element).getSimpleName().toString();
+
+            methodBuilder
+                    .addStatement("master.$L = ($T) provider.get()",
+                            fieldName, TypeName.get(element.asType()))
+                    .addStatement("master.$L.setName($S)",
+                            fieldName, loggerName);
+        }
+
+        builder.addMethod(methodBuilder.build());
         return false;
     }
 }

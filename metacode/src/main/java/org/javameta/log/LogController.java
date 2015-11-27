@@ -23,15 +23,14 @@ import org.javameta.util.Provider;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class LogController extends MasterController<Object, LogMetacode> {
+public class LogController<M> extends MasterController<M, LogMetacode<M>> {
 
-    public LogController(Metasitory metasitory, Object master) {
+    public LogController(Metasitory metasitory, M master) {
         super(metasitory, master, Log.class);
     }
 
     public void createLogger(Provider<? extends NamedLogger> loggerProvider) {
-        for (LogMetacode metacode : metacodes)
+        for (LogMetacode<M> metacode : metacodes)
             metacode.applyLogger(master, loggerProvider);
     }
-
 }
