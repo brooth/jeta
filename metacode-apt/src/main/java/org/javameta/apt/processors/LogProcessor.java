@@ -17,11 +17,8 @@
 package org.javameta.apt.processors;
 
 import com.squareup.javapoet.TypeSpec;
-import org.javameta.apt.ProcessorContext;
+import org.javameta.apt.ProcessorEnvironment;
 import org.javameta.log.Log;
-
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
 
 /**
  *
@@ -34,8 +31,8 @@ public class LogProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
-        // todo: ProcessorEnviroment and builder only
+    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+
         return false;
     }
 }

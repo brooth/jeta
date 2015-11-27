@@ -19,13 +19,11 @@ package org.javameta.apt.processors;
 import com.squareup.javapoet.*;
 import org.javameta.apt.MetacodeContext;
 import org.javameta.apt.MetacodeUtils;
-import org.javameta.apt.ProcessorContext;
+import org.javameta.apt.ProcessorEnvironment;
 import org.javameta.validate.MetaValidator;
 import org.javameta.validate.Validate;
 import org.javameta.validate.ValidatorMetacode;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -45,8 +43,8 @@ public class ValidateProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
-        MetacodeContext context = ctx.metacodeContext;
+    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+        MetacodeContext context = env.metacodeContext();
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(ValidatorMetacode.class), masterClassName));
@@ -61,8 +59,8 @@ public class ValidateProcessor extends SimpleProcessor {
                 .addParameter(masterClassName, "master", Modifier.FINAL)
                 .addStatement("$T errors = new $T()", listTypeName, arrayListTypeName);
 
-        Elements elementUtils = env.getElementUtils();
-        for (Element element : ctx.elements) {
+        Elements elementUtils = env.processingEnv().getElementUtils();
+        for (Element element : env.elements()) {
             String fieldNameStr = element.getSimpleName().toString();
 
             final Validate annotation = element.getAnnotation(Validate.class);

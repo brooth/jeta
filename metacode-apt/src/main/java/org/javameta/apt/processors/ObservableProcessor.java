@@ -19,12 +19,10 @@ package org.javameta.apt.processors;
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.*;
 import org.javameta.apt.MetacodeContext;
-import org.javameta.apt.ProcessorContext;
+import org.javameta.apt.ProcessorEnvironment;
 import org.javameta.observer.ObservableMetacode;
 import org.javameta.observer.Subject;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import java.util.Map;
@@ -40,8 +38,8 @@ public class ObservableProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
-        MetacodeContext context = ctx.metacodeContext;
+    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+        MetacodeContext context = env.metacodeContext();
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(ObservableMetacode.class), masterClassName));
@@ -52,7 +50,7 @@ public class ObservableProcessor extends SimpleProcessor {
                 .returns(void.class)
                 .addParameter(masterClassName, "master");
 
-        for (Element element : ctx.elements) {
+        for (Element element : env.elements()) {
             String fieldName = element.getSimpleName().toString();
 
             String monitorFiledName = fieldName + "_MONITOR";

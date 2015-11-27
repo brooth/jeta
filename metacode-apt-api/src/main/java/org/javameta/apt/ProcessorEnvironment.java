@@ -16,14 +16,24 @@
 
 package org.javameta.apt;
 
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import java.util.List;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public final class ProcessorContext {
-	public List<Element> elements;
-	public MetacodeContext metacodeContext;
-	public Logger logger;
+public interface ProcessorEnvironment {
+    ProcessingEnvironment processingEnv();
+
+    RoundEnvironment roundEnv();
+
+    List<Element> elements();
+
+    MetacodeContext metacodeContext();
+
+    Logger logger();
+
+    int round();
 }

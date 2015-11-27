@@ -16,24 +16,21 @@
 
 package org.javameta.apt.processors;
 
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import com.squareup.javapoet.*;
 import org.javameta.apt.MetacodeUtils;
-import org.javameta.apt.ProcessorContext;
+import org.javameta.apt.ProcessorEnvironment;
 import org.javameta.collector.ObjectCollector;
 import org.javameta.collector.ObjectCollectorMetacode;
 import org.javameta.util.Provider;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import com.google.common.collect.FluentIterable;
-import com.google.common.base.Function;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -45,9 +42,9 @@ public class ObjectCollectorProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
+    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
         // it's enough one element to collect the type
-        final Element element = ctx.elements.iterator().next();
+        final Element element = env.elements().iterator().next();
         builder.addSuperinterface(ClassName.get(ObjectCollectorMetacode.class));
 
         TypeName annotationClassTypeName = ParameterizedTypeName.get(ClassName.get(Class.class),
@@ -70,7 +67,7 @@ public class ObjectCollectorProcessor extends SimpleProcessor {
         });
         for (String annotationStr : annotationsStr) {
             Set<? extends Element> annotatedElements =
-                    roundEnv.getElementsAnnotatedWith(env.getElementUtils().getTypeElement(annotationStr));
+                    env.roundEnv().getElementsAnnotatedWith(env.processingEnv().getElementUtils().getTypeElement(annotationStr));
 
             annotatedElements = FluentIterable.from(annotatedElements)
                     .transform(new Function<Element, Element>() {

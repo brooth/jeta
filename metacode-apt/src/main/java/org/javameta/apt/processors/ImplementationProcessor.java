@@ -17,11 +17,8 @@
 package org.javameta.apt.processors;
 
 import com.squareup.javapoet.TypeSpec;
-import org.javameta.apt.ProcessorContext;
+import org.javameta.apt.ProcessorEnvironment;
 import org.javameta.util.Implementation;
-
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -33,7 +30,7 @@ public class ImplementationProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
+    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
         return false;
     }
 }

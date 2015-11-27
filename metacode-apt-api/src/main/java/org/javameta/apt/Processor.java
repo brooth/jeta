@@ -19,7 +19,6 @@ package org.javameta.apt;
 import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
@@ -33,7 +32,7 @@ public interface Processor {
     /*
      * @return true if next round is needed
      */
-    boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round);
+    boolean process(ProcessorEnvironment env, TypeSpec.Builder builder);
 
     /*
      * Tell to MetacodeProcessor the annotations, it should collect elements with.

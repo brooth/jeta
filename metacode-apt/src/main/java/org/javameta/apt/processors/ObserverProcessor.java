@@ -20,14 +20,12 @@ import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.*;
 import org.javameta.apt.MetacodeContext;
 import org.javameta.apt.MetacodeUtils;
-import org.javameta.apt.ProcessorContext;
+import org.javameta.apt.ProcessorEnvironment;
 import org.javameta.observer.EventObserver;
 import org.javameta.observer.Observer;
 import org.javameta.observer.ObserverHandler;
 import org.javameta.observer.ObserverMetacode;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -43,8 +41,8 @@ import java.util.List;
     }
 
     @Override
-    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
-        MetacodeContext context = ctx.metacodeContext;
+    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+        MetacodeContext context = env.metacodeContext();
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(ObserverMetacode.class), masterClassName));
@@ -58,7 +56,7 @@ import java.util.List;
                 .addParameter(Object.class, "observable")
                 .addParameter(Class.class, "observableClass");
 
-        for (Element element : ctx.elements) {
+        for (Element element : env.elements()) {
             final Observer annotation = element.getAnnotation(Observer.class);
             String observableClass = MetacodeUtils.extractClassName(new Runnable() {
                 @Override
@@ -68,7 +66,7 @@ import java.util.List;
             });
             ClassName observableTypeName = ClassName.bestGuess(observableClass);
             ClassName metacodeTypeName = ClassName.bestGuess(MetacodeUtils.
-                    getMetacodeOf(env.getElementUtils(), observableClass));
+                    getMetacodeOf(env.processingEnv().getElementUtils(), observableClass));
 
             List<? extends VariableElement> params = ((ExecutableElement) element).getParameters();
             if (params.size() != 1)

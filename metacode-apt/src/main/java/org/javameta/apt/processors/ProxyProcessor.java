@@ -22,12 +22,10 @@ import com.google.common.collect.Sets;
 import com.squareup.javapoet.*;
 import org.javameta.apt.MetacodeContext;
 import org.javameta.apt.MetacodeUtils;
-import org.javameta.apt.ProcessorContext;
+import org.javameta.apt.ProcessorEnvironment;
 import org.javameta.proxy.Proxy;
 import org.javameta.proxy.ProxyMetacode;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.util.HashSet;
@@ -43,8 +41,8 @@ public class ProxyProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
-        MetacodeContext context = ctx.metacodeContext;
+    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+        MetacodeContext context = env.metacodeContext();
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(ProxyMetacode.class), masterClassName));
@@ -56,7 +54,7 @@ public class ProxyProcessor extends SimpleProcessor {
                 .addParameter(masterClassName, "master")
                 .addParameter(Object.class, "real", Modifier.FINAL);
 
-        for (Element element : ctx.elements) {
+        for (Element element : env.elements()) {
             String realFieldName = element.getSimpleName().toString();
             ClassName realClassName = ClassName.bestGuess(element.asType().toString());
             final Proxy annotation = element.getAnnotation(Proxy.class);
@@ -66,7 +64,7 @@ public class ProxyProcessor extends SimpleProcessor {
                     annotation.value();
                 }
             });
-            TypeElement proxyTypeElement = env.getElementUtils().getTypeElement(proxyClassNameStr);
+            TypeElement proxyTypeElement = env.processingEnv().getElementUtils().getTypeElement(proxyClassNameStr);
             ClassName proxyClassName = ClassName.bestGuess(proxyClassNameStr);
 
             TypeSpec.Builder proxyTypeSpecBuilder = TypeSpec.anonymousClassBuilder("")
@@ -78,7 +76,7 @@ public class ProxyProcessor extends SimpleProcessor {
                             .addStatement("return ($T) real", realClassName)
                             .build());
 
-            TypeElement realTypeElement = (TypeElement) env.getTypeUtils().asElement(element.asType());
+            TypeElement realTypeElement = (TypeElement) env.processingEnv().getTypeUtils().asElement(element.asType());
             Set<ExecutableElement> toImplementMethods = new HashSet<>();
             for (Element subElement : ((TypeElement) realTypeElement).getEnclosedElements()) {
                 if (subElement.getKind() == ElementKind.METHOD)

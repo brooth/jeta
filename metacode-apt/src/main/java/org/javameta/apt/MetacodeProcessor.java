@@ -147,24 +147,26 @@ public class MetacodeProcessor extends AbstractProcessor {
         Iterator<MetacodeContextImpl> iterator = metacodeContextList.iterator();
         while (iterator.hasNext()) {
             MetacodeContextImpl context = iterator.next();
-            Iterator<Map.Entry<Processor, ProcessorContext>> processorContextIterator
-                    = context.processorContextMap.entrySet().iterator();
-            while (processorContextIterator.hasNext()) {
-                Map.Entry<Processor, ProcessorContext> entry = processorContextIterator.next();
+            Iterator<Map.Entry<Processor, ProcessorEnvironmentImpl>> processorEnvIterator
+                    = context.processorEnvironments.entrySet().iterator();
+            while (processorEnvIterator.hasNext()) {
+                Map.Entry<Processor, ProcessorEnvironmentImpl> entry = processorEnvIterator.next();
                 Processor processor = entry.getKey();
-                ProcessorContext processorContext = entry.getValue();
+                ProcessorEnvironmentImpl processorEnvironment = entry.getValue();
 
                 logger.debug("processing " + context.metacodeCanonicalName +
                         " with " + processor.getClass().getSimpleName());
 
-                if (!processor.process(processingEnv, roundEnv, processorContext, context.builder, round))
-                    processorContextIterator.remove();
+                processorEnvironment.roundEnvironment = roundEnv;
+                processorEnvironment.round = round;
+                if (!processor.process(processorEnvironment, context.builder))
+                    processorEnvIterator.remove();
 
                 if (processor.needReclaim())
                     reclaim = true;
             }
 
-            if (context.processorContextMap.isEmpty()) {
+            if (context.processorEnvironments.isEmpty()) {
                 JavaFile javaFile = JavaFile.builder(context.getMasterPackage(), context.builder.build()).build();
                 Writer out = null;
                 try {
@@ -240,24 +242,64 @@ public class MetacodeProcessor extends AbstractProcessor {
                         }
                         context.metacodeAnnotations().add(annotation);
 
-                        ProcessorContext processorContext = context.processorContextMap.get(processor);
-                        if (processorContext == null) {
-                            processorContext = new ProcessorContext();
-                            processorContext.metacodeContext = context;
-                            processorContext.elements = new ArrayList<>();
-                            processorContext.logger = logger;
-                            context.processorContextMap.put(processor, processorContext);
+                        ProcessorEnvironmentImpl processorEnvironment = context.processorEnvironments.get(processor);
+                        if (processorEnvironment == null) {
+                            processorEnvironment = new ProcessorEnvironmentImpl();
+                            processorEnvironment.processingEnvironment = env;
+                            processorEnvironment.metacodeContext = context;
+                            processorEnvironment.elements = new ArrayList<>();
+                            processorEnvironment.logger = logger;
+                            context.processorEnvironments.put(processor, processorEnvironment);
                         }
-                        processorContext.elements.add(element);
+                        processorEnvironment.elements.add(element);
                     }
                 }
             }
         }
     }
 
+    private static class ProcessorEnvironmentImpl implements ProcessorEnvironment {
+        private ProcessingEnvironment processingEnvironment;
+        private RoundEnvironment roundEnvironment;
+        private MetacodeContext metacodeContext;
+        private List<Element> elements;
+        private Messager logger;
+        private int round;
+
+        @Override
+        public ProcessingEnvironment processingEnv() {
+            return processingEnvironment;
+        }
+
+        @Override
+        public RoundEnvironment roundEnv() {
+            return roundEnvironment;
+        }
+
+        @Override
+        public List<Element> elements() {
+            return elements;
+        }
+
+        @Override
+        public MetacodeContext metacodeContext() {
+            return metacodeContext;
+        }
+
+        @Override
+        public Logger logger() {
+            return logger;
+        }
+
+        @Override
+        public int round() {
+            return round;
+        }
+    }
+
     private static class MetacodeContextImpl implements MetacodeContext {
         private TypeSpec.Builder builder;
-        private Map<Processor, ProcessorContext> processorContextMap = new HashMap<>();
+        private Map<Processor, ProcessorEnvironmentImpl> processorEnvironments = new HashMap<>();
 
         private final String masterPackage;
         private final String masterCanonicalName;

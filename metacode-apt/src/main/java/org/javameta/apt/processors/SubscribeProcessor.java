@@ -21,12 +21,10 @@ import com.google.common.base.Joiner;
 import com.squareup.javapoet.*;
 import org.javameta.apt.MetacodeContext;
 import org.javameta.apt.MetacodeUtils;
-import org.javameta.apt.ProcessorContext;
+import org.javameta.apt.ProcessorEnvironment;
 import org.javameta.observer.EventObserver;
 import org.javameta.pubsub.*;
 
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -42,8 +40,8 @@ public class SubscribeProcessor extends SimpleProcessor {
     }
 
     @Override
-    public boolean process(ProcessingEnvironment env, RoundEnvironment roundEnv, ProcessorContext ctx, TypeSpec.Builder builder, int round) {
-        MetacodeContext context = ctx.metacodeContext;
+    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+        MetacodeContext context = env.metacodeContext();
         ClassName masterClassName = ClassName.bestGuess(context.getMasterCanonicalName());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(SubscriberMetacode.class), masterClassName));
@@ -56,10 +54,10 @@ public class SubscribeProcessor extends SimpleProcessor {
                 .addParameter(masterClassName, "master", Modifier.FINAL)
                 .addStatement("$T handler = new $T()", handlerClassName, handlerClassName);
 
-        Types typeUtils = env.getTypeUtils();
-        Elements elementUtils = env.getElementUtils();
+        Types typeUtils = env.processingEnv().getTypeUtils();
+        Elements elementUtils = env.processingEnv().getElementUtils();
 
-        for (Element element : ctx.elements) {
+        for (Element element : env.elements()) {
             final Subscribe annotation = element.getAnnotation(Subscribe.class);
             String publisherClass = MetacodeUtils.extractClassName(new Runnable() {
                 @Override
@@ -69,7 +67,7 @@ public class SubscribeProcessor extends SimpleProcessor {
             });
             ClassName observableTypeName = ClassName.bestGuess(publisherClass);
             ClassName metacodeTypeName = ClassName.bestGuess(MetacodeUtils.
-                    getMetacodeOf(env.getElementUtils(), publisherClass));
+                    getMetacodeOf(env.processingEnv().getElementUtils(), publisherClass));
 
             List<? extends VariableElement> params = ((ExecutableElement) element).getParameters();
             if (params.size() != 1)
