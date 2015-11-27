@@ -23,5 +23,5 @@ import org.javameta.util.Provider;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface LogMetacode<M> extends MasterMetacode<M> {
-    public void applyLogger(M master, Provider<? extends NamedLogger> loggerProvider);
+    public void applyLogger(M master, Provider<?> loggerProvider);
 }

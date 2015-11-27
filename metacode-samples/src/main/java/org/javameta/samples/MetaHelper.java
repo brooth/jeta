@@ -19,7 +19,6 @@ package org.javameta.samples;
 import org.javameta.collector.ObjectCollectorController;
 import org.javameta.collector.TypeCollectorController;
 import org.javameta.log.LogController;
-import org.javameta.log.NamedLogger;
 import org.javameta.metasitory.MapMetasitory;
 import org.javameta.metasitory.Metasitory;
 import org.javameta.observer.ObservableController;
@@ -105,7 +104,7 @@ public class MetaHelper {
         return new ObjectCollectorController(getInstance().metasitory, masterClass).getObjects(annotationClass);
     }
 
-    public static void createLogger(Object master, Provider<? extends NamedLogger> provider) {
+    public static void createLogger(Object master, Provider<?> provider) {
         new LogController(getInstance().metasitory, master).createLogger(provider);
     }
 

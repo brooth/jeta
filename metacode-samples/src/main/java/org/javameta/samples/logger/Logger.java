@@ -16,16 +16,13 @@
 
 package org.javameta.samples.logger;
 
-import org.javameta.log.NamedLogger;
-
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class Logger implements NamedLogger {
+public class Logger {
     
     private String name;    
 
-    @Override
     public void setName(String name) {
         this.name = name;
     }

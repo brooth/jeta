@@ -46,6 +46,6 @@ dependencies {
 
 tasks.withType(JavaCompile) { task ->
     def args = task.options.compilerArgs
-    args << '-AjetaDebug=true'
+    args << '-AjetaDebug=true2'
     args << '-AjetaMapMetasitoryPackage=org.javameta.samples'
 }

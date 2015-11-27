@@ -38,7 +38,7 @@ public class MultitonSample {
 
     public static void main(String[] args) {
         System.out.println(getInstance("one") == getInstance("one"));
+        System.out.println(getInstance("one") != getInstance("two"));
         System.out.println(getInstance("two") == getInstance("two"));
-        System.out.println(getInstance("one") == getInstance("two"));
     }
 }
