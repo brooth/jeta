@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-package org.javameta.samples.logger;
+package org.javameta.samples.proxy;
 
-import org.javameta.log.Log;
-import org.javameta.samples.MetaHelper;
+import org.javameta.proxy.AbstractProxy;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class LoggerSample {
-    @Log
-    Logger logger;
-
-    public LoggerSample() {
-        MetaHelper.createLogger(this, LoggerProvider.getInstance());
-    }
-
-    public void logAway() {
-        logger.debug("Hello, Jeta!");
-    }
-
-    public static void main(String[] args) {
-        new LoggerSample().logAway();
+public abstract class FixTheTruth implements Ping, AbstractProxy<Ping> {
+    @Override
+    public int execute() {
+        return real().execute() / 2;
     }
 }

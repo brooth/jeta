@@ -40,7 +40,7 @@ public class ObserverSample {
 
         public void run() {
             // ...
-            observers.notifyAndClear(new CompleteEvent("Hello world!"));
+            observers.notifyAndClear(new CompleteEvent("Jeta roles!"));
         }
 
         public static class CompleteEvent {

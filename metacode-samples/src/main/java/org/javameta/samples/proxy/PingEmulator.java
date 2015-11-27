@@ -14,27 +14,32 @@
  * limitations under the License.
  */
 
-package org.javameta.samples.logger;
-
-import org.javameta.log.Log;
-import org.javameta.samples.MetaHelper;
+package org.javameta.samples.proxy;
 
 /**
- * @author Oleg Khalidov (brooth@gmail.com)
- */
-public class LoggerSample {
-    @Log
-    Logger logger;
+* @author Oleg Khalidov (brooth@gmail.com)
+*/
+public class PingEmulator implements Ping {
+    private String uri;
 
-    public LoggerSample() {
-        MetaHelper.createLogger(this, LoggerProvider.getInstance());
+    @Override
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
-    public void logAway() {
-        logger.debug("Hello, Jeta!");
+    @Override
+    public String getUri() {
+        return uri;
     }
 
-    public static void main(String[] args) {
-        new LoggerSample().logAway();
+    @Override
+    public int execute() {
+        long ts = System.currentTimeMillis();
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            //
+        }
+        return (int) (System.currentTimeMillis() - ts);
     }
 }

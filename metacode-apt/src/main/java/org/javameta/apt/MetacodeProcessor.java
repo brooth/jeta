@@ -110,8 +110,9 @@ public class MetacodeProcessor extends AbstractProcessor {
             metasitoryWriter.close();
         }
 
-        if (blankRounds == 1 && logger.debug)
-            logger.debug(String.format("done in %dms", System.currentTimeMillis() - ts));
+        if (blankRounds == 1) {
+            logger.debug(String.format("built in %dms", System.currentTimeMillis() - ts));
+        }
 
         blankRounds++;
         return true;

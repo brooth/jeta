@@ -28,53 +28,28 @@ import java.util.List;
  */
 public class CollectorSample {
 
-    public @interface MyAction {
-
-    }
-
-    interface Action {
-        String execute();
-    }
-
-    @MyAction
-    public static class ActionOne implements Action {
-        @Override
-        public String execute() {
-            return "one";
-        }
-    }
-
-    @MyAction
-    public static class ActionTwo implements Action {
-        @MyAction
-        @Override
-        public String execute() {
-            return "two";
-        }
-    }
-
     @TypeCollector(MyAction.class)
-    public static class HandlerClassCollector {
+    public static class ActionTypeCollector {
         public void collect() {
-            List<Class> handlers = MetaHelper.collectTypes(getClass(), MyAction.class);
-            for (Class handlerClass : handlers) {
-                System.out.println("action class: " + handlerClass.getCanonicalName());
+            List<Class> actions = MetaHelper.collectTypes(getClass(), MyAction.class);
+            for (Class action : actions) {
+                System.out.println("action class: " + action.getCanonicalName());
             }
         }
     }
 
     @ObjectCollector(MyAction.class)
-    public static class HandlerObjectCollector {
+    public static class ActionObjectCollector {
         public void collect() {
-            List<Provider<?>> handlers = MetaHelper.collectObjects(getClass(), MyAction.class);
-            for (Provider<?> provider : handlers) {
-                System.out.println("action result: " + ((Action) provider.get()).execute());
+            List<Provider<?>> actions = MetaHelper.collectObjects(getClass(), MyAction.class);
+            for (Provider<?> action : actions) {
+                System.out.println("action result: " + ((Action) action.get()).execute());
             }
         }
     }
 
     public static void main(String[] args) {
-        new HandlerClassCollector().collect();
-        new HandlerObjectCollector().collect();
+        new ActionTypeCollector().collect();
+        new ActionObjectCollector().collect();
     }
 }

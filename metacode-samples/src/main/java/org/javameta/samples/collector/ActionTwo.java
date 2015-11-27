@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-package org.javameta.samples.logger;
-
-import org.javameta.log.Log;
-import org.javameta.samples.MetaHelper;
+package org.javameta.samples.collector;
 
 /**
- * @author Oleg Khalidov (brooth@gmail.com)
- */
-public class LoggerSample {
-    @Log
-    Logger logger;
-
-    public LoggerSample() {
-        MetaHelper.createLogger(this, LoggerProvider.getInstance());
-    }
-
-    public void logAway() {
-        logger.debug("Hello, Jeta!");
-    }
-
-    public static void main(String[] args) {
-        new LoggerSample().logAway();
+* @author Oleg Khalidov (brooth@gmail.com)
+*/
+@MyAction
+public class ActionTwo implements Action {
+    @MyAction
+    @Override
+    public String execute() {
+        return "two";
     }
 }
