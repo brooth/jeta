@@ -23,8 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @param <E>
  *
  * @author Oleg Khalidov (brooth@gmail.com)
- */
-public class Observers<E> {
+ */ public class Observers<E> {
 
     private final List<EventObserver<E>> observers = new CopyOnWriteArrayList<>();
 
@@ -52,10 +51,6 @@ public class Observers<E> {
     public Handler<E> register(EventObserver<E> observer) {
         observers.add(observer);
         return new Handler<>(observers, observer);
-    }
-
-    public boolean unregister(EventObserver<E> observer) {
-        return observers.remove(observer);
     }
 
     /**

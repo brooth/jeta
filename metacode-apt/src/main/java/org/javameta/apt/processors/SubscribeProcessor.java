@@ -152,8 +152,9 @@ public class SubscribeProcessor extends SimpleProcessor {
                     .addMethod(onEventMethodSpec)
                     .build();
 
-            methodBuilder.addStatement("handler.add($T.class, $T.class,\n$T.$L().\nregister($L))",
-                            observableTypeName, eventTypeName, metacodeTypeName, methodHashName, eventObserverTypeSpec);
+            methodBuilder.addStatement("handler.add($T.class, $T.class,\n$T.$L().\nregister($L, $L))",
+                            observableTypeName, eventTypeName, metacodeTypeName, methodHashName, 
+                            eventObserverTypeSpec, annotation.priority());
         }
 
         methodBuilder.addStatement("return handler");
