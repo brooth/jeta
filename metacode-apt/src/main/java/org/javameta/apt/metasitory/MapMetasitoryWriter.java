@@ -24,7 +24,6 @@ import org.javameta.apt.MetacodeContext;
 import org.javameta.apt.MetacodeUtils;
 import org.javameta.metasitory.MapMetasitoryContainer;
 
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.tools.Diagnostic;
@@ -35,6 +34,8 @@ import java.lang.annotation.Annotation;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import org.javameta.apt.Logger;
+
 /**
  * jetaMapMetasitoryPackage=com.example             - metasitory package
  *
@@ -43,15 +44,15 @@ import java.util.Map;
 public class MapMetasitoryWriter implements MetasitoryWriter {
 
     protected ProcessingEnvironment env;
-    protected Messager messager;
+    protected Logger logger;
 
     protected TypeSpec.Builder typeBuilder;
     protected MethodSpec.Builder methodBuilder;
 
     @Override
-    public void open(ProcessingEnvironment env) {
-        this.env = env;
-        messager = env.getMessager();
+    public void open(MetasitoryEnvironment env) {
+        this.env = env.processingEnv();
+        logger = env.logger();
 
         typeBuilder = TypeSpec.classBuilder("MetasitoryContainer")
                 .addModifiers(Modifier.PUBLIC)
@@ -95,7 +96,7 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
     public void close() {
         String metasitoryPackage = env.getOptions().get("jetaMapMetasitoryPackage");
         if (metasitoryPackage == null) {
-            messager.printMessage(Diagnostic.Kind.WARNING, "jetaMapMetasitoryPackage not present. root package is used");
+            logger.debug("jetaMapMetasitoryPackage not present. root package is used");
             metasitoryPackage = "";
         }
 
@@ -107,7 +108,7 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
         try {
             String fileName = metasitoryPackage.isEmpty() ?
                     "MetasitoryContainer" : metasitoryPackage + ".MetasitoryContainer";
-            messager.printMessage(Diagnostic.Kind.NOTE, "writing metasitory to " + fileName);
+            logger.debug("writing metasitory to " + fileName);
 
             JavaFileObject sourceFile = env.getFiler().createSourceFile(fileName);
             out = sourceFile.openWriter();

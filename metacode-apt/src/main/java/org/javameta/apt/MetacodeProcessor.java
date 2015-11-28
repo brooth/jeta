@@ -23,6 +23,7 @@ import com.squareup.javapoet.*;
 import org.javameta.IMetacode;
 import org.javameta.apt.metasitory.MapMetasitoryWriter;
 import org.javameta.apt.metasitory.MetasitoryWriter;
+import org.javameta.apt.metasitory.MetasitoryEnvironment;
 import org.javameta.apt.processors.*;
 
 import javax.annotation.processing.*;
@@ -103,7 +104,10 @@ public class MetacodeProcessor extends AbstractProcessor {
         if (!metacodeContextList.isEmpty()) {
             if (round == 1) {
                 metasitoryWriter = new MapMetasitoryWriter();
-                metasitoryWriter.open(env);
+                MetasitoryEnvironmentImpl impl = new MetasitoryEnvironmentImpl();
+                impl.env = env;
+                impl.logger = logger;
+                metasitoryWriter.open(impl);
                 generateMetaTypeBuilders();
             }
 
@@ -361,6 +365,19 @@ public class MetacodeProcessor extends AbstractProcessor {
         @Override
         public boolean apply(MetacodeContext input) {
             return input.masterElement().equals(masterTypeElement);
+        }
+    }
+
+    private static class MetasitoryEnvironmentImpl implements MetasitoryEnvironment {
+        private ProcessingEnvironment env;
+        private Logger logger;
+
+        public ProcessingEnvironment processingEnv() {
+            return env;
+        }
+
+        public Logger logger() {
+            return logger;
         }
     }
 }

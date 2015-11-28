@@ -16,15 +16,13 @@
 
 package org.javameta.apt.metasitory;
 
-import org.javameta.apt.MetacodeContext;
+import javax.annotation.processing.ProcessingEnvironment;
+import org.javameta.apt.Logger;
 
 /**
- * todo: pass MetasitoryEnv to open() with logger;
- *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface MetasitoryWriter {
-    void open(MetasitoryEnvironment env);
-    void write(MetacodeContext context);
-    void close();
+public interface MetasitoryEnvironment {
+    ProcessingEnvironment processingEnv();
+    Logger logger();                 
 }
