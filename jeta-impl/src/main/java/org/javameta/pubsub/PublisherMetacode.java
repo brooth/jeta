@@ -21,6 +21,6 @@ import org.javameta.IMetacode;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface PublisherMetacode<M> extends IMetacode<M> {
+public interface PublisherMetacode<M> {
     void applyPublisher(M master);
 }

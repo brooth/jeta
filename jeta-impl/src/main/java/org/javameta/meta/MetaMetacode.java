@@ -21,6 +21,6 @@ import org.javameta.IMetacode;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface MetaMetacode<M> extends IMetacode<M> {
+public interface MetaMetacode<M> {
     public void applyMeta(M master, MetaEntityFactory factory);
 }

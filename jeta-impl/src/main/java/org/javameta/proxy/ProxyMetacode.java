@@ -21,7 +21,7 @@ import org.javameta.IMetacode;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface ProxyMetacode<M> extends IMetacode<M> {
+public interface ProxyMetacode<M> {
     void applyProxy(M master, Object real);
 }
 

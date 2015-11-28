@@ -21,6 +21,6 @@ import org.javameta.IMetacode;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface SubscriberMetacode<M> extends IMetacode<M> {
+public interface SubscriberMetacode<M> {
     public SubscriptionHandler applySubscribers(M master);
 }

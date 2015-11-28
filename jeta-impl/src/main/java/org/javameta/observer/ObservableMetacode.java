@@ -21,6 +21,6 @@ import org.javameta.IMetacode;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface ObservableMetacode<M> extends IMetacode<M> {
+public interface ObservableMetacode<M> {
     void applyObservable(M master);
 }

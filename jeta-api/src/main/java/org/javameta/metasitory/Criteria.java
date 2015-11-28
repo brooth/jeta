@@ -44,6 +44,8 @@ public final class Criteria {
     private Criteria() {
 
     }
+    
+    // todo: toString, hashcode, equals
 
     public static class Builder {
         Criteria criteria = new Criteria();

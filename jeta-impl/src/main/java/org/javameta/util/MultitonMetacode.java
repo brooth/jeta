@@ -21,6 +21,6 @@ import org.javameta.IMetacode;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface MultitonMetacode<M> extends IMetacode<M> {
+public interface MultitonMetacode<M> {
     void applyMultiton(Object key);
 }

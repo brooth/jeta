@@ -23,6 +23,6 @@ import java.util.List;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface ValidatorMetacode<M> extends IMetacode<M> {
+public interface ValidatorMetacode<M> {
     List<String> applyValidation(M master);
 }
