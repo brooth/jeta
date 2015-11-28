@@ -25,6 +25,6 @@ repositories{
 }
 
 dependencies {
-    compile project(':metacode-api')
+    compile project(':jeta-api')
     compile 'com.google.guava:guava:18.0'
 }

@@ -38,7 +38,7 @@ public interface Processor {
      * Tell to MetacodeProcessor the annotations, it should collect elements with.
      * All the elements will passed to this processor in generating metacode stage.
      */
-    public void collectElementsAnnotatedWith(Set<Class<? extends Annotation>> set) ;
+    Set<Class<? extends Annotation>> collectElementsAnnotatedWith();
 
     /*
      * Ensure type elements (masters elements) associated with @param element
@@ -50,10 +50,10 @@ public interface Processor {
      * No mater if master's source code hasn't been changed since its meta code generated,
      * return true to rebuild it
      */
-    public boolean forceOverwriteMetacode();
+    boolean forceOverwriteMetacode();
     
 	/**
 	 * return true if current rounds set of annotations is needed in the next round
 	 */
-	public boolean needReclaim();
+	boolean needReclaim();
 }

@@ -20,16 +20,16 @@ version = '0.1-SNAPSHOT'
 buildscript {
     repositories {
         maven {
-            url "https://plugins.gradle.org/m2/"
+            url 'https://plugins.gradle.org/m2/'
         }
     }
     dependencies {
-        classpath "net.ltgt.gradle:gradle-apt-plugin:0.4"
+        classpath 'net.ltgt.gradle:gradle-apt-plugin:0.4'
     }
 }
 
 apply plugin: 'java'
-apply plugin: "net.ltgt.apt"
+apply plugin: 'net.ltgt.apt'
 apply plugin: 'application'
 
 mainClassName = 'org.javameta.samples.pubsub.PublishSubscribeSample'
@@ -40,8 +40,8 @@ repositories {
 }
 
 dependencies {
-    apt project(':metacode-apt')
-    compile project(':metacode')
+    apt project(':jeta-apt-impl')
+    compile project(':jeta-impl')
 }
 
 tasks.withType(JavaCompile) { task ->

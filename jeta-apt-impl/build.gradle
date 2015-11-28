@@ -25,6 +25,6 @@ repositories{
 }
 
 dependencies {
-    compile project(':metacode-apt-api')
-    compile project(':metacode')
+    compile project(':jeta-apt-api')
+    compile project(':jeta-impl')
 }

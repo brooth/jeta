@@ -208,10 +208,8 @@ public class MetacodeProcessor extends AbstractProcessor {
     private void assembleMetacodeContextList(RoundEnvironment roundEnv) {
         logger.debug("assemble metacode context list");
 
-        Set<Class<? extends Annotation>> annotations = new HashSet<>(5);
         for (final Processor processor : processors) {
-            annotations.clear();
-            processor.collectElementsAnnotatedWith(annotations);
+            Set<Class<? extends Annotation>> annotations = processor.collectElementsAnnotatedWith();
             if (annotations.isEmpty()) {
                 logger.warn("Processor " + processor.getClass().getCanonicalName()
                         + " without annotations. Nothing to collect");

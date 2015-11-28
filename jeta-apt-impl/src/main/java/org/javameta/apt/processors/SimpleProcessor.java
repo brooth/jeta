@@ -38,8 +38,8 @@ public abstract class SimpleProcessor implements Processor {
     }
 
     @Override
-    public void collectElementsAnnotatedWith(Set<Class<? extends Annotation>> set) {
-        set.add(annotation);
+    public Set<Class<? extends Annotation>> collectElementsAnnotatedWith() {
+        return Collections.singleton(annotation);
     }
 
     @Override

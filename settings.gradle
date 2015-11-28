@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-rootProject.name = 'metacode-all'
+rootProject.name = 'jeta-all'
 
-include ':metacode-apt-api'
-include ':metacode-apt'
-include ':metacode-api'
-include ':metacode'
-include ':metacode-samples'
+include ':jeta-apt-api'
+include ':jeta-apt-impl'
+include ':jeta-api'
+include ':jeta-impl'
+include ':jeta-samples'
 
