@@ -18,18 +18,42 @@ package org.javameta.proxy;
 
 import org.javameta.MasterController;
 import org.javameta.metasitory.Metasitory;
+import org.javameta.metasitory.Criteria;
+import org.javameta.IMetacode;
+
+import java.util.Collection;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class ProxyController extends MasterController<Object, ProxyMetacode<Object>> {
+public class ProxyController {
+    
+    private ProxyMetacode<Object> metacode;
+    private Object master;
 
     public ProxyController(Metasitory metasitory, Object master) {
-        super(metasitory, master, Proxy.class);
+        this.master = master;
+        search(metasitory);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void search(Metasitory metasitory) {
+        Criteria criteria = new Criteria.Builder()
+            .masterEq(master.getClass())
+            .usesAny(Proxy.class)
+            .build();
+
+        Collection<IMetacode> metacodes = metasitory.search(criteria);
+        if(metacodes.size() > 1)
+            throw new IllegalStateException("Metasitory returned more than one masterEq result");
+        if(metacodes.size() == 1)
+            metacode = (ProxyMetacode<Object>) metacodes.iterator().next();
     }
 
     public void createProxy(Object real) {
-        for (ProxyMetacode<Object> metacode : metacodes)
-            metacode.applyProxy(master, real);
+        if(metacode == null)
+            throw new IllegalStateException("No metacode found to create proxy");
+
+        metacode.applyProxy(master, real);
     }
 }
