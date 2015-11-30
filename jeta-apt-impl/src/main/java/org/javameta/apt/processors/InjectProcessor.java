@@ -190,7 +190,7 @@ public class InjectProcessor extends SimpleProcessor {
             return String.format("new %s(factory)", factoryElements.get(typeElement));
         }
 
-        return String.format("((%1$s.MetaEntity)\n\tfactory.getMetaEntity(%2$s.class))\n\t\t.%3$s",
+        return String.format("((%1$s.MetaEntity)\n\tfactory.getMetaEntity(%2$s.class))\n\t\t\t.%3$s",
                 MetacodeUtils.getMetacodeOf(env.getElementUtils(), elementTypeStr),
                 elementTypeStr,
                 classOf ? "getEntityClass()" : getInstanceStr);
@@ -212,7 +212,7 @@ public class InjectProcessor extends SimpleProcessor {
 
         String toValidate = unwrapClass && genericType.startsWith("java.lang.Class") ?
                 getGenericType(genericType, false) : genericType;
-        if (!toValidate.matches("^[a-zA-Z0-9.]*"))
+        if (!toValidate.matches("^[a-zA-Z0-9._$]*"))
             throw new IllegalStateException(type + " not valid meta structure of generics.");
 
         return genericType;
