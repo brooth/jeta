@@ -19,6 +19,7 @@ package org.javameta.metasitory;
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -44,8 +45,6 @@ public final class Criteria {
     private Criteria() {
 
     }
-    
-    // todo: toString, hashcode, equals
 
     public static class Builder {
         Criteria criteria = new Criteria();
@@ -100,6 +99,35 @@ public final class Criteria {
     @Nullable
     public Set<Class<? extends Annotation>> getUsesAll() {
         return usesAll;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        Criteria criteria = (Criteria) o;
+        return Objects.equals(masterEq, criteria.masterEq)
+                && Objects.equals(masterEqDeep, criteria.masterEqDeep)
+                && Objects.equals(usesAll, criteria.usesAll)
+                && Objects.equals(usesAny, criteria.usesAny);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(masterEq, masterEqDeep, usesAny, usesAll);
+    }
+
+    @Override
+    public String toString() {
+        return "Criteria{" +
+                "masterEq=" + masterEq +
+                ", masterEqDeep=" + masterEqDeep +
+                ", usesAny=" + usesAny +
+                ", usesAll=" + usesAll +
+                '}';
     }
 }
 

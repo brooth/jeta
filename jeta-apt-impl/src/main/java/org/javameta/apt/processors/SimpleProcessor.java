@@ -39,7 +39,7 @@ public abstract class SimpleProcessor implements Processor {
 
     @Override
     public Set<Class<? extends Annotation>> collectElementsAnnotatedWith() {
-        return Collections.singleton(annotation);
+        return Collections.<Class<? extends Annotation>>singleton(annotation);
     }
 
     @Override
@@ -48,9 +48,9 @@ public abstract class SimpleProcessor implements Processor {
     }
 
     @Override
-	public boolean needReclaim() {
-		return false;
-	}
+    public boolean needReclaim() {
+        return false;
+    }
 
     @Override
     public boolean forceOverwriteMetacode() {

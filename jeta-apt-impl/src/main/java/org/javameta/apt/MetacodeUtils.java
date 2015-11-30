@@ -31,10 +31,10 @@ import java.util.List;
  */
 public class MetacodeUtils {
 
-    public static String getMetacodeOf(Elements elementsUtils, String masterCanonicalName) {
-        TypeElement typeElement = elementsUtils.getTypeElement(masterCanonicalName);
+    public static String getMetacodeOf(Elements elementsUtils, String canonicalName) {
+        TypeElement typeElement = elementsUtils.getTypeElement(canonicalName);
         Object packageName = elementsUtils.getPackageOf(typeElement).getQualifiedName().toString();
-        return packageName + "." + masterCanonicalName.replace(packageName + ".", "")
+        return packageName + "." + canonicalName.replace(packageName + ".", "")
                 .replaceAll("\\.", "_") + MetacodeProcessor.METACODE_CLASS_POSTFIX;
     }
 

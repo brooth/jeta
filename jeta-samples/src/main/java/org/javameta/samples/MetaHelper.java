@@ -16,6 +16,8 @@
 
 package org.javameta.samples;
 
+import org.javameta.base.MetaController;
+import org.javameta.base.MetaEntityFactory;
 import org.javameta.collector.ObjectCollectorController;
 import org.javameta.collector.TypeCollectorController;
 import org.javameta.log.LogController;
@@ -50,6 +52,8 @@ public class MetaHelper {
 
     private final Metasitory metasitory;
 
+    private final MetaEntityFactory metaEntityFactory;
+
     public static MetaHelper getInstance() {
         if (instance == null)
             instance = new MetaHelper("org.javameta.samples");
@@ -58,6 +62,12 @@ public class MetaHelper {
 
     private MetaHelper(String metaPackage) {
         metasitory = new MapMetasitory(metaPackage);
+        metaEntityFactory = new MetaEntityFactory(metasitory);
+    }
+
+
+    public static void injectMeta(Object master) {
+        new MetaController(getInstance().metasitory, master).injectMeta(getInstance().metaEntityFactory);
     }
 
     public static <I> ImplementationController<I> getImplementationController(Class<I> of) {

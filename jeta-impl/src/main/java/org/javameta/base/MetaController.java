@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package org.javameta.meta;
+package org.javameta.base;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
+import org.javameta.MasterController;
+import org.javameta.metasitory.Metasitory;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-@Target(ElementType.FIELD)
-public @interface Meta {
+public class MetaController extends MasterController<Object, InjectMetacode<Object>> {
+
+    public MetaController(Metasitory metasitory, Object master) {
+        super(metasitory, master, Meta.class);
+    }
+
+    public void injectMeta(MetaEntityFactory factory) {
+        for (InjectMetacode<Object> metacode : metacodes)
+            metacode.applyMeta(master, factory);
+    }
 }

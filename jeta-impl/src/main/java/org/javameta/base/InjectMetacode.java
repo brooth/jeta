@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package org.javameta.meta;
+package org.javameta.base;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MetaEntityFactory {
+public interface InjectMetacode<M> {
+    public void applyMeta(M master, MetaEntityFactory factory);
+
+    public void applyStaticMeta(MetaEntityFactory factory);
 }

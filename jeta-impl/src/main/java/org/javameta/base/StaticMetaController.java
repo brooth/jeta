@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-package org.javameta.meta;
+package org.javameta.base;
+
+import org.javameta.MasterClassController;
+import org.javameta.MasterController;
+import org.javameta.metasitory.Metasitory;
 
 /**
- * MObjectCollector, MTypeCollector, ...
- *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public @interface MProxy {
-    Class<?> value();
+public class StaticMetaController extends MasterClassController<Object, InjectMetacode<Object>> {
+
+    public StaticMetaController(Metasitory metasitory, Class<?> masterClass) {
+        super(metasitory, masterClass, Meta.class);
+    }
+
+    public void injectStaticMeta(MetaEntityFactory factory) {
+        for (InjectMetacode<Object> metacode : metacodes)
+            metacode.applyStaticMeta(factory);
+    }
 }

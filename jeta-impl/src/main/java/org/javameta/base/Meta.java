@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.javameta.meta;
+package org.javameta.base;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
@@ -22,16 +22,6 @@ import java.lang.annotation.Target;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-@Target(ElementType.TYPE)
-public @interface MetaEntity {
-
-    Class of() default Void.class;
-
-    Class ext() default Void.class;
-
-    String staticConstructor() default "";
-
-    boolean minor() default false;
-
-    int priority() default 0;
+@Target(ElementType.FIELD)
+public @interface Meta {
 }
