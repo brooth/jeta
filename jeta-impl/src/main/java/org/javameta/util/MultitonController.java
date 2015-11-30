@@ -17,8 +17,8 @@
 package org.javameta.util;
 
 import com.google.common.collect.Iterables;
-import org.javameta.MasterClassController;
 import org.javameta.IMetacode;
+import org.javameta.MasterClassController;
 import org.javameta.metasitory.Criteria;
 import org.javameta.metasitory.Metasitory;
 

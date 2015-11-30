@@ -32,11 +32,14 @@ public class TypeCollectorController extends MasterClassController<Object, TypeC
         super(metasitory, masterClass);
     }
 
-    public List<Class> getTypes(Class<? extends Annotation> withAnnotation) {
+    public List<Class> getTypes(Class<? extends Annotation> annotation) {
         List<Class> result = new ArrayList<>();
 
         for (TypeCollectorMetacode collector : metacodes) {
-            result.addAll(collector.getTypeCollection(withAnnotation));
+            List<Class> collection = collector.getTypeCollection(annotation);
+            if (collection == null)
+                throw new IllegalArgumentException(masterClass + " doesn't collect types of " + annotation);
+            result.addAll(collection);
         }
 
         return result;

@@ -16,7 +16,6 @@
 
 package org.javameta.log;
 
-import org.javameta.IMetacode;
 import org.javameta.util.Provider;
 
 /**

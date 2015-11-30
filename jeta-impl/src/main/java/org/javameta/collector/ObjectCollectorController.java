@@ -33,11 +33,15 @@ public class ObjectCollectorController extends MasterClassController<Object, Obj
         super(metasitory, masterClass);
     }
 
-    public List<Provider<?>> getObjects(Class<? extends Annotation> withAnnotation) {
+    public List<Provider<?>> getObjects(Class<? extends Annotation> annotation) {
         List<Provider<?>> result = new ArrayList<>();
 
         for (ObjectCollectorMetacode collector : metacodes) {
-            result.addAll(collector.getObjectCollection(withAnnotation));
+            List<Provider<?>> collection = collector.getObjectCollection(annotation);
+            if (collection == null)
+                throw new IllegalArgumentException(masterClass + " doesn't collect objects of " + annotation);
+
+            result.addAll(collection);
         }
 
         return result;

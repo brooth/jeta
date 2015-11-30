@@ -50,7 +50,7 @@ public class ProxyProcessor extends SimpleProcessor {
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyProxy")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .returns(void.class)
+                .returns(boolean.class)
                 .addParameter(masterClassName, "master")
                 .addParameter(Object.class, "real", Modifier.FINAL);
 
@@ -122,12 +122,11 @@ public class ProxyProcessor extends SimpleProcessor {
             methodBuilder
                     .beginControlFlow("if (real == master.$L)", realFieldName)
                     .addStatement("master.$L = $L", realFieldName, proxyTypeSpecBuilder.build())
-                    .addStatement("return")
+                    .addStatement("return true")
                     .endControlFlow();
         }
 
-        methodBuilder.addStatement("throw new IllegalArgumentException(real.getClass() + \" not valid object for proxy wrapping. " +
-                "Is its field annotated with @Proxy?\")");
+        methodBuilder.addStatement("return false");
         builder.addMethod(methodBuilder.build());
         return false;
     }

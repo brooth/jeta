@@ -32,10 +32,14 @@ public class ObserverController<M> extends MasterController<M, ObserverMetacode<
         return registerObserver(observable, observable.getClass());
     }
 
-    public ObserverHandler registerObserver(Object observable, Class observableClass) {   
+    public ObserverHandler registerObserver(Object observable, Class observableClass) {
         ObserverHandler handler = new ObserverHandler();
-        for (ObserverMetacode<M> observer : metacodes)
-            handler.add(observer.applyObservers(master, observable, observableClass));
+        for (ObserverMetacode<M> observer : metacodes) {
+            ObserverHandler observerHandler = observer.applyObservers(master, observable, observableClass);
+            if (observerHandler == null)
+                throw new IllegalArgumentException("Not an observer of " + observable.getClass());
+            handler.add(observerHandler);
+        }
 
         return handler;
     }

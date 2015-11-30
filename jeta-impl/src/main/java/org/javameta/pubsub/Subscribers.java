@@ -16,13 +16,13 @@
 
 package org.javameta.pubsub;
 
-import org.javameta.observer.Observers;
 import org.javameta.observer.EventObserver;
+import org.javameta.observer.Observers;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)

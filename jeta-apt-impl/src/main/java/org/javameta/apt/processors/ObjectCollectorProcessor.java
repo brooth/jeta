@@ -101,7 +101,7 @@ public class ObjectCollectorProcessor extends SimpleProcessor {
                     .endControlFlow();
         }
 
-        methodBuilder.addStatement("throw new IllegalArgumentException(getMasterClass() + \" doesn't collect objects of \" + annotation)");
+        methodBuilder.addStatement("return null");
         builder.addMethod(methodBuilder.build());
         return false;
     }

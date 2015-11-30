@@ -99,9 +99,8 @@ import java.util.List;
                     .addStatement("return handler")
                     .endControlFlow();
         }
-        methodBuilder.addStatement("throw new IllegalArgumentException(\"Not an observer of \" + observable.getClass())");
+        methodBuilder.addStatement("return null");
         builder.addMethod(methodBuilder.build());
-
         return false;
     }
 }

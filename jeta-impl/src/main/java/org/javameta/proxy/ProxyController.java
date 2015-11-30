@@ -16,10 +16,9 @@
 
 package org.javameta.proxy;
 
-import org.javameta.MasterController;
-import org.javameta.metasitory.Metasitory;
-import org.javameta.metasitory.Criteria;
 import org.javameta.IMetacode;
+import org.javameta.metasitory.Criteria;
+import org.javameta.metasitory.Metasitory;
 
 import java.util.Collection;
 
@@ -54,6 +53,7 @@ public class ProxyController {
         if(metacode == null)
             throw new IllegalStateException("No metacode found to create proxy");
 
-        metacode.applyProxy(master, real);
+        if(!metacode.applyProxy(master, real))
+            throw new IllegalArgumentException(real.getClass() + " not valid object for proxy wrapping. Is its field annotated with @Proxy?");
     }
 }

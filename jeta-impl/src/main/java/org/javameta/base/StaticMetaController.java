@@ -17,7 +17,6 @@
 package org.javameta.base;
 
 import org.javameta.MasterClassController;
-import org.javameta.MasterController;
 import org.javameta.metasitory.Metasitory;
 
 /**

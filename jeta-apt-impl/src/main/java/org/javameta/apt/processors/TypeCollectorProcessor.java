@@ -88,7 +88,7 @@ public class TypeCollectorProcessor extends SimpleProcessor {
                     .endControlFlow();
         }
 
-        methodBuilder.addStatement("throw new IllegalArgumentException(getMasterClass() + \" doesn't collect types of \" + annotation)");
+        methodBuilder.addStatement("return null");
         builder.addMethod(methodBuilder.build());
         return false;
     }

@@ -16,8 +16,6 @@
 
 package org.javameta.observer;
 
-import org.javameta.IMetacode;
-
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */

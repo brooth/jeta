@@ -16,8 +16,6 @@
 
 package org.javameta.validate;
 
-import org.javameta.IMetacode;
-
 import java.util.List;
 
 /**
