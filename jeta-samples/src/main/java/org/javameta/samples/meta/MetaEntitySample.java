@@ -21,12 +21,14 @@ public class MetaEntitySample {
 
     @Meta
     MetaFactory factory;
+
     @Factory
     interface MetaFactory {
         SampleEntity getSampleEntity(String value);
 
-        // todo: support? lazy?
-        //Provider<SampleEntity> getSampleEntityProvider(String value);
+        Provider<SampleEntity> getSampleEntityProvider(String value);
+
+        Lazy<SampleEntity> getSampleEntityLazy(String value);
     }
 
     public void testMeta() {
@@ -38,7 +40,8 @@ public class MetaEntitySample {
         System.out.println(sampleEntityProvider.get().getValue());
 
         System.out.println(factory.getSampleEntity("foo").getValue());
-        //System.out.println(factory.getSampleEntityProvider("via provider").get().getValue());
+        System.out.println(factory.getSampleEntityProvider("via provider").get().getValue());
+        System.out.println(factory.getSampleEntityLazy("via lazy").get().getValue());
     }
 
     public static void main(String[] args) {

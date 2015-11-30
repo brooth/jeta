@@ -10,9 +10,10 @@ import org.javameta.base.Meta;
 import org.javameta.base.MetaEntityFactory;
 import org.javameta.util.Factory;
 
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,9 +58,7 @@ public class InjectProcessor extends SimpleProcessor {
 
             for (Element element : env.elements()) {
                 String elementTypeStr = element.asType().toString();
-                TypeName elementTypeName = TypeName.get(element.asType());
                 String fieldNameStr = element.getSimpleName().toString();
-
                 String fieldStatement = null;
                 if (staticMeta) {
                     if (element.getModifiers().contains(Modifier.STATIC))
@@ -72,71 +71,20 @@ public class InjectProcessor extends SimpleProcessor {
                 if (fieldStatement == null)
                     continue;
 
-                String fieldTypeStr = env.processingEnv().getTypeUtils().erasure(element.asType()).toString();
-                switch (fieldTypeStr) {
-                    case "org.javameta.util.Provider": {
-                        fieldTypeStr = getGenericType(elementTypeStr);
-                        ClassName fieldClassName = ClassName.bestGuess(fieldTypeStr);
-
-                        TypeSpec providerTypeSpec = TypeSpec.anonymousClassBuilder("")
-                                .addSuperinterface(elementTypeName)
-                                .addMethod(MethodSpec.methodBuilder("get")
-                                        .addAnnotation(Override.class)
-                                        .addModifiers(Modifier.PUBLIC)
-                                        .returns(fieldClassName)
-                                        .addStatement("return ($T) factory.getMetaEntity($T.class).getInstance()",
-                                                ClassName.bestGuess(MetacodeUtils.getMetacodeOf(
-                                                        env.processingEnv().getElementUtils(), fieldTypeStr) + ".MetaEntity"),
-                                                fieldClassName)
-                                        .build())
-                                .build();
-
-                        methodBuilder.addStatement(fieldStatement + " $L", providerTypeSpec);
-                        break;
-                    }
-                    case "org.javameta.util.Lazy": {
-                        fieldTypeStr = getGenericType(elementTypeStr);
-                        ClassName fieldClassName = ClassName.bestGuess(fieldTypeStr);
-
-                        TypeSpec lazyTypeSpec = TypeSpec.anonymousClassBuilder("")
-                                .addSuperinterface(elementTypeName)
-                                .addField(fieldClassName, "instance", Modifier.PRIVATE)
-                                .addMethod(MethodSpec.methodBuilder("get")
-                                        .addAnnotation(Override.class)
-                                        .addModifiers(Modifier.PUBLIC)
-                                        .returns(fieldClassName)
-                                        .beginControlFlow("if(instance == null)")
-                                        .beginControlFlow("synchronized (this)")
-                                        .beginControlFlow("if(instance == null)")
-                                        .addStatement("instance = ($T) factory.getMetaEntity($T.class).getInstance()",
-                                                ClassName.bestGuess(MetacodeUtils.getMetacodeOf(
-                                                        env.processingEnv().getElementUtils(), fieldTypeStr) + ".MetaEntity"),
-                                                fieldClassName)
-                                        .endControlFlow()
-                                        .endControlFlow()
-                                        .endControlFlow()
-                                        .addStatement("return instance")
-                                        .build())
-                                .build();
-                        methodBuilder.addStatement(fieldStatement + " $L", lazyTypeSpec);
-                        break;
-                    }
-                    default:
-                        methodBuilder.addStatement(fieldStatement + getResultStatement(env, elementTypeStr));
-                        break;
-                }
+                addReturnStatement(methodBuilder, env.processingEnv(), element.asType(),
+                        Collections.<TypeMirror, String>emptyMap(), fieldStatement);
             }
 
             builder.addMethod(methodBuilder.build());
         }
 
         for (TypeElement element : factoryElements.keySet())
-            buildFactoryImpl(builder, element, factoryElements.get(element), env.processingEnv().getElementUtils());
+            buildFactoryImpl(builder, env.processingEnv(), element, factoryElements.get(element));
 
         return false;
     }
 
-    private void buildFactoryImpl(TypeSpec.Builder builder, TypeElement element, String name, Elements elementsUtils) {
+    private void buildFactoryImpl(TypeSpec.Builder builder, ProcessingEnvironment env, TypeElement element, String name) {
         TypeSpec.Builder factoryBuilder = TypeSpec.classBuilder(name)
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC)
                 .addSuperinterface(ClassName.bestGuess(element.getQualifiedName().toString()))
@@ -149,27 +97,20 @@ public class InjectProcessor extends SimpleProcessor {
         for (Element subElement : element.getEnclosedElements())
             if (subElement.getKind() == ElementKind.METHOD) {
                 ExecutableElement method = (ExecutableElement) subElement;
-                TypeMirror[] params = new TypeMirror[method.getParameters().size()];
-                String[] paramValues = new String[params.length];
-                int pi = 0;
-                for (VariableElement param : method.getParameters()) {
-                    params[pi] = param.asType();
-                    paramValues[pi++] = param.getSimpleName().toString();
-                }
+                Map<TypeMirror, String> params = new HashMap<>();
+                for (VariableElement param : method.getParameters())
+                    params.put(param.asType(), param.getSimpleName().toString());
 
                 MethodSpec.Builder methodSpec = MethodSpec.methodBuilder(method.getSimpleName().toString())
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
-                        .returns(TypeName.get(method.getReturnType()))
-                        .addStatement("return (($T)\n\tfactory.getMetaEntity($T.class)).\n\t\tgetInstance($L)",
-                                ClassName.bestGuess(MetacodeUtils.getMetacodeOf(elementsUtils,
-                                        method.getReturnType().toString()) + ".MetaEntity"),
-                                method.getReturnType(),
-                                Joiner.on(", ").join(paramValues));
+                        .returns(TypeName.get(method.getReturnType()));
 
-                for (int i = 0; i < params.length; i++)
-                    methodSpec.addParameter(TypeName.get(params[i]), paramValues[i]);
+                for (TypeMirror type : params.keySet()) {
+                    methodSpec.addParameter(TypeName.get(type), params.get(type), Modifier.FINAL);
+                }
 
+                addReturnStatement(methodSpec, env, method.getReturnType(), params, "return");
                 factoryBuilder.addMethod(methodSpec.build());
 
             }
@@ -177,18 +118,71 @@ public class InjectProcessor extends SimpleProcessor {
         builder.addType(factoryBuilder.build());
     }
 
-    private String getResultStatement(ProcessorEnvironment env, String elementTypeStr) {
+    private void addReturnStatement(MethodSpec.Builder methodBuilder, ProcessingEnvironment env,
+                                    TypeMirror returnTypeMirror, Map<TypeMirror, String> params,
+                                    String statementPrefix) {
+
+        String returnTypeStr = env.getTypeUtils().erasure(returnTypeMirror).toString();
+        String getInstanceStr = String.format("getInstance(%s)", Joiner.on(", ").join(params.values()));
+
+        switch (returnTypeStr) {
+            case "org.javameta.util.Provider": {
+                returnTypeStr = getGenericType(returnTypeMirror.toString());
+
+                TypeSpec providerTypeSpec = TypeSpec.anonymousClassBuilder("")
+                        .addSuperinterface(TypeName.get(returnTypeMirror))
+                        .addMethod(MethodSpec.methodBuilder("get")
+                                .addAnnotation(Override.class)
+                                .addModifiers(Modifier.PUBLIC)
+                                .returns(ClassName.bestGuess(returnTypeStr))
+                                .addStatement("return " + getResultStatement(env, returnTypeStr, getInstanceStr))
+                                .build())
+                        .build();
+
+                methodBuilder.addStatement(statementPrefix + " $L", providerTypeSpec);
+                break;
+            }
+            case "org.javameta.util.Lazy": {
+                returnTypeStr = getGenericType(returnTypeMirror.toString());
+                ClassName returnClassName = ClassName.bestGuess(returnTypeStr);
+
+                TypeSpec lazyTypeSpec = TypeSpec.anonymousClassBuilder("")
+                        .addSuperinterface(TypeName.get(returnTypeMirror))
+                        .addField(returnClassName, "instance", Modifier.PRIVATE)
+                        .addMethod(MethodSpec.methodBuilder("get")
+                                .addAnnotation(Override.class)
+                                .addModifiers(Modifier.PUBLIC)
+                                .returns(returnClassName)
+                                .beginControlFlow("if(instance == null)")
+                                .beginControlFlow("synchronized (this)")
+                                .beginControlFlow("if(instance == null)")
+                                .addStatement("instance = " + getResultStatement(env, returnTypeStr, getInstanceStr))
+                                .endControlFlow()
+                                .endControlFlow()
+                                .endControlFlow()
+                                .addStatement("return instance")
+                                .build())
+                        .build();
+                methodBuilder.addStatement(statementPrefix + " $L", lazyTypeSpec);
+                break;
+            }
+            default:
+                methodBuilder.addStatement(statementPrefix + getResultStatement(env, returnTypeMirror.toString(), getInstanceStr));
+        }
+    }
+
+    private String getResultStatement(ProcessingEnvironment env, String elementTypeStr, String getInstanceStr) {
         boolean classOf = elementTypeStr.startsWith("java.lang.Class");
         if (classOf)
             elementTypeStr = getGenericType(elementTypeStr);
 
-        TypeElement typeElement = env.processingEnv().getElementUtils().getTypeElement(elementTypeStr);
+        TypeElement typeElement = env.getElementUtils().getTypeElement(elementTypeStr);
         Factory factory = typeElement.getAnnotation(Factory.class);
         if (factory != null) {
             if (classOf)
                 throw new IllegalStateException("Class of " + elementTypeStr + " not valid meta structure.");
             if (typeElement.getKind() != ElementKind.INTERFACE)
-                throw new IllegalStateException(elementTypeStr + " is not an interface so not allowed to be used as a meta factory.");
+                throw new IllegalStateException(elementTypeStr + " only interfaces allowed to be used as a meta factory.");
 
             if (!factoryElements.containsKey(typeElement))
                 factoryElements.put(typeElement, typeElement.getSimpleName().toString() + "Impl" + factoryElements.size());
@@ -197,9 +191,9 @@ public class InjectProcessor extends SimpleProcessor {
         }
 
         return String.format("((%1$s.MetaEntity)\n\tfactory.getMetaEntity(%2$s.class))\n\t\t.%3$s",
-                MetacodeUtils.getMetacodeOf(env.processingEnv().getElementUtils(), elementTypeStr),
+                MetacodeUtils.getMetacodeOf(env.getElementUtils(), elementTypeStr),
                 elementTypeStr,
-                classOf ? "getEntityClass()" : "getInstance()");
+                classOf ? "getEntityClass()" : getInstanceStr);
     }
 
     private String getGenericType(String type) {
