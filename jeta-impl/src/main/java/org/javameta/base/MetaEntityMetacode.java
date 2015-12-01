@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface MetaEntityMetacode<M, E> {
+public interface MetaEntityMetacode<M, E extends IMetaEntity> {
 
     E getMetaEntityImpl();
 

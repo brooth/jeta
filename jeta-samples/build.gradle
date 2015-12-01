@@ -32,7 +32,7 @@ apply plugin: 'java'
 apply plugin: 'net.ltgt.apt'
 apply plugin: 'application'
 
-mainClassName = 'org.javameta.samples.proxy.ProxySample'
+mainClassName = 'org.javameta.samples.meta.MetaEntitySample'
 
 repositories {
     mavenLocal()

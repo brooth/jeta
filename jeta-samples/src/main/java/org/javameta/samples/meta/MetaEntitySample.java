@@ -18,7 +18,6 @@ public class MetaEntitySample {
     Lazy<SampleEntity> sampleEntityLazy;
     @Meta
     Provider<SampleEntity> sampleEntityProvider;
-
     @Meta
     MetaFactory factory;
 
@@ -39,9 +38,9 @@ public class MetaEntitySample {
         System.out.println(sampleEntityLazy.get().getValue());
         System.out.println(sampleEntityProvider.get().getValue());
 
-        System.out.println(factory.getSampleEntity("foo").getValue());
-        System.out.println(factory.getSampleEntityProvider("via provider").get().getValue());
-        System.out.println(factory.getSampleEntityLazy("via lazy").get().getValue());
+        System.out.println(factory.getSampleEntity("factory").getValue());
+        System.out.println(factory.getSampleEntityProvider("provider").get().getValue());
+        System.out.println(factory.getSampleEntityLazy("lazy").get().getValue());
     }
 
     public static void main(String[] args) {
