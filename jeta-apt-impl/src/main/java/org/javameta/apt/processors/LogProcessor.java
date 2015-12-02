@@ -22,16 +22,12 @@ import org.javameta.apt.MetacodeUtils;
 import org.javameta.apt.ProcessorEnvironment;
 import org.javameta.log.Log;
 import org.javameta.log.LogMetacode;
-import org.javameta.util.Provider;
+import org.javameta.log.NamedLoggerProvider;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
-import com.google.common.base.Optional;
-
 /**
- * jetaLogNameMethod     - name of the name setter, setName("$S") by default
- *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class LogProcessor extends SimpleProcessor {
@@ -47,7 +43,7 @@ public class LogProcessor extends SimpleProcessor {
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(LogMetacode.class), masterClassName));
 
-        TypeName providerTypeName = ParameterizedTypeName.get(ClassName.get(Provider.class),
+        TypeName providerTypeName = ParameterizedTypeName.get(ClassName.get(NamedLoggerProvider.class),
                 WildcardTypeName.subtypeOf(Object.class));
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyLogger")
@@ -63,14 +59,8 @@ public class LogProcessor extends SimpleProcessor {
             if (loggerName.isEmpty())
                 loggerName = MetacodeUtils.typeElementOf(element).getSimpleName().toString();
 
-            String setterNameStr = Optional.fromNullable(env.processingEnv().
-                    getOptions().get("jetaLogNameMethod")).or("setName($S)");
-
-            methodBuilder
-                    .addStatement("master.$L = ($T) provider.get()",
-                            fieldName, TypeName.get(element.asType()))
-                    .addStatement("master.$L." + setterNameStr,
-                            fieldName, loggerName);
+            methodBuilder.addStatement("master.$L = ($T) provider.get($S)",
+                    fieldName, TypeName.get(element.asType()), loggerName);
         }
 
         builder.addMethod(methodBuilder.build());

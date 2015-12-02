@@ -17,7 +17,19 @@
 group = 'org.javameta'
 version = '0.1-SNAPSHOT'
 
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'net.ltgt.gradle:gradle-apt-plugin:0.4'
+    }
+}
+
 apply plugin: 'java'
+apply plugin: 'net.ltgt.apt'
 
 repositories{
     mavenLocal()
@@ -27,4 +39,16 @@ repositories{
 dependencies {
     compile project(':jeta-api')
     compile 'com.google.guava:guava:18.0'
+
+    testApt project(':jeta-apt-impl')
+    testCompile group: 'org.hamcrest', name: 'hamcrest-core', version: '1.3'
+    testCompile group: 'junit', name: 'junit-dep', version: '4.10'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '1.9.+'
+}
+
+tasks.withType(JavaCompile) { task ->
+    def args = task.options.compilerArgs
+    args << '-AjetaDebug=true'
+    args << '-AjetaMapMetasitoryPackage=org.javameta'
 }

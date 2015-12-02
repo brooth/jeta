@@ -16,12 +16,12 @@
 
 package org.javameta.samples.logger;
 
-import org.javameta.util.Provider;
+import org.javameta.log.NamedLoggerProvider;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class LoggerProvider implements Provider<Logger> {
+public class LoggerProvider implements NamedLoggerProvider<Logger> {
 
     private static LoggerProvider instance = new LoggerProvider();
 
@@ -29,7 +29,9 @@ public class LoggerProvider implements Provider<Logger> {
         return instance;
     }
 
-    public Logger get() {
-        return new Logger();
+    public Logger get(String name) {
+        Logger logger = new Logger();
+        logger.setName(name);
+        return logger;
     }
 }

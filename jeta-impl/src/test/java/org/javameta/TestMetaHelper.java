@@ -1,20 +1,4 @@
-/*
- * Copyright 2015 Oleg Khalidov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-package org.javameta.samples;
+package org.javameta;
 
 import org.javameta.base.MetaController;
 import org.javameta.base.MetaEntityFactory;
@@ -40,32 +24,41 @@ import org.javameta.validate.ValidationException;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * No reflection, no problems...
- * Feel the power of javax.annotation.processing
- *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MetaHelper {
+public class TestMetaHelper {
 
-    private static MetaHelper instance;
+    private static TestMetaHelper instance;
 
     private final Metasitory metasitory;
 
     private final MetaEntityFactory metaEntityFactory;
 
-    public static MetaHelper getInstance() {
+    private NamedLoggerProvider<Logger> loggerProvider;
+
+    public static TestMetaHelper getInstance() {
         if (instance == null)
-            instance = new MetaHelper("org.javameta.samples");
+            instance = new TestMetaHelper("org.javameta");
         return instance;
     }
 
-    private MetaHelper(String metaPackage) {
+    private TestMetaHelper(String metaPackage) {
         metasitory = new MapMetasitory(metaPackage);
         metaEntityFactory = new MetaEntityFactory(metasitory);
-    }
 
+        loggerProvider = new NamedLoggerProvider<Logger>() {
+            @Override
+            public Logger get(String name) {
+                Logger logger = Logger.getLogger(name);
+                logger.setLevel(Level.FINE);
+                return logger;
+            }
+        };
+    }
 
     public static void injectMeta(Object master) {
         new MetaController(getInstance().metasitory, master).injectMeta(getInstance().metaEntityFactory);
@@ -115,8 +108,8 @@ public class MetaHelper {
         return new ObjectCollectorController(getInstance().metasitory, masterClass).getObjects(annotationClass);
     }
 
-    public static void createLogger(Object master, NamedLoggerProvider<?> provider) {
-        new LogController(getInstance().metasitory, master).createLogger(provider);
+    public static void createLogger(Object master) {
+        new LogController(getInstance().metasitory, master).createLogger(getInstance().loggerProvider);
     }
 
     public static void createSingleton(Class<?> masterClass) {

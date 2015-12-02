@@ -16,11 +16,9 @@
 
 package org.javameta.log;
 
-import org.javameta.util.Provider;
-
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface LogMetacode<M> {
-    public void applyLogger(M master, Provider<?> loggerProvider);
+    public void applyLogger(M master, NamedLoggerProvider<?> loggerProvider);
 }

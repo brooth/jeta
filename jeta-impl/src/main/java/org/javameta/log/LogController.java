@@ -18,7 +18,6 @@ package org.javameta.log;
 
 import org.javameta.MasterController;
 import org.javameta.metasitory.Metasitory;
-import org.javameta.util.Provider;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -29,7 +28,7 @@ public class LogController extends MasterController<Object, LogMetacode<Object>>
         super(metasitory, master, Log.class);
     }
 
-    public void createLogger(Provider<?> loggerProvider) {
+    public void createLogger(NamedLoggerProvider<?> loggerProvider) {
         for (LogMetacode<Object> metacode : metacodes)
             metacode.applyLogger(master, loggerProvider);
     }
