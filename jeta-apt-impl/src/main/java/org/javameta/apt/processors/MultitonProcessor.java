@@ -58,9 +58,9 @@ public class MultitonProcessor extends SimpleProcessor {
 
             String initStr = element.getAnnotation(Multiton.class).staticConstructor();
             if (initStr.isEmpty())
-                initStr = "new $T()";
+                initStr = "new $T(key)";
             else
-                initStr = "$T." + initStr + "()";
+                initStr = "$T." + initStr + "(key)";
 
             methodBuilder
                     .beginControlFlow("if(!$T.$L.containsKey(key))", masterClassName, fieldName)

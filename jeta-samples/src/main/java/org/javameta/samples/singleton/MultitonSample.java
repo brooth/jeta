@@ -36,6 +36,10 @@ public class MultitonSample {
         return multiton.get(key);
     }
 
+    MultitonSample(Object key) {
+
+    }
+
     public static void main(String[] args) {
         System.out.println(getInstance("one") == getInstance("one"));
         System.out.println(getInstance("one") != getInstance("two"));

@@ -1,11 +1,10 @@
 package org.javameta.tests.log;
 
 import org.javameta.BaseTest;
+import org.javameta.Logger;
 import org.javameta.TestMetaHelper;
 import org.javameta.log.Log;
 import org.junit.Test;
-
-import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -37,7 +36,7 @@ public class LogTest extends BaseTest {
         assertNotNull(logger);
         assertNotNull(loggerHolder.logger);
 
-        logger.info("testClassName()");
+        logger.debug("testClassName()");
 
         assertEquals(logger.getName(), LogTest.class.getSimpleName());
         assertEquals(loggerHolder.logger.getName(), LoggerHolder.class.getSimpleName());
@@ -49,7 +48,7 @@ public class LogTest extends BaseTest {
         assertNotNull(customNameLogger);
         assertNotNull(loggerHolder.customNameLogger);
 
-        logger.info("testCustomName()");
+        logger.debug("testCustomName()");
 
         assertEquals(customNameLogger.getName(), "Named");
         assertEquals(loggerHolder.customNameLogger.getName(), "Inner");

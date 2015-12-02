@@ -24,8 +24,6 @@ import org.javameta.validate.ValidationException;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -53,9 +51,7 @@ public class TestMetaHelper {
         loggerProvider = new NamedLoggerProvider<Logger>() {
             @Override
             public Logger get(String name) {
-                Logger logger = Logger.getLogger(name);
-                logger.setLevel(Level.FINE);
-                return logger;
+                return new Logger(name);
             }
         };
     }
