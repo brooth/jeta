@@ -63,7 +63,7 @@ public class ImplementationController<I> {
                     @Override
                     public int compare(ImplementationMetacode<I> o1, ImplementationMetacode<I> o2) {
                         return o1.getImplementationPriority() == o2.getImplementationPriority() ? 0 :
-                                o2.getImplementationPriority() - o1.getImplementationPriority();
+                                o1.getImplementationPriority() > o2.getImplementationPriority() ? -1 : 1;
                     }
                 });
     }

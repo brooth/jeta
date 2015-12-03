@@ -55,10 +55,10 @@ public class Subscribers<E extends Message> {
         observers.getAll().addAll(copy);
         return handler;
     }
-                                                  
+
     private static class PriorityEventObserver<E> implements EventObserver<E> {
         EventObserver<E> observer;
-        int priority;                                             
+        int priority;
 
         private PriorityEventObserver(EventObserver<E> observer, int priority) {
             this.observer = observer;
@@ -74,10 +74,10 @@ public class Subscribers<E extends Message> {
     private static class PriorityComparator implements Comparator<EventObserver> {
         @Override
         public int compare(EventObserver o1, EventObserver o2) {
-            return ((PriorityEventObserver) o1).priority == 
-                ((PriorityEventObserver) o2).priority ? 0 :
-                ((PriorityEventObserver) o1).priority +
-                ((PriorityEventObserver) o2).priority;
+            return ((PriorityEventObserver) o1).priority ==
+                    ((PriorityEventObserver) o2).priority ? 0 :
+                    ((PriorityEventObserver) o1).priority >
+                            ((PriorityEventObserver) o2).priority ? -1 : 1;
         }
     }
 }
