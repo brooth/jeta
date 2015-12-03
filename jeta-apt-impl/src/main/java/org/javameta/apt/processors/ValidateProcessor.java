@@ -1,17 +1,17 @@
 /*
  * Copyright 2015 Oleg Khalidov
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package org.javameta.apt.processors;
@@ -62,7 +62,6 @@ public class ValidateProcessor extends SimpleProcessor {
         int i = 0;
         for (Element element : env.elements()) {
             String fieldNameStr = element.getSimpleName().toString();
-            String validatorVarName = "validator_" + i++;
 
             final Validate annotation = element.getAnnotation(Validate.class);
             List<String> validators = MetacodeUtils.extractClassesNames(new Runnable() {
@@ -72,12 +71,12 @@ public class ValidateProcessor extends SimpleProcessor {
                 }
             });
             for (String validatorClassNameStr : validators) {
+                String validatorVarName = "validator_" + i++;
                 TypeElement validatorTypeElement = elementUtils.getTypeElement(validatorClassNameStr);
                 TypeName validatorTypeName = TypeName.get(validatorTypeElement.asType());
 
                 // Class Validator
                 if (validatorTypeElement.getKind() == ElementKind.CLASS) {
-                    ;
                     methodBuilder
                             .addStatement("$T $L = new $T()", validatorTypeName, validatorVarName, validatorTypeName)
                             .beginControlFlow("if(!($L.validate(master.$L, $S)))", validatorVarName, fieldNameStr, fieldNameStr)
@@ -92,10 +91,14 @@ public class ValidateProcessor extends SimpleProcessor {
                                 + "' must be implementation of Validator"
                                 + " or interface annotated with org.javameta.validate.MetacodeValidator");
 
-                    String expression = metaValidator.emitExpression().replaceAll("\\$m", "master");
+                    String expression = metaValidator.emitExpression()
+                            .replaceAll("\\$f", "master." + fieldNameStr)
+                            .replaceAll("\\$m", "master");
                     String error = metaValidator.emitError()
+                            .replaceAll("\\$f", "master." + fieldNameStr)
+                            .replaceAll("\\$n", fieldNameStr)
                             .replaceAll("\\$m", "master")
-                            .replaceAll("\\$\\{([^}]*)}", "\" + $1 + \"");
+                            .replaceAll("\\$\\{([^}]*)}", "\" + ($1) + \"");
 
                     methodBuilder.beginControlFlow("if(!($L)) ", expression)
                             .addStatement("errors.add(\"$L\")", error)

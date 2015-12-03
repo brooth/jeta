@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class ValidateTest extends BaseTest {
+public class ClassValidatorsTest extends BaseTest {
 
     @Log
     Logger logger;
@@ -138,6 +138,33 @@ public class ValidateTest extends BaseTest {
         holder.notEmptyString = null;
         logger.debug("error: '%s'", checkThrows(controller));
         assertThat(controller.validateSafe(), hasSize(1));
+    }
+
+    public static class MultiValidatorHolder {
+        @Validate({NotNull.class, NotEmpty.class, NotBlank.class})
+        String value;
+    }
+
+    @Test
+    public void testMultipleValidators() {
+        logger.debug("testMultipleValidators()");
+
+        MultiValidatorHolder holder = new MultiValidatorHolder();
+        ValidationController controller = TestMetaHelper.validationController(holder);
+        logger.debug(String.format("error: '%s'", checkThrows(controller)));
+        assertThat(controller.validateSafe(), hasSize(3));
+
+        holder.value = "";
+        logger.debug(String.format("error: '%s'", checkThrows(controller)));
+        assertThat(controller.validateSafe(), hasSize(2));
+
+        holder.value = "\t";
+        logger.debug(String.format("error: '%s'", checkThrows(controller)));
+        assertThat(controller.validateSafe(), hasSize(1));
+
+        holder.value = ".";
+        assertThat(controller.validateSafe(), empty());
+        controller.validate();
     }
 
     private String checkThrows(ValidationController controller) {
