@@ -60,12 +60,12 @@ public class TestMetaHelper {
         new MetaController(getInstance().metasitory, master).injectMeta(getInstance().metaEntityFactory);
     }
 
-    public static <I> ImplementationController<I> getImplementationController(Class<I> of) {
+    public static <I> ImplementationController<I> implementationController(Class<I> of) {
         return new ImplementationController<>(getInstance().metasitory, of);
     }
 
     public static <I> I getImplementation(Class<I> of) {
-        return getImplementationController(of).getImplementation();
+        return implementationController(of).getImplementation();
     }
 
     public static void createPublisher(Object master) {
@@ -84,12 +84,16 @@ public class TestMetaHelper {
         return new ObserverController<>(getInstance().metasitory, observer).registerObserver(observable);
     }
 
+    public static ValidationController validationController(Object master) throws ValidationException {
+        return new ValidationController(getInstance().metasitory, master);
+    }
+
     public static void validate(Object master) throws ValidationException {
-        new ValidationController(getInstance().metasitory, master).validate();
+        validationController(master).validate();
     }
 
     public static List<String> validateSafe(Object master) {
-        return new ValidationController(getInstance().metasitory, master).validateSafe();
+        return validationController(master).validateSafe();
     }
 
     public static void createProxy(Object master, Object real) {

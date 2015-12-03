@@ -17,7 +17,6 @@
 package org.javameta.validate;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,28 +25,27 @@ import java.util.Map;
 public class NotEmpty implements Validator {
 
     @Override
-    public void validate(Object object, String name, List<String> errors) {
-        boolean result;
-        if (object == null) {
-            result = true;
+    public boolean validate(Object object, String name) {
+        if (object == null)
+            return false;
 
-        } else if (object instanceof String) {
-            result = object.toString().isEmpty();
+        if (object instanceof String)
+            return !object.toString().isEmpty();
 
-        } else if (object instanceof Object[]) {
-            result = ((Object[]) object).length < 1;
+        if (object instanceof Object[])
+            return ((Object[]) object).length > 0;
 
-        } else if ((object instanceof Collection)) {
-            result = ((Collection) object).isEmpty();
+        if ((object instanceof Collection))
+            return !((Collection) object).isEmpty();
 
-        } else if ((object instanceof Map)) {
-            result = ((Map) object).isEmpty();
+        if ((object instanceof Map))
+            return !((Map) object).isEmpty();
 
-        } else {
-            throw new ValidationException("Can't check '" + object.getClass().getCanonicalName() + "' is empty");
-        }
+        throw new ValidationException("Can't check '" + object.getClass().getCanonicalName() + "' is empty");
+    }
 
-        if (result)
-            errors.add(name + " is empty");
+    @Override
+    public String describeError(Object object, String name) {
+        return name + " is empty";
     }
 }

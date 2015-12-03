@@ -25,7 +25,7 @@ public class ImplementationTest extends BaseTest {
     public void testFooImplementer() {
         logger.debug("testFooImplementer()");
 
-        ImplementationController<AbstractFoo> controller = TestMetaHelper.getImplementationController(AbstractFoo.class);
+        ImplementationController<AbstractFoo> controller = TestMetaHelper.implementationController(AbstractFoo.class);
         assertThat(controller, notNullValue());
         assertThat(controller.hasImplementation(), is(true));
 
@@ -52,7 +52,7 @@ public class ImplementationTest extends BaseTest {
     public void testNoImplementation() {
         logger.debug("testNoImplementation()");
 
-        ImplementationController<AbstractNone> controller = TestMetaHelper.getImplementationController(AbstractNone.class);
+        ImplementationController<AbstractNone> controller = TestMetaHelper.implementationController(AbstractNone.class);
         assertThat(controller, notNullValue());
         assertThat(controller.hasImplementation(), is(false));
         assertThat(controller.getImplementation(), is(nullValue()));
@@ -63,7 +63,7 @@ public class ImplementationTest extends BaseTest {
     public void testPriority() {
         logger.debug("testPriority()");
 
-        ImplementationController<AbstractPriority> controller = TestMetaHelper.getImplementationController(AbstractPriority.class);
+        ImplementationController<AbstractPriority> controller = TestMetaHelper.implementationController(AbstractPriority.class);
         assertThat(controller, notNullValue());
         assertThat(controller.hasImplementation(), is(true));
 

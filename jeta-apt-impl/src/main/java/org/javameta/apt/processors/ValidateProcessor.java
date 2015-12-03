@@ -28,7 +28,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +59,10 @@ public class ValidateProcessor extends SimpleProcessor {
                 .addStatement("$T errors = new $T()", listTypeName, arrayListTypeName);
 
         Elements elementUtils = env.processingEnv().getElementUtils();
+        int i = 0;
         for (Element element : env.elements()) {
             String fieldNameStr = element.getSimpleName().toString();
+            String validatorVarName = "validator_" + i++;
 
             final Validate annotation = element.getAnnotation(Validate.class);
             List<String> validators = MetacodeUtils.extractClassesNames(new Runnable() {
@@ -72,11 +73,16 @@ public class ValidateProcessor extends SimpleProcessor {
             });
             for (String validatorClassNameStr : validators) {
                 TypeElement validatorTypeElement = elementUtils.getTypeElement(validatorClassNameStr);
-                TypeMirror validatorTypeMirror = validatorTypeElement.asType();
+                TypeName validatorTypeName = TypeName.get(validatorTypeElement.asType());
+
                 // Class Validator
                 if (validatorTypeElement.getKind() == ElementKind.CLASS) {
-                    methodBuilder.addStatement("new $T().validate(master.$L, $S, errors)",
-                            TypeName.get(validatorTypeMirror), fieldNameStr, fieldNameStr);
+                    ;
+                    methodBuilder
+                            .addStatement("$T $L = new $T()", validatorTypeName, validatorVarName, validatorTypeName)
+                            .beginControlFlow("if(!($L.validate(master.$L, $S)))", validatorVarName, fieldNameStr, fieldNameStr)
+                            .addStatement("errors.add($L.describeError(master.$L, $S))", validatorVarName, fieldNameStr, fieldNameStr)
+                            .endControlFlow();
 
                     // MetacodeValidator
                 } else {
