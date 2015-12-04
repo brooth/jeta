@@ -21,7 +21,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @param <E>
- *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class Observers<E> {
@@ -47,6 +46,10 @@ public class Observers<E> {
 
     public List<EventObserver<E>> getAll() {
         return observers;
+    }
+
+    protected void addAll(List<EventObserver<E>> list) {
+        observers.addAll(list);
     }
 
     public Handler<E> register(EventObserver<E> observer) {
