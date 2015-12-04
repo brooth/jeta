@@ -14,18 +14,20 @@
  *  limitations under the License.
  */
 
-package org.javameta.pubsub;
+package org.javameta.tests.pubsub;
+
+import org.javameta.pubsub.BaseMessage;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public @interface MetaFilter {
+public class MessageOne extends BaseMessage {
 
-    /**
-     * $m - master
-     * $e - message
-     *
-     * @return filter expression
-     */
-    String emitExpression();
+    public MessageOne(int id, String topic) {
+        super(id, topic);
+    }
+
+    public void incId() {
+        id++;
+    }
 }

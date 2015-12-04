@@ -16,17 +16,14 @@
 
 package org.javameta.tests.pubsub;
 
-import org.javameta.BaseTest;
-import org.javameta.Logger;
-import org.javameta.log.Log;
+import org.javameta.pubsub.BaseMessage;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class PublishSubsriberTest extends BaseTest {
+public class MessageTwo extends BaseMessage {
 
-    @Log
-    Logger logger;
-
-
+    public MessageTwo(int id, String topic) {
+        super(id, topic);
+    }
 }

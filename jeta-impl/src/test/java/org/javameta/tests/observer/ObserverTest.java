@@ -278,4 +278,5 @@ public class ObserverTest extends BaseTest {
         assertThat(observable.oneObservers.getAll().size(), is(0));
         assertThat(holder.handler.unregisterAll(), is(0));
     }
+
 }
