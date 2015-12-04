@@ -194,11 +194,24 @@ public class ObserverTest extends BaseTest {
 
         otherObservable.oneObservers.clear();
         assertThat(handler.unregisterAll(), is(2));
+
+        // handler.unregister()
+        handler = TestMetaHelper.registerObserver(observer, observable);
+        observable.oneObservers.notify(new EventOne("catch it 2"));
+        observable.twoObservers.notify(new EventTwo("catch two 8"));
+        assertThat(observer.onEventOneInvokes, is(2));
+        assertThat(observer.onEventTwoInvokes, is(7));
+
+        handler.unregisterAll(ObservableHolder.class);
+        observable.oneObservers.notify(new EventOne("catch it 3"));
+        observable.twoObservers.notify(new EventTwo("catch two 9"));
+        assertThat(observer.onEventOneInvokes, is(2));
+        assertThat(observer.onEventTwoInvokes, is(7));
     }
 
     @Test
     public void testAsyncNotify() {
-        logger.debug("testSimpleNotify()");
+        logger.debug("testAsyncNotify()");
 
         final ObservableHolder observable = new ObservableHolder();
         TestMetaHelper.createObservable(observable);
@@ -233,5 +246,36 @@ public class ObserverTest extends BaseTest {
         assertThat(observer.lastOtherEventOne, not(nullValue()));
         assertThat(otherObserver.onOtherEventOneInvokes, is(10));
         assertThat(otherObserver.lastOtherEventOne, not(nullValue()));
+    }
+
+    public static class ConcurrentModificationTestHolder {
+        @Log
+        Logger logger;
+
+        ObserverHandler handler;
+
+        public ConcurrentModificationTestHolder(OtherObservableHolder observable) {
+            TestMetaHelper.createLogger(this);
+            handler = TestMetaHelper.registerObserver(this, observable);
+        }
+
+        @Observer(OtherObservableHolder.class)
+        void onOtherEventOne(EventOne event) {
+            logger.debug("onOtherEventOne()");
+            // unregister during the event is being notified
+            handler.unregisterAll();
+        }
+    }
+
+    @Test
+    public void testConcurrentModificationException() {
+        logger.debug("testConcurrentModificationException()");
+
+        OtherObservableHolder observable = new OtherObservableHolder();
+        TestMetaHelper.createObservable(observable);
+        ConcurrentModificationTestHolder holder = new ConcurrentModificationTestHolder(observable);
+        observable.oneObservers.notify(new EventOne("boom"));
+        assertThat(observable.oneObservers.getAll().size(), is(0));
+        assertThat(holder.handler.unregisterAll(), is(0));
     }
 }
