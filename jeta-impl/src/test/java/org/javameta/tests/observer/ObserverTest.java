@@ -195,4 +195,43 @@ public class ObserverTest extends BaseTest {
         otherObservable.oneObservers.clear();
         assertThat(handler.unregisterAll(), is(2));
     }
+
+    @Test
+    public void testAsyncNotify() {
+        logger.debug("testSimpleNotify()");
+
+        final ObservableHolder observable = new ObservableHolder();
+        TestMetaHelper.createObservable(observable);
+        final OtherObservableHolder otherObservable = new OtherObservableHolder();
+        TestMetaHelper.createObservable(otherObservable);
+
+        ObserverHolder observer = new ObserverHolder();
+        TestMetaHelper.registerObserver(observer, observable);
+        TestMetaHelper.registerObserver(observer, otherObservable);
+        OtherObserverHolder otherObserver = new OtherObserverHolder();
+        TestMetaHelper.registerObserver(otherObserver, otherObservable);
+
+        Thread[] threads = new Thread[10];
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    observable.oneObservers.notify(new EventOne("catch async"));
+                    otherObservable.oneObservers.notify(new EventOne("catch other async"));
+                }
+            });
+        }
+
+        for (Thread thread : threads)
+            thread.start();
+
+        sleepQuietly(500);
+
+        assertThat(observer.onEventOneInvokes, is(10));
+        assertThat(observer.lastEventOne, not(nullValue()));
+        assertThat(observer.onOtherEventOneInvokes, is(10));
+        assertThat(observer.lastOtherEventOne, not(nullValue()));
+        assertThat(otherObserver.onOtherEventOneInvokes, is(10));
+        assertThat(otherObserver.lastOtherEventOne, not(nullValue()));
+    }
 }
