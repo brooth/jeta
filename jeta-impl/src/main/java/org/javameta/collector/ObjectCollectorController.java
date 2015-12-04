@@ -16,6 +16,7 @@
 
 package org.javameta.collector;
 
+import com.google.common.base.Preconditions;
 import org.javameta.MasterClassController;
 import org.javameta.metasitory.Metasitory;
 import org.javameta.util.Provider;
@@ -34,8 +35,9 @@ public class ObjectCollectorController extends MasterClassController<Object, Obj
     }
 
     public List<Provider<?>> getObjects(Class<? extends Annotation> annotation) {
-        List<Provider<?>> result = new ArrayList<>();
+        Preconditions.checkNotNull(annotation, "annotation");
 
+        List<Provider<?>> result = new ArrayList<>();
         for (ObjectCollectorMetacode collector : metacodes) {
             List<Provider<?>> collection = collector.getObjectCollection(annotation);
             if (collection != null)
