@@ -47,7 +47,7 @@ public class Subscribers<E extends Message> {
         return observers.getAll();
     }
 
-    public Observers.Handler<E> register(EventObserver<E> observer, int priority) {
+    public synchronized Observers.Handler<E> register(EventObserver<E> observer, int priority) {
         Observers.Handler<E> handler = observers.register(new PriorityEventObserver<>(observer, priority));
         ((ObserversDecorator<E>) observers).order();
         return handler;
@@ -69,7 +69,7 @@ public class Subscribers<E extends Message> {
     }
 
     private static class ObserversDecorator<E> extends Observers<E> {
-        private synchronized void order() {
+        private void order() {
             List<EventObserver<E>> copy = new ArrayList<>(getAll());
             Collections.sort(copy, new PriorityComparator());
             clear();
