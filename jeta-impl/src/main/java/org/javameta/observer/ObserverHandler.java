@@ -1,17 +1,17 @@
 /*
  * Copyright 2015 Oleg Khalidov
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 
 package org.javameta.observer;
@@ -32,7 +32,7 @@ public class ObserverHandler {
         Class column;
         Observers.Handler handler;
 
-        Record(Class row, Class column, Observers.Handler handler){
+        Record(Class row, Class column, Observers.Handler handler) {
             this.row = row;
             this.column = column;
             this.handler = handler;
@@ -42,8 +42,8 @@ public class ObserverHandler {
     protected final List<Record> handlers = new ArrayList<>();
 
     /**
-     * used by metacode 
-    */
+     * used by metacode
+     */
     public void add(Class observableClass, Class eventClass, Observers.Handler handler) {
         handlers.add(new Record(observableClass, eventClass, handler));
     }
@@ -67,12 +67,12 @@ public class ObserverHandler {
     public int unregister(Class eventClass, Class observableClass) {
         int result = 0;
         Iterator<Record> records = handlers.iterator();
-        while(records.hasNext()) {
+        while (records.hasNext()) {
             Record record = records.next();
-            if(record.row == observableClass && record.column == eventClass) {
-                record.handler.unregister();
+            if (record.row == observableClass && record.column == eventClass) {
+                if (record.handler.unregister())
+                    result++;
                 records.remove();
-                result++;
             }
         }
 
@@ -88,15 +88,14 @@ public class ObserverHandler {
     public int unregister(Class eventClass) {
         int result = 0;
         Iterator<Record> records = handlers.iterator();
-        while(records.hasNext()) {
+        while (records.hasNext()) {
             Record record = records.next();
-            if(record.column == eventClass) {
-                record.handler.unregister();
+            if (record.column == eventClass) {
+                if (record.handler.unregister())
+                    result++;
                 records.remove();
-                result++;
             }
         }
-
         return result;
     }
 
@@ -109,27 +108,28 @@ public class ObserverHandler {
     public int unregisterAll(Class observableClass) {
         int result = 0;
         Iterator<Record> records = handlers.iterator();
-        while(records.hasNext()) {
+        while (records.hasNext()) {
             Record record = records.next();
-            if(record.row == observableClass) {
-                record.handler.unregister();
+            if (record.row == observableClass) {
+                if (record.handler.unregister())
+                    result++;
                 records.remove();
-                result++;
             }
         }
-
         return result;
     }
 
     /**
      * unregister from all the events of all observables
+     *
      * @return number of unregistered events
      */
     public int unregisterAll() {
+        int result = 0;
         for (Record record : handlers)
-            record.handler.unregister();
+            if (record.handler.unregister())
+                result++;
 
-        int result = handlers.size();
         handlers.clear();
         return result;
     }
