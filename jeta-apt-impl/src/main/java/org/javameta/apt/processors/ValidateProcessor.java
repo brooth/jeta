@@ -79,8 +79,8 @@ public class ValidateProcessor extends SimpleProcessor {
                 if (validatorTypeElement.getKind() == ElementKind.CLASS) {
                     methodBuilder
                             .addStatement("$T $L = new $T()", validatorTypeName, validatorVarName, validatorTypeName)
-                            .beginControlFlow("if(!($L.validate(master.$L, $S)))", validatorVarName, fieldNameStr, fieldNameStr)
-                            .addStatement("errors.add($L.describeError(master.$L, $S))", validatorVarName, fieldNameStr, fieldNameStr)
+                            .beginControlFlow("if(!($L.validate(master, master.$L, $S)))", validatorVarName, fieldNameStr, fieldNameStr)
+                            .addStatement("errors.add($L.describeError())", validatorVarName)
                             .endControlFlow();
 
                     // MetacodeValidator

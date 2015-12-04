@@ -14,30 +14,17 @@
  *  limitations under the License.
  */
 
-package org.javameta.validate;
+package org.javameta.tests.collector;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class NotBlank implements Validator {
+@UsedAnnotation
+public class TestEntityTwo {
 
-    private String fieldName;
-
-    @Override
-    public boolean validate(Object master, Object field, String fieldName) {
-        this.fieldName = fieldName;
-
-        if (field == null)
-            return false;
-
-        if (field instanceof CharSequence)
-            return !field.toString().trim().isEmpty();
-
-        throw new IllegalArgumentException("Can't check '" + fieldName + "' is blank");
-    }
-
-    @Override
-    public String describeError() {
-        return fieldName + " is blank";
+    @UsedAnnotation
+    public interface InnerTestEntityTwo {
+        @UsedAnnotation
+        int foo();
     }
 }

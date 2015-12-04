@@ -103,7 +103,6 @@ public class MetaValidatorsTest extends BaseTest {
             controller.validate();
             assertTrue(false);
         } catch (ValidationException e) {
-            assertTrue(true);
             return e.getMessage();
         }
         return null;
