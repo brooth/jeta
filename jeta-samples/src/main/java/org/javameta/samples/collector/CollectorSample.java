@@ -31,7 +31,7 @@ public class CollectorSample {
     @TypeCollector(MyAction.class)
     public static class ActionTypeCollector {
         public void collect() {
-            List<Class> actions = MetaHelper.collectTypes(getClass(), MyAction.class);
+            List<Class<?>>  actions = MetaHelper.collectTypes(getClass(), MyAction.class);
             for (Class action : actions) {
                 System.out.println("action class: " + action.getCanonicalName());
             }

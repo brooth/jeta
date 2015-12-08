@@ -34,7 +34,7 @@ public class ObserverController<M> extends MasterController<M, ObserverMetacode<
         return registerObserver(observable, observable.getClass());
     }
 
-    public ObserverHandler registerObserver(Object observable, Class observableClass) {
+    public ObserverHandler registerObserver(Object observable, Class<?> observableClass) {
         Preconditions.checkNotNull(observable, "observable");
         Preconditions.checkNotNull(observableClass, "observableClass");
 

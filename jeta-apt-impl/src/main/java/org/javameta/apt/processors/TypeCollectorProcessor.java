@@ -48,7 +48,7 @@ public class TypeCollectorProcessor extends SimpleProcessor {
         TypeName annotationClassTypeName = ParameterizedTypeName.get(ClassName.get(Class.class),
                 WildcardTypeName.subtypeOf(Annotation.class));
         ParameterizedTypeName listTypeName = ParameterizedTypeName.get(ClassName.get(List.class),
-                ClassName.get(Class.class));
+                ParameterizedTypeName.get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(TypeName.OBJECT)));
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getTypeCollection")
                 .addAnnotation(Override.class)
@@ -77,7 +77,9 @@ public class TypeCollectorProcessor extends SimpleProcessor {
             methodBuilder
                     .beginControlFlow("if(annotation == $L.class)", annotationStr)
                     .addStatement("$T result = new $T($L)", listTypeName, ParameterizedTypeName.get(
-                            ClassName.get(ArrayList.class), ClassName.get(Class.class)), annotatedElements.size());
+                                    ClassName.get(ArrayList.class), ParameterizedTypeName.get(ClassName.get(Class.class),
+                                            WildcardTypeName.subtypeOf(TypeName.OBJECT))),
+                            annotatedElements.size());
 
             for (Element annotatedElement : annotatedElements) {
                 methodBuilder.addStatement("result.add($L.class)", annotatedElement.toString());

@@ -20,5 +20,5 @@ package org.javameta.observer;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface ObserverMetacode<M> {
-    public ObserverHandler applyObservers(M master, Object observable, Class observableClass);
+    public ObserverHandler applyObservers(M master, Object observable, Class<?> observableClass);
 }

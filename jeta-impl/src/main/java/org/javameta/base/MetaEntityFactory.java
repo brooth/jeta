@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class MetaEntityFactory {
 
-    protected Map<Class, MetaEntityMetacode> graph;
+    protected Map<Class<?>, MetaEntityMetacode> graph;
 
     public MetaEntityFactory(Metasitory metasitory) {
         Collection<IMetacode> entities = metasitory.search(new Criteria.Builder().usesAny(MetaEntity.class).build());
@@ -56,13 +56,13 @@ public class MetaEntityFactory {
             if (impl == null)
                 continue;
 
-            Class extEntityClass = impl.getMetaEntityExtClass();
+            Class<?> extEntityClass = impl.getMetaEntityExtClass();
             while (extEntityClass != null) {
                 if (!graph.containsKey(extEntityClass))
                     throw new IllegalStateException("Can't extend " + extEntityClass + ", not a meta entity");
 
                 MetaEntityMetacode extImpl = graph.get(extEntityClass);
-                Class extImplExt = null;
+                Class<?> extImplExt = null;
                 if (extImpl != null) {
                     // already extended?
                     if (impl == extImpl)

@@ -26,7 +26,7 @@ public class SubscriptionHandler {
 
     private final ObserverHandler handler = new ObserverHandler();
 
-    public void add(Class publisherClass, Class eventClass, Observers.Handler handler) {
+    public void add(Class publisherClass, Class<?> eventClass, Observers.Handler handler) {
         this.handler.add(publisherClass, eventClass, handler);
     }
 
@@ -34,7 +34,7 @@ public class SubscriptionHandler {
         handler.add(other.handler);
     }
 
-    public int unregister(Class eventClass, Class publisherClass) {
+    public int unregister(Class eventClass, Class<?> publisherClass) {
         return handler.unregister(eventClass, publisherClass);
     }
 

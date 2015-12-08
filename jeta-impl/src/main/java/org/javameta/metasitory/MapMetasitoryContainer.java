@@ -26,10 +26,10 @@ import java.util.Map;
  */
 public interface MapMetasitoryContainer {
 
-    public Map<Class, Context> get();
+    public Map<Class<?>, Context> get();
 
     public final class Context {
-        public final Class masterClass;
+        public final Class<?> masterClass;
         public final Provider<? extends IMetacode> metacodeProvider;
         public final Class[] annotations;
 

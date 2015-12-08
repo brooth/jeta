@@ -116,7 +116,7 @@ public class TestMetaHelper {
         new ProxyController(getInstance().metasitory, master).createProxy(real);
     }
 
-    public static List<Class> collectTypes(Class masterClass, Class<? extends Annotation> annotationClass) {
+    public static List<Class<?>>  collectTypes(Class masterClass, Class<? extends Annotation> annotationClass) {
         return new TypeCollectorController(getInstance().metasitory, masterClass).getTypes(annotationClass);
     }
 

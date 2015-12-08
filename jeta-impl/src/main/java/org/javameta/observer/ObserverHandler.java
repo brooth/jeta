@@ -28,11 +28,11 @@ import java.util.List;
 public class ObserverHandler {
 
     private static class Record {
-        Class row;
-        Class column;
+        Class<?> row;
+        Class<?> column;
         Observers.Handler handler;
 
-        Record(Class row, Class column, Observers.Handler handler) {
+        Record(Class row, Class<?> column, Observers.Handler handler) {
             this.row = row;
             this.column = column;
             this.handler = handler;
@@ -44,7 +44,7 @@ public class ObserverHandler {
     /**
      * used by metacode
      */
-    public void add(Class observableClass, Class eventClass, Observers.Handler handler) {
+    public void add(Class observableClass, Class<?> eventClass, Observers.Handler handler) {
         handlers.add(new Record(observableClass, eventClass, handler));
     }
 
@@ -64,7 +64,7 @@ public class ObserverHandler {
      * @param observableClass observable class
      * @return number of unregistered events
      */
-    public int unregister(Class eventClass, Class observableClass) {
+    public int unregister(Class eventClass, Class<?> observableClass) {
         int result = 0;
         Iterator<Record> records = handlers.iterator();
         while (records.hasNext()) {

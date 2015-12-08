@@ -20,21 +20,19 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.squareup.javapoet.*;
+import org.javameta.apt.Logger;
 import org.javameta.apt.MetacodeContext;
 import org.javameta.apt.MetacodeUtils;
 import org.javameta.metasitory.MapMetasitoryContainer;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
-import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.IdentityHashMap;
 import java.util.Map;
-
-import org.javameta.apt.Logger;
 
 /**
  * jetaMapMetasitoryPackage=com.example             - metasitory package
@@ -59,7 +57,7 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
                 .addSuperinterface(TypeName.get(MapMetasitoryContainer.class));
 
         ClassName mapClassName = ClassName.get(Map.class);
-        TypeName classTypeName = TypeName.get(Class.class);
+        TypeName classTypeName = ParameterizedTypeName.get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(TypeName.OBJECT));
         TypeName contextTypeName = TypeName.get(MapMetasitoryContainer.Context.class);
 
         methodBuilder = MethodSpec.methodBuilder("get")

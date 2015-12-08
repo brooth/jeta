@@ -50,7 +50,7 @@ public class CollectorTest extends BaseTest {
     public void testUsedAnnotation() {
         logger.debug("testUsedAnnotation()");
 
-        List<Class> types = TestMetaHelper.collectTypes(TypeCollectorHolder.class, UsedAnnotation.class);
+        List<Class<?>>  types = TestMetaHelper.collectTypes(TypeCollectorHolder.class, UsedAnnotation.class);
         assertThat(types, allOf(notNullValue(), hasSize(6)));
 
         for(Class type : types) {
@@ -69,7 +69,7 @@ public class CollectorTest extends BaseTest {
     public void testNoneAnnotation() {
         logger.debug("testNoneAnnotation()");
 
-        List<Class> types = TestMetaHelper.collectTypes(TypeCollectorHolder.class, NoneAnnotation.class);
+        List<Class<?>>  types = TestMetaHelper.collectTypes(TypeCollectorHolder.class, NoneAnnotation.class);
         assertThat(types, allOf(notNullValue(), hasSize(0)));
 
         types = TestMetaHelper.collectTypes(TypeCollectorHolder.class, Log.class);

@@ -36,7 +36,7 @@ public class MapMetasitory implements Metasitory {
 
     public static final int SUPPORTED_CRITERIA_VERSION = 1;
 
-    private Map<Class, MapMetasitoryContainer.Context> meta;
+    private Map<Class<?>, MapMetasitoryContainer.Context> meta;
 
     public MapMetasitory(String metaPackage) {
         loadContainer(metaPackage);
@@ -71,7 +71,7 @@ public class MapMetasitory implements Metasitory {
         if (Criteria.VERSION > SUPPORTED_CRITERIA_VERSION)
             throw new IllegalArgumentException("Criteria version " + Criteria.VERSION + " not supported");
 
-        Map<Class, MapMetasitoryContainer.Context> selection = meta;
+        Map<Class<?>, MapMetasitoryContainer.Context> selection = meta;
         selection = masterEq(selection, criteria);
         selection = masterEqDeep(selection, criteria);
         selection = usesAll(selection, criteria);
@@ -88,7 +88,7 @@ public class MapMetasitory implements Metasitory {
         });
     }
 
-    private Map<Class, MapMetasitoryContainer.Context> usesAny(Map<Class, MapMetasitoryContainer.Context> selection, final Criteria criteria) {
+    private Map<Class<?>, MapMetasitoryContainer.Context> usesAny(Map<Class<?>, MapMetasitoryContainer.Context> selection, final Criteria criteria) {
         if (criteria.getUsesAny() == null)
             return selection;
 
@@ -107,10 +107,10 @@ public class MapMetasitory implements Metasitory {
         });
     }
 
-    private Map<Class, MapMetasitoryContainer.Context> usesAll(Map<Class, MapMetasitoryContainer.Context> selection, final Criteria criteria) {
+    private Map<Class<?>, MapMetasitoryContainer.Context> usesAll(Map<Class<?>, MapMetasitoryContainer.Context> selection, final Criteria criteria) {
         if (criteria.getUsesAll() == null)
             return selection;
-        if(criteria.getUsesAll().isEmpty())
+        if (criteria.getUsesAll().isEmpty())
             throw new IllegalArgumentException("criteria.useAll is empty");
 
         return Maps.filterValues(selection, new Predicate<MapMetasitoryContainer.Context>() {
@@ -132,12 +132,12 @@ public class MapMetasitory implements Metasitory {
         });
     }
 
-    private Map<Class, MapMetasitoryContainer.Context> masterEqDeep(Map<Class, MapMetasitoryContainer.Context> selection, Criteria criteria) {
+    private Map<Class<?>, MapMetasitoryContainer.Context> masterEqDeep(Map<Class<?>, MapMetasitoryContainer.Context> selection, Criteria criteria) {
         if (criteria.getMasterEqDeep() == null)
             return selection;
 
-        Map<Class, MapMetasitoryContainer.Context> result = new HashMap<>();
-        Class clazz = criteria.getMasterEqDeep();
+        Map<Class<?>, MapMetasitoryContainer.Context> result = new HashMap<>();
+        Class<?> clazz = criteria.getMasterEqDeep();
         while (clazz != Object.class) {
             MapMetasitoryContainer.Context context = selection.get(clazz);
             if (context != null)
@@ -148,13 +148,15 @@ public class MapMetasitory implements Metasitory {
         return result;
     }
 
-    private Map<Class, MapMetasitoryContainer.Context> masterEq(Map<Class, MapMetasitoryContainer.Context> selection, Criteria criteria) {
+    private Map<Class<?>, MapMetasitoryContainer.Context> masterEq(Map<Class<?>, MapMetasitoryContainer.Context> selection, Criteria criteria) {
         if (criteria.getMasterEq() == null)
             return selection;
 
         MapMetasitoryContainer.Context context = selection.get(criteria.getMasterEq());
-        return context == null ? Collections.<Class, MapMetasitoryContainer.Context>emptyMap() :
-                Collections.singletonMap(criteria.getMasterEq(), context);
+        if (context == null)
+            return Collections.emptyMap();
+
+        return Collections.<Class<?>, MapMetasitoryContainer.Context>singletonMap(criteria.getMasterEq(), context);
     }
 }
 

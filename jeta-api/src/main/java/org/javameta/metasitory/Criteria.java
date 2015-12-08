@@ -34,9 +34,9 @@ public final class Criteria {
      */
     public static final int VERSION = 1;
 
-    private Class masterEq;
+    private Class<?> masterEq;
 
-    private Class masterEqDeep;
+    private Class<?> masterEqDeep;
 
     private Set<Class<? extends Annotation>> usesAny;
 
@@ -82,12 +82,12 @@ public final class Criteria {
     }
 
     @Nullable
-    public Class getMasterEq() {
+    public Class<?> getMasterEq() {
         return masterEq;
     }
 
     @Nullable
-    public Class getMasterEqDeep() {
+    public Class<?> getMasterEqDeep() {
         return masterEqDeep;
     }
 
