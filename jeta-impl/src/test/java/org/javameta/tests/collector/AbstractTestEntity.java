@@ -20,5 +20,5 @@ package org.javameta.tests.collector;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 @UsedAnnotation
-public abstract class AbstructTestEntity {
+public abstract class AbstractTestEntity {
 }
