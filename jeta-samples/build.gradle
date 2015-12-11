@@ -50,3 +50,9 @@ tasks.withType(JavaCompile) { task ->
     args << '-AjetaFileComment=\nLicense text\n'
     args << '-AjetaMapMetasitoryPackage=org.javameta.samples'
 }
+
+task runas(type:JavaExec) {
+   main = mainClass
+   classpath = sourceSets.main.runtimeClasspath
+}
+
