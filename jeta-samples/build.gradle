@@ -51,8 +51,8 @@ tasks.withType(JavaCompile) { task ->
     args << '-AjetaMapMetasitoryPackage=org.javameta.samples'
 }
 
-task runas(type:JavaExec) {
-   main = mainClass
+task runas(type:JavaExec) << {
+   main = project['mainClass']
    classpath = sourceSets.main.runtimeClasspath
 }
 

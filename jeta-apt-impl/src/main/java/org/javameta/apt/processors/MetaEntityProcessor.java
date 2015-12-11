@@ -16,10 +16,20 @@
 
 package org.javameta.apt.processors;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
-import com.squareup.javapoet.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+
 import org.javameta.apt.MetacodeUtils;
 import org.javameta.apt.ProcessorEnvironment;
 import org.javameta.base.IMetaEntity;
@@ -27,10 +37,17 @@ import org.javameta.base.MetaEntity;
 import org.javameta.base.MetaEntityMetacode;
 import org.javameta.util.Constructor;
 
-import javax.annotation.Nullable;
-import javax.lang.model.element.*;
-import java.util.ArrayList;
-import java.util.List;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -63,10 +80,8 @@ public class MetaEntityProcessor extends SimpleProcessor {
 
         List<ExecutableElement> constructors = new ArrayList<>();
         for (Element subElement : ((TypeElement) element).getEnclosedElements()) {
-            boolean validInitConstructor = subElement.getSimpleName().contentEquals("<init>")
-                    && isProvider
-                    && ofTypeEqElementType
-                    && !subElement.getModifiers().contains(Modifier.PRIVATE)
+            boolean validInitConstructor = subElement.getSimpleName().contentEquals("<init>") && isProvider
+                    && ofTypeEqElementType && !subElement.getModifiers().contains(Modifier.PRIVATE)
                     // enums may have constructors
                     && element.getKind() == ElementKind.CLASS;
 
@@ -76,53 +91,50 @@ public class MetaEntityProcessor extends SimpleProcessor {
 
         // emit MetaEntity interface
         if (ofTypeEqElementType && !annotation.minor()) {
-            ClassName superClassName = extTypeStr == null ? ClassName.get(IMetaEntity.class) :
-                    ClassName.bestGuess(MetacodeUtils.getMetacodeOf(env.processingEnv().getElementUtils(), extTypeStr) + ".MetaEntity");
+            ClassName superClassName = extTypeStr == null ? ClassName.get(IMetaEntity.class)
+                    : ClassName.bestGuess(MetacodeUtils.getMetacodeOf(env.processingEnv().getElementUtils(), extTypeStr)
+                            + ".MetaEntity");
 
             TypeSpec.Builder interfaceBuilder = TypeSpec.interfaceBuilder("MetaEntity")
-                    .addJavadoc("emitted by @see " + elementTypeStr + '\n')
-                    .addModifiers(Modifier.PUBLIC)
-                    .addSuperinterface(superClassName)
-                    .addMethod(MethodSpec.methodBuilder("getEntityClass")
-                            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                            .returns(ParameterizedTypeName.get(ClassName.get(Class.class),
-                                    WildcardTypeName.subtypeOf(ofClassName)))
-                            .build());
+                    .addJavadoc("emitted by @see " + elementTypeStr + '\n').addModifiers(Modifier.PUBLIC)
+                    .addSuperinterface(superClassName).addMethod(
+                            MethodSpec.methodBuilder("getEntityClass")
+                                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT).returns(ParameterizedTypeName
+                                            .get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(ofClassName)))
+                                    .build());
 
             for (ExecutableElement constructor : constructors) {
                 Iterable<ParameterSpec> params = Iterables.transform(constructor.getParameters(),
                         new Function<VariableElement, ParameterSpec>() {
                             @Override
                             public ParameterSpec apply(VariableElement input) {
-                                return ParameterSpec.builder(TypeName.get(input.asType()),
-                                        input.getSimpleName().toString()).build();
+                                return ParameterSpec
+                                        .builder(TypeName.get(input.asType()), input.getSimpleName().toString())
+                                        .build();
                             }
                         });
 
-                interfaceBuilder.addMethod(MethodSpec.methodBuilder("getInstance")
-                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                        .returns(ofClassName)
-                        .addParameters(params)
-                        .build());
+                interfaceBuilder.addMethod(
+                        MethodSpec.methodBuilder("getInstance").addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                                .returns(ofClassName).addParameters(params).build());
             }
 
             builder.addType(interfaceBuilder.build());
         }
 
-        // emit MetaEntityImpl (for autocode, host annotated @MetaEntity with and not an interface/scheme)
+        // emit MetaEntityImpl (for autocode, host annotated @MetaEntity with
+        // and not an interface/scheme)
         if (isProvider && element.getKind() != ElementKind.INTERFACE) {
-            ClassName implOfClassName = ClassName.bestGuess(MetacodeUtils.getMetacodeOf(env.processingEnv().getElementUtils(),
-                    ofTypeEqElementType ? masterTypeStr : ofTypeStr) + ".MetaEntity");
+            ClassName implOfClassName = ClassName
+                    .bestGuess(MetacodeUtils.getMetacodeOf(env.processingEnv().getElementUtils(),
+                            ofTypeEqElementType ? masterTypeStr : ofTypeStr) + ".MetaEntity");
 
             TypeSpec.Builder implBuilder = TypeSpec.classBuilder("MetaEntityImpl")
-                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                    .addSuperinterface(implOfClassName)
-                    .addMethod(MethodSpec.methodBuilder("getEntityClass")
-                            .addAnnotation(Override.class)
-                            .addModifiers(Modifier.PUBLIC)
-                            .addStatement("return $T.class", ofClassName)
-                            .returns(ParameterizedTypeName.get(ClassName.get(Class.class),
-                                    WildcardTypeName.subtypeOf(ofClassName)))
+                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL).addSuperinterface(implOfClassName).addMethod(
+                            MethodSpec.methodBuilder("getEntityClass").addAnnotation(Override.class)
+                                    .addModifiers(Modifier.PUBLIC)
+                                    .addStatement("return $T.class", ofClassName).returns(ParameterizedTypeName
+                                            .get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(ofClassName)))
                             .build());
 
             for (ExecutableElement constructor : constructors) {
@@ -132,8 +144,8 @@ public class MetaEntityProcessor extends SimpleProcessor {
                 String[] paramValues = new String[params.length / 2];
                 int pi = 0;
                 for (VariableElement param : constructor.getParameters()) {
-                    params2.add(ParameterSpec.builder(TypeName.get(param.asType()), param.getSimpleName().toString()).build());
-
+                    params2.add(ParameterSpec.builder(TypeName.get(param.asType()), param.getSimpleName().toString())
+                            .build());
 
                     int vi = pi / 2;
                     params[pi++] = param.asType().toString();
@@ -141,32 +153,27 @@ public class MetaEntityProcessor extends SimpleProcessor {
                     params[pi++] = paramValues[vi];
                 }
 
-                MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getInstance")
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(ofClassName)
-                        .addParameters(params2);
+                MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getInstance").addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC).returns(ofClassName).addParameters(params2);
 
                 String paramNames = Joiner.on(", ").join(paramValues);
                 if (constructor.getSimpleName().contentEquals("<init>")) {
                     methodBuilder.addStatement("return new $T($L)", ofClassName, paramNames);
 
                 } else {
-                    String initCode = constructor.getModifiers().contains(Modifier.STATIC) ?
-                            masterTypeStr : annotation.staticConstructor().isEmpty() ?
-                            ("new $T()") : String.format("$T.%s()", annotation.staticConstructor());
+                    String initCode = constructor.getModifiers().contains(Modifier.STATIC) ? "$T"
+                            : annotation.staticConstructor().isEmpty() ? ("new $T()")
+                                    : String.format("$T.%s()", annotation.staticConstructor());
 
-                    methodBuilder.addStatement("return " + initCode + ".$L($L)",
-                            elementClassName, constructor.getSimpleName().toString(), paramNames);
+                    methodBuilder.addStatement("return " + initCode + ".$L($L)", elementClassName,
+                            constructor.getSimpleName().toString(), paramNames);
                 }
 
                 implBuilder.addMethod(methodBuilder.build());
             }
 
             MethodSpec.Builder extClassMethodBuilder = MethodSpec.methodBuilder("getMetaEntityExtClass")
-                    .addAnnotation(Override.class)
-                    .addAnnotation(Nullable.class)
-                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class).addAnnotation(Nullable.class).addModifiers(Modifier.PUBLIC)
                     .returns(ParameterizedTypeName.get(ClassName.get(Class.class),
                             WildcardTypeName.supertypeOf(ofClassName)));
             if (extTypeStr == null)
@@ -174,26 +181,18 @@ public class MetaEntityProcessor extends SimpleProcessor {
             else
                 extClassMethodBuilder.addStatement("return $T.class", ClassName.bestGuess(elementTypeStr));
 
-            builder.addSuperinterface(ParameterizedTypeName.get(
-                    ClassName.get(MetaEntityMetacode.class), ofClassName, implOfClassName))
-                    .addMethod(MethodSpec.methodBuilder("getMetaEntityImpl")
-                            .addAnnotation(Override.class)
-                            .addModifiers(Modifier.PUBLIC)
-                            .returns(implOfClassName)
-                            .addStatement("return new MetaEntityImpl()")
-                            .build())
-                    .addMethod(MethodSpec.methodBuilder("getMetaEntityOfClass")
-                            .addAnnotation(Override.class)
+            builder.addSuperinterface(
+                    ParameterizedTypeName.get(ClassName.get(MetaEntityMetacode.class), ofClassName, implOfClassName))
+                    .addMethod(MethodSpec.methodBuilder("getMetaEntityImpl").addAnnotation(Override.class)
+                            .addModifiers(Modifier.PUBLIC).returns(implOfClassName)
+                            .addStatement("return new MetaEntityImpl()").build())
+                    .addMethod(MethodSpec.methodBuilder("getMetaEntityOfClass").addAnnotation(Override.class)
                             .addModifiers(Modifier.PUBLIC)
                             .returns(ParameterizedTypeName.get(ClassName.get(Class.class), ofClassName))
-                            .addStatement("return $T.class", ofClassName)
-                            .build())
-                    .addMethod(MethodSpec.methodBuilder("getMetaEntityPriority")
-                            .addAnnotation(Override.class)
-                            .addModifiers(Modifier.PUBLIC)
-                            .returns(int.class)
-                            .addStatement("return $L", annotation.priority())
-                            .build())
+                            .addStatement("return $T.class", ofClassName).build())
+                    .addMethod(MethodSpec.methodBuilder("getMetaEntityPriority").addAnnotation(Override.class)
+                            .addModifiers(Modifier.PUBLIC).returns(int.class)
+                            .addStatement("return $L", annotation.priority()).build())
                     .addMethod(extClassMethodBuilder.build());
 
             builder.addType(implBuilder.build());
@@ -217,5 +216,21 @@ public class MetaEntityProcessor extends SimpleProcessor {
                 annotation.ext();
             }
         });
+    }
+
+    @Override
+    public Set<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element) {
+        Set<TypeElement> masters = super.applicableMastersOfElement(env, element);
+        MetaEntity annotation = element.getAnnotation(MetaEntity.class);
+        String ofClass = getOfClass(annotation);
+
+        if (!annotation.minor() && !ofClass.equals(Void.class.getCanonicalName())) {
+            TypeElement of = env.getElementUtils().getTypeElement(ofClass);
+            TypeElement master = masters.iterator().next();
+            if (!master.equals(of))
+                masters = Sets.newHashSet(master, of);
+        }
+
+        return masters;
     }
 }

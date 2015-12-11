@@ -1,4 +1,5 @@
 .vimrc
+.vimsession
 .project
 .classpath
 .settings/
@@ -9,3 +10,5 @@
 *.iws
 .gradle/
 build/
+bin/
+.apt_generated/
