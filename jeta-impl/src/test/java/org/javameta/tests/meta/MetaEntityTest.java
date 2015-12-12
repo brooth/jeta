@@ -16,6 +16,7 @@
 
 package org.javameta.tests.meta;
 
+import static org.junit.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -27,6 +28,9 @@ import org.javameta.base.Meta;
 import org.javameta.base.MetaEntity;
 import org.javameta.log.Log;
 import org.javameta.util.Constructor;
+import org.javameta.util.Factory;
+import org.javameta.util.Lazy;
+import org.javameta.util.Provider;
 import org.junit.Test;
 
 /**
@@ -45,6 +49,12 @@ public class MetaEntityTest extends BaseTest {
     public static class MetaEntityHolder {
         @Meta
         MetaEntityOne entity;
+        @Meta
+        Class<? extends MetaEntityOne> clazz;
+        @Meta
+        Lazy<MetaEntityOne> lazy;
+        @Meta
+        Provider<MetaEntityOne> provider;
     }
 
     @Test
@@ -55,6 +65,15 @@ public class MetaEntityTest extends BaseTest {
         TestMetaHelper.injectMeta(holder);
         assertThat(holder.entity, notNullValue());
         assertThat(holder.entity.value, is("one"));
+        
+        assertThat(holder.clazz, notNullValue());
+        assertEquals(holder.clazz, MetaEntityOne.class);
+        
+        assertThat(holder.lazy, notNullValue());
+        assertThat(holder.lazy.get().value, is("one"));
+        
+        assertThat(holder.provider, notNullValue());
+        assertThat(holder.provider.get().value, is("one"));
     }
 
     public static class MetaEntityTwo {
@@ -130,5 +149,47 @@ public class MetaEntityTest extends BaseTest {
         assertThat(holder.entityFour, notNullValue());
         assertThat(holder.entityFour.value, is("four"));
         logger.debug("entityFour.value: %s", holder.entityFour.value);
+    }
+
+    @MetaEntity
+    public static class MetaEntityFive {
+        String value;
+
+        public MetaEntityFive(String value) { 
+            this.value = value;
+        }
+    }
+
+    public static class MetaFactoryHolder {
+        @Meta 
+        MetaFactory factory;
+
+        @Factory
+        public interface MetaFactory {
+            MetaEntityFive get(String value);
+            Class<? extends MetaEntityFive> getClazz();
+            Lazy<MetaEntityFive> getLazy(String value);
+            Provider<MetaEntityFive> getProvider(String value);
+        }
+    }
+
+    @Test
+	public void testMetaFactory() {
+        logger.debug("testMetaFactory()");
+
+        MetaFactoryHolder holder = new MetaFactoryHolder();
+        TestMetaHelper.injectMeta(holder);
+        assertThat(holder.factory, notNullValue());
+        assertThat(holder.factory.get(null), notNullValue());
+        assertThat(holder.factory.get("five").value, is("five"));
+        
+        assertThat(holder.factory.getClazz(), notNullValue());
+        assertEquals(holder.factory.getClazz(), MetaEntityFive.class);
+        
+        assertThat(holder.factory.getLazy(null), notNullValue());
+        assertThat(holder.factory.getLazy("lazyFive").get().value, is("lazyFive"));
+        
+        assertThat(holder.factory.getProvider(null), notNullValue());
+        assertThat(holder.factory.getProvider("fiveProvider").get().value, is("fiveProvider"));
     }
 }
