@@ -42,8 +42,6 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
- * No reflection, no problems...
- * Feel the power of javax.annotation.processing
  *
  * @author Oleg Khalidov (brooth@gmail.com)
  */

@@ -16,17 +16,24 @@
 
 package org.javameta.tests.meta;
 
-import static org.junit.Assert.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.javameta.BaseTest;
+import org.javameta.IMetacode;
 import org.javameta.Logger;
 import org.javameta.TestMetaHelper;
 import org.javameta.base.Meta;
 import org.javameta.base.MetaEntity;
 import org.javameta.log.Log;
+import org.javameta.metasitory.ClassForNameMetasitory;
+import org.javameta.metasitory.Criteria;
 import org.javameta.util.Constructor;
 import org.javameta.util.Factory;
 import org.javameta.util.Lazy;
@@ -266,5 +273,28 @@ public class MetaEntityTest extends BaseTest {
 
         assertThat(holder.entitySeven, notNullValue());
         assertThat(holder.entitySeven.getValue(), is("seven ext ext"));
+    }
+
+    // test ClassForNameMetasitory here. there are compatable entities right above
+
+    @Test
+	public void testClassForNameMetasitory() {
+        logger.debug("testClassForNameMetasitor()");
+
+        ClassForNameMetasitory metasitory = new ClassForNameMetasitory();
+
+        Criteria criteria = new Criteria.Builder().masterEq(MetaEntitySevenExt.class).build();
+        List<IMetacode<?>> items = metasitory.search(criteria);
+        assertThat(items, notNullValue());
+        assertThat(items.size(), is(1));
+        assertTrue(items.get(0).getMasterClass() == MetaEntitySevenExt.class);
+
+        criteria = new Criteria.Builder().masterEqDeep(MetaEntitySevenExtExt.class).build();
+        items = metasitory.search(criteria);
+        assertThat(items, notNullValue());
+        assertThat(items.size(), is(3));
+        assertTrue(items.get(0).getMasterClass() == MetaEntitySevenExtExt.class);
+        assertTrue(items.get(1).getMasterClass() == MetaEntitySevenExt.class);
+        assertTrue(items.get(2).getMasterClass() == MetaEntitySeven.class);
     }
 }

@@ -16,10 +16,10 @@
 
 package org.javameta.metasitory;
 
-import org.javameta.IMetacode;
-
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+
+import org.javameta.IMetacode;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -28,31 +28,35 @@ public class ClassForNameMetasitory implements Metasitory {
 
     @Override
     public List<IMetacode<?>> search(Criteria c) {
-        // todo: support
-        if (c.getMasterEqDeep() != null)
-            throw new UnsupportedOperationException("Criteria.masterAssignableFrom not supported. Criteria.masterEq only.");
         if (c.getUsesAny() != null)
             throw new UnsupportedOperationException("Criteria.usesAny not supported. Criteria.masterEq only.");
         if (c.getUsesAll() != null)
             throw new UnsupportedOperationException("Criteria.usesAll not supported. Criteria.masterEq only.");
-        if (c.getMasterEq() == null)
-            throw new UnsupportedOperationException("Criteria.masterEq not present.");
 
+        Class<?> masterClass = c.getMasterEq() != null ? c.getMasterEq() : c.getMasterEqDeep();
         Class<?> metacodeClass;
-        try {
-            metacodeClass = Class.forName(c.getMasterEq().getName() + "_Metacode");
+        List<IMetacode<?>> result = new ArrayList<>();
+        while (masterClass != null) {
+            try {
+                metacodeClass = Class.forName(masterClass.getName().replaceAll("\\$", "_") + "_Metacode");
 
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Failed to load class " + c.getMasterEq(), e);
+            } catch (ClassNotFoundException e) {
+                break;
+            }
+
+            try {
+                result.add((IMetacode<?>) metacodeClass.newInstance());
+
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Failed to initiate class " + metacodeClass, e);
+            }
+
+            if(c.getMasterEqDeep() != null)
+                masterClass = masterClass.getSuperclass();
+            else 
+                break;
         }
-
-        try {
-            IMetacode<?> instance = (IMetacode<?>) metacodeClass.newInstance();
-            return Collections.<IMetacode<?>>singletonList(instance);
-
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to initiate class " + metacodeClass, e);
-        }
+        return result;
     }
 }
 
