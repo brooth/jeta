@@ -16,7 +16,7 @@
 
 package org.javameta.tests.meta;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -40,12 +40,12 @@ public class MetaEntityTest extends BaseTest {
 
     @Log
     Logger logger;
-    
+
     @MetaEntity
     public static class MetaEntityOne {
         String value = "one";
     }
-    
+
     public static class MetaEntityHolder {
         @Meta
         MetaEntityOne entity;
@@ -65,21 +65,29 @@ public class MetaEntityTest extends BaseTest {
         TestMetaHelper.injectMeta(holder);
         assertThat(holder.entity, notNullValue());
         assertThat(holder.entity.value, is("one"));
-        
+
         assertThat(holder.clazz, notNullValue());
         assertEquals(holder.clazz, MetaEntityOne.class);
-        
+
         assertThat(holder.lazy, notNullValue());
         assertThat(holder.lazy.get().value, is("one"));
-        
+
         assertThat(holder.provider, notNullValue());
         assertThat(holder.provider.get().value, is("one"));
+
+        assertTrue(holder.entity == holder.entity);
+        assertTrue(holder.lazy.get() == holder.lazy.get());
+        assertFalse(holder.provider.get() == holder.provider.get());
+
+        assertFalse(holder.entity == holder.lazy.get());
+        assertFalse(holder.entity == holder.provider.get());
+        assertFalse(holder.lazy.get() == holder.provider.get());
     }
 
     public static class MetaEntityTwo {
         String value;
     }
-    
+
     @MetaEntity(of=MetaEntityTwo.class)
     public static class MetaEntityTwoProvider {
         @Constructor
@@ -93,7 +101,7 @@ public class MetaEntityTest extends BaseTest {
     public static class MetaEntityThree {
         String value;
     }
-    
+
     @MetaEntity(of=MetaEntityThree.class)
     public static class MetaEntityThreeProvider {
         @Constructor
@@ -107,12 +115,12 @@ public class MetaEntityTest extends BaseTest {
     public static class MetaEntityFour {
         String value;
     }
-    
+
     @MetaEntity(of=MetaEntityFour.class, staticConstructor="getInstance")
     public static class MetaEntityFourProvider {
 
         public static MetaEntityFourProvider getInstance() {
-            return new MetaEntityFourProvider();   
+            return new MetaEntityFourProvider();
         }
 
         @Constructor
@@ -122,7 +130,7 @@ public class MetaEntityTest extends BaseTest {
             return e;
         }
     }
-    
+
     public static class MetaProviderHolder {
         @Meta
         MetaEntityTwo entityTwo;
@@ -155,13 +163,13 @@ public class MetaEntityTest extends BaseTest {
     public static class MetaEntityFive {
         String value;
 
-        public MetaEntityFive(String value) { 
+        public MetaEntityFive(String value) {
             this.value = value;
         }
     }
 
     public static class MetaFactoryHolder {
-        @Meta 
+        @Meta
         MetaFactory factory;
 
         @Factory
@@ -182,13 +190,13 @@ public class MetaEntityTest extends BaseTest {
         assertThat(holder.factory, notNullValue());
         assertThat(holder.factory.get(null), notNullValue());
         assertThat(holder.factory.get("five").value, is("five"));
-        
+
         assertThat(holder.factory.getClazz(), notNullValue());
         assertEquals(holder.factory.getClazz(), MetaEntityFive.class);
-        
+
         assertThat(holder.factory.getLazy(null), notNullValue());
         assertThat(holder.factory.getLazy("lazyFive").get().value, is("lazyFive"));
-        
+
         assertThat(holder.factory.getProvider(null), notNullValue());
         assertThat(holder.factory.getProvider("fiveProvider").get().value, is("fiveProvider"));
     }
