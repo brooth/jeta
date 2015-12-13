@@ -77,13 +77,13 @@ public class Subscribers<E extends Message> {
         }
     }
 
-    private static class PriorityComparator implements Comparator<EventObserver> {
+    private static class PriorityComparator implements Comparator<EventObserver<?>> {
         @Override
-        public int compare(EventObserver o1, EventObserver o2) {
-            return ((PriorityEventObserver) o1).priority ==
-                    ((PriorityEventObserver) o2).priority ? 0 :
-                    ((PriorityEventObserver) o1).priority >
-                            ((PriorityEventObserver) o2).priority ? -1 : 1;
+        public int compare(EventObserver<?> o1, EventObserver<?> o2) {
+            return ((PriorityEventObserver<?>) o1).priority ==
+                    ((PriorityEventObserver<?>) o2).priority ? 0 :
+                    ((PriorityEventObserver<?>) o1).priority >
+                            ((PriorityEventObserver<?>) o2).priority ? -1 : 1;
         }
     }
 }

@@ -27,6 +27,6 @@ import java.util.Collection;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface Metasitory {
-	Collection<IMetacode> search(Criteria criteria);
+	Collection<IMetacode<?>> search(Criteria criteria);
 }
 

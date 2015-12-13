@@ -30,9 +30,9 @@ public class ObserverHandler {
     private static class Record {
         Class<?> row;
         Class<?> column;
-        Observers.Handler handler;
+        Observers.Handler<?> handler;
 
-        Record(Class row, Class<?> column, Observers.Handler handler) {
+        Record(Class<?> row, Class<?> column, Observers.Handler<?> handler) {
             this.row = row;
             this.column = column;
             this.handler = handler;
@@ -44,7 +44,7 @@ public class ObserverHandler {
     /**
      * used by metacode
      */
-    public void add(Class observableClass, Class<?> eventClass, Observers.Handler handler) {
+    public void add(Class<?> observableClass, Class<?> eventClass, Observers.Handler<?> handler) {
         handlers.add(new Record(observableClass, eventClass, handler));
     }
 
@@ -64,7 +64,7 @@ public class ObserverHandler {
      * @param observableClass observable class
      * @return number of unregistered events
      */
-    public int unregister(Class eventClass, Class<?> observableClass) {
+    public int unregister(Class<?> eventClass, Class<?> observableClass) {
         int result = 0;
         Iterator<Record> records = handlers.iterator();
         while (records.hasNext()) {
@@ -85,7 +85,7 @@ public class ObserverHandler {
      * @param eventClass event class unregister from
      * @return number of unregistered events
      */
-    public int unregister(Class eventClass) {
+    public int unregister(Class<?> eventClass) {
         int result = 0;
         Iterator<Record> records = handlers.iterator();
         while (records.hasNext()) {
@@ -105,7 +105,7 @@ public class ObserverHandler {
      * @param observableClass observable class to unregister all event from
      * @return number of unregistered events
      */
-    public int unregisterAll(Class observableClass) {
+    public int unregisterAll(Class<?> observableClass) {
         int result = 0;
         Iterator<Record> records = handlers.iterator();
         while (records.hasNext()) {

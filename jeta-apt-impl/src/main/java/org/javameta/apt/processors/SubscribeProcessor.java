@@ -16,19 +16,34 @@
 
 package org.javameta.apt.processors;
 
-import com.google.common.base.CaseFormat;
-import com.google.common.base.Joiner;
-import com.squareup.javapoet.*;
+import java.util.List;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.util.Elements;
+
 import org.javameta.apt.MetacodeContext;
 import org.javameta.apt.MetacodeUtils;
 import org.javameta.apt.ProcessorEnvironment;
 import org.javameta.observer.EventObserver;
-import org.javameta.pubsub.*;
+import org.javameta.pubsub.IdsFilter;
+import org.javameta.pubsub.MetaFilter;
+import org.javameta.pubsub.Subscribe;
+import org.javameta.pubsub.SubscriberMetacode;
+import org.javameta.pubsub.SubscriptionHandler;
+import org.javameta.pubsub.TopicsFilter;
 
-import javax.lang.model.element.*;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
-import java.util.List;
+import com.google.common.base.CaseFormat;
+import com.google.common.base.Joiner;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -54,7 +69,6 @@ public class SubscribeProcessor extends SimpleProcessor {
                 .addParameter(masterClassName, "master", Modifier.FINAL)
                 .addStatement("$T handler = new $T()", handlerClassName, handlerClassName);
 
-        Types typeUtils = env.processingEnv().getTypeUtils();
         Elements elementUtils = env.processingEnv().getElementUtils();
 
         for (Element element : env.elements()) {

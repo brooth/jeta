@@ -40,10 +40,10 @@ public class NotEmpty implements Validator {
             return ((Object[]) field).length > 0;
 
         if ((field instanceof Collection))
-            return !((Collection) field).isEmpty();
+            return !((Collection<?>) field).isEmpty();
 
         if ((field instanceof Map))
-            return !((Map) field).isEmpty();
+            return !((Map<?, ?>) field).isEmpty();
 
         throw new ValidationException("Can't check '" + field.getClass().getCanonicalName() + "' is empty");
     }

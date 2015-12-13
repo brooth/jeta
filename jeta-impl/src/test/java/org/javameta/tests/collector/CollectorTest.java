@@ -53,14 +53,14 @@ public class CollectorTest extends BaseTest {
         List<Class<?>>  types = TestMetaHelper.collectTypes(TypeCollectorHolder.class, UsedAnnotation.class);
         assertThat(types, allOf(notNullValue(), hasSize(6)));
 
-        for(Class type : types) {
+        for(Class<?> type : types) {
             logger.debug("type: %s", type.getCanonicalName());
         }
 
         List<Provider<?>> objects = TestMetaHelper.collectObjects(ObjectCollectorHolder.class, UsedAnnotation.class);
         assertThat(objects, allOf(notNullValue(), hasSize(3)));
 
-        for(Provider provider : objects) {
+        for(Provider<?> provider : objects) {
             logger.debug("object: %s", provider.get().toString());
         }
     }

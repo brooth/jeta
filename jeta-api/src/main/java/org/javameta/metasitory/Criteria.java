@@ -53,12 +53,12 @@ public final class Criteria {
             return criteria;
         }
 
-        public Builder masterEq(Class value) {
+        public Builder masterEq(Class<?> value) {
             criteria.masterEq = value;
             return this;
         }
 
-        public Builder masterEqDeep(Class value) {
+        public Builder masterEqDeep(Class<?> value) {
             criteria.masterEqDeep = value;
             return this;
         }

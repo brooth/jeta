@@ -46,20 +46,20 @@ public class ImplementationController<I> {
         Preconditions.checkNotNull(metasitory, "metasitory");
         Preconditions.checkNotNull(of, "of");
 
-        Collection<IMetacode> allImplementers =
+        Collection<IMetacode<?>> allImplementers =
                 metasitory.search(new Criteria.Builder().usesAny(Implementation.class).build());
 
         metacodes = FluentIterable.from(allImplementers)
-                .transform(new Function<IMetacode, ImplementationMetacode<I>>() {
+                .transform(new Function<IMetacode<?>, ImplementationMetacode<I>>() {
                     @SuppressWarnings("unchecked")
                     @Override
-                    public ImplementationMetacode<I> apply(IMetacode input) {
+                    public ImplementationMetacode<I> apply(IMetacode<?> input) {
                         return (ImplementationMetacode<I>) input;
                     }
                 })
-                .filter(new Predicate<ImplementationMetacode>() {
+                .filter(new Predicate<ImplementationMetacode<?>>() {
                     @Override
-                    public boolean apply(ImplementationMetacode input) {
+                    public boolean apply(ImplementationMetacode<?> input) {
                         return input.getImplementationOf() == of;
                     }
                 })

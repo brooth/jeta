@@ -25,7 +25,7 @@ import org.javameta.metasitory.Metasitory;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MultitonController<M> extends MasterClassController<M, IMetacode> {
+public class MultitonController<M> extends MasterClassController<M, IMetacode<?>> {
 
     public MultitonController(Metasitory metasitory, Class<? extends M> masterClass) {
         super(metasitory, masterClass);
@@ -40,10 +40,10 @@ public class MultitonController<M> extends MasterClassController<M, IMetacode> {
         if (metacodes.size() > 1)
             throw new IllegalStateException("More than one metacode returned fot Criteria.masterEq");
 
-        IMetacode multiton = Iterables.getFirst(metacodes, null);
+        IMetacode<?> multiton = Iterables.getFirst(metacodes, null);
         if (multiton == null || !(multiton instanceof MultitonMetacode))
             throw new IllegalStateException(masterClass.getCanonicalName() + " has not multiton meta code. No @Multiton annotation on it?");
 
-        ((MultitonMetacode) multiton).applyMultiton(key);
+        ((MultitonMetacode<?>) multiton).applyMultiton(key);
     }
 }

@@ -25,7 +25,7 @@ import org.javameta.metasitory.Metasitory;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class SingletonController extends MasterClassController<Object, IMetacode> {
+public class SingletonController extends MasterClassController<Object, IMetacode<?>> {
 
     public SingletonController(Metasitory metasitory, Class<? extends Object> masterClass) {
         super(metasitory, masterClass);
@@ -40,10 +40,10 @@ public class SingletonController extends MasterClassController<Object, IMetacode
         if (metacodes.size() > 1)
             throw new IllegalStateException("More than one metacode returned fot Criteria.masterEq");
 
-        IMetacode singleton = Iterables.getFirst(metacodes, null);
+        IMetacode<?> singleton = Iterables.getFirst(metacodes, null);
         if (singleton == null || !(singleton instanceof SingletonMetacode))
             throw new IllegalStateException(masterClass.getCanonicalName() + " has not singleton meta code. No @Singleton annotation on it?");
 
-        ((SingletonMetacode) singleton).applySingleton();
+        ((SingletonMetacode<?>) singleton).applySingleton();
     }
 }

@@ -45,7 +45,7 @@ public class ProxyController {
             .usesAny(Proxy.class)
             .build();
 
-        Collection<IMetacode> metacodes = metasitory.search(criteria);
+        Collection<IMetacode<?>> metacodes = metasitory.search(criteria);
         if(metacodes.size() > 1)
             throw new IllegalStateException("Metasitory returned more than one masterEq result");
         if(metacodes.size() == 1)

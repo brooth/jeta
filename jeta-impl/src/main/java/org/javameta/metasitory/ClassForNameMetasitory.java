@@ -27,7 +27,7 @@ import java.util.List;
 public class ClassForNameMetasitory implements Metasitory {
 
     @Override
-    public List<IMetacode> search(Criteria c) {
+    public List<IMetacode<?>> search(Criteria c) {
         // todo: support
         if (c.getMasterEqDeep() != null)
             throw new UnsupportedOperationException("Criteria.masterAssignableFrom not supported. Criteria.masterEq only.");
@@ -47,8 +47,8 @@ public class ClassForNameMetasitory implements Metasitory {
         }
 
         try {
-            IMetacode<?> instance = (IMetacode) metacodeClass.newInstance();
-            return Collections.<IMetacode>singletonList(instance);
+            IMetacode<?> instance = (IMetacode<?>) metacodeClass.newInstance();
+            return Collections.<IMetacode<?>>singletonList(instance);
 
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to initiate class " + metacodeClass, e);

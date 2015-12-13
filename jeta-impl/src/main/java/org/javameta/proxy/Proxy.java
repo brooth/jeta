@@ -24,5 +24,5 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.FIELD)
 public @interface Proxy {
-    Class<? extends AbstractProxy> value();
+    Class<? extends AbstractProxy<?>> value();
 }

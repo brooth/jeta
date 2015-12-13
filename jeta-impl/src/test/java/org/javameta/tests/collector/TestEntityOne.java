@@ -27,7 +27,8 @@ public class TestEntityOne {
 
     @UsedAnnotation
     public TestEntityOne() {
-        @UsedAnnotation
+        @SuppressWarnings("unused")
+		@UsedAnnotation
         Object o2 = new Object();
     }
 

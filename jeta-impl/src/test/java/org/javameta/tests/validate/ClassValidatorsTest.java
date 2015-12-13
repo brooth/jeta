@@ -94,9 +94,9 @@ public class ClassValidatorsTest extends BaseTest {
         @Validate(NotEmpty.class)
         Object[] notEmptyArray;
         @Validate(NotEmpty.class)
-        Collection notEmptyCollection;
+        Collection<Object> notEmptyCollection;
         @Validate(NotEmpty.class)
-        Map notEmptyMap;
+        Map<Object, ?> notEmptyMap;
     }
 
     @Test

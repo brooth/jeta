@@ -25,7 +25,9 @@ import java.util.List;
  */
 public class ValidationException extends RuntimeException {
 
-    public ValidationException(String msg) {
+	private static final long serialVersionUID = -4597845405692712462L;
+
+	public ValidationException(String msg) {
         super(msg);
     }
 

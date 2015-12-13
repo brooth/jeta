@@ -66,8 +66,9 @@ public class MapMetasitory implements Metasitory {
             meta.putAll(container.get());
     }
 
-    @Override
-    public Collection<IMetacode> search(Criteria criteria) {
+    @SuppressWarnings("unused")
+	@Override
+    public Collection<IMetacode<?>> search(Criteria criteria) {
         if (Criteria.VERSION > SUPPORTED_CRITERIA_VERSION)
             throw new IllegalArgumentException("Criteria version " + Criteria.VERSION + " not supported");
 
@@ -80,9 +81,9 @@ public class MapMetasitory implements Metasitory {
         if (selection.isEmpty())
             return Collections.emptyList();
 
-        return Collections2.transform(selection.values(), new Function<MapMetasitoryContainer.Context, IMetacode>() {
+        return Collections2.transform(selection.values(), new Function<MapMetasitoryContainer.Context, IMetacode<?>>() {
             @Override
-            public IMetacode apply(MapMetasitoryContainer.Context input) {
+            public IMetacode<?> apply(MapMetasitoryContainer.Context input) {
                 return input.metacodeProvider.get();
             }
         });
@@ -95,8 +96,8 @@ public class MapMetasitory implements Metasitory {
         return Maps.filterValues(selection, new Predicate<MapMetasitoryContainer.Context>() {
             @Override
             public boolean apply(MapMetasitoryContainer.Context input) {
-                for (Class annotation : input.annotations) {
-                    for (Class uses : criteria.getUsesAny()) {
+                for (Class<?> annotation : input.annotations) {
+                    for (Class<?> uses : criteria.getUsesAny()) {
                         if (annotation == uses) {
                             return true;
                         }
@@ -116,9 +117,9 @@ public class MapMetasitory implements Metasitory {
         return Maps.filterValues(selection, new Predicate<MapMetasitoryContainer.Context>() {
             @Override
             public boolean apply(MapMetasitoryContainer.Context input) {
-                for (Class need : criteria.getUsesAll()) {
+                for (Class<?> need : criteria.getUsesAll()) {
                     boolean used = false;
-                    for (Class annotation : input.annotations) {
+                    for (Class<?> annotation : input.annotations) {
                         if (annotation == need) {
                             used = true;
                             break;
