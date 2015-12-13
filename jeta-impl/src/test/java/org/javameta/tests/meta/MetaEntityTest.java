@@ -200,4 +200,71 @@ public class MetaEntityTest extends BaseTest {
         assertThat(holder.factory.getProvider(null), notNullValue());
         assertThat(holder.factory.getProvider("fiveProvider").get().value, is("fiveProvider"));
     }
+
+    @MetaEntity
+    public static class MetaEntitySix {
+        String value = "six";
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    @MetaEntity(ext=MetaEntitySix.class, priority=Integer.MIN_VALUE)
+    public static class WeakMetaEntitySixExt extends MetaEntitySix {
+        public String getValue() {
+            throw new IllegalStateException();
+        }
+    }
+
+    @MetaEntity(ext=MetaEntitySix.class, priority=Integer.MAX_VALUE)
+    public static class MetaEntitySixExt extends MetaEntitySix {
+        public String getValue() {
+            return super.getValue() + " ext";
+        }
+    }
+
+    @MetaEntity
+    public static class MetaEntitySeven {
+        String value = "seven";
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    @MetaEntity(ext=MetaEntitySeven.class)
+    public static class MetaEntitySevenExt extends MetaEntitySeven {
+        public String getValue() {
+            return super.getValue() + " ext";
+        }
+    }
+
+    @MetaEntity(ext=MetaEntitySevenExt.class)
+    public static class MetaEntitySevenExtExt extends MetaEntitySevenExt {
+        public String getValue() {
+            return super.getValue() + " ext";
+        }
+    }
+
+    public static class ExtMetaHolder {
+        @Meta
+        public MetaEntitySix entity;
+        @Meta
+        public MetaEntitySeven entitySeven;
+    }
+
+    @Test
+	public void testMetaExt() {
+        logger.debug("testMetaExt()");
+
+        ExtMetaHolder holder = new ExtMetaHolder();
+        TestMetaHelper.injectMeta(holder);
+
+        assertThat(holder.entity, notNullValue());
+        assertThat(holder.entity.getValue(), is("six ext"));
+
+        assertThat(holder.entitySeven, notNullValue());
+        assertThat(holder.entitySeven.getValue(), is("seven ext ext"));
+    }
 }

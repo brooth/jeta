@@ -173,13 +173,16 @@ public class MetaEntityProcessor extends SimpleProcessor {
             }
 
             MethodSpec.Builder extClassMethodBuilder = MethodSpec.methodBuilder("getMetaEntityExtClass")
-                    .addAnnotation(Override.class).addAnnotation(Nullable.class).addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .addAnnotation(Nullable.class)
+                    .addModifiers(Modifier.PUBLIC)
                     .returns(ParameterizedTypeName.get(ClassName.get(Class.class),
-                            WildcardTypeName.supertypeOf(ofClassName)));
+                            WildcardTypeName.supertypeOf(
+                                extTypeStr == null ? WildcardTypeName.OBJECT : ClassName.bestGuess(extTypeStr))));
             if (extTypeStr == null)
                 extClassMethodBuilder.addStatement("return null");
             else
-                extClassMethodBuilder.addStatement("return $T.class", ClassName.bestGuess(elementTypeStr));
+                extClassMethodBuilder.addStatement("return $T.class", ClassName.bestGuess(extTypeStr));
 
             builder.addSuperinterface(
                     ParameterizedTypeName.get(ClassName.get(MetaEntityMetacode.class), ofClassName, implOfClassName))
