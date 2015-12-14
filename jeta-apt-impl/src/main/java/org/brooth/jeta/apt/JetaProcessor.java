@@ -43,7 +43,7 @@ import java.util.*;
  * jetaDebug=true                                - debug output
  * jetaMetasitory=com.example.MyMetasitory       - set metasitory
  * jetaAdd={com.example.apt.MyCustomProcessor}   - add processor
- * jetaExclude={Inject.*, LogProcessor}          - exclude processors
+ * jetaDisable=Meta.*,Log                        - exclude processors
  *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
@@ -77,6 +77,10 @@ public class JetaProcessor extends AbstractProcessor {
         logger.debug = Boolean.parseBoolean(Optional.fromNullable(env.getOptions().get("jetaDebug")).or("false"));
         logger.debug("init");
 
+        addProcessors();
+    }
+
+    protected void addProcessors() {
         processors.add(new ObservableProcessor());
         processors.add(new ObserverProcessor());
         processors.add(new ProxyProcessor());
@@ -100,6 +104,7 @@ public class JetaProcessor extends AbstractProcessor {
         if (round == 1) {
             ts = System.currentTimeMillis();
             metacodeContextList.clear();
+            removeDisabledProcessors();
             assembleMetacodeContextList(roundEnv);
         }
 
@@ -126,6 +131,17 @@ public class JetaProcessor extends AbstractProcessor {
 
         blankRounds++;
         return true;
+    }
+
+    protected void removeDisabledProcessors() {
+        Iterator<Processor> iter = processors.iterator();
+        while (iter.hasNext()) {
+            Processor processor = iter.next();
+            if (!processor.isEnabled(processingEnv)) {
+                logger.debug("processor " + processor.getClass().getCanonicalName() + " disabled");
+                iter.remove();
+            }
+        }
     }
 
     private void generateMetaTypeBuilders() {

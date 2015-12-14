@@ -29,6 +29,8 @@ import java.util.Set;
  */
 public interface Processor {
 
+    boolean isEnabled(ProcessingEnvironment processingEnv);
+
     /*
      * @return true if next round is needed
      */
@@ -49,6 +51,8 @@ public interface Processor {
     /*
      * No mater if master's source code hasn't been changed since its meta code generated,
      * return true to rebuild it
+     *
+     * todo: impl
      */
     boolean forceOverwriteMetacode();
     
