@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-group = 'org.brooth.jeta'
-version = '0.1-SNAPSHOT'
+group = 'org.brooth.jeta-samples'
+version = '0.1-alpha'
 
 buildscript {
     repositories {
@@ -30,18 +30,20 @@ buildscript {
 
 apply plugin: 'java'
 apply plugin: 'net.ltgt.apt'
-apply plugin: 'application'
-
-mainClassName = 'ValidatorSample'
 
 repositories {
     mavenLocal()
     mavenCentral()
+    maven {
+        url  "http://dl.bintray.com/brooth/maven"
+    }
 }
 
 dependencies {
-    apt project(':jeta-apt-impl')
-    compile project(':jeta-impl')
+//    apt project(':jeta-apt-impl')
+//    compile project(':jeta-impl')
+    apt 'org.brooth.jeta:jeta-apt:0.1-alpha'
+    compile 'org.brooth.jeta:jeta:0.1-alpha'
 }
 
 tasks.withType(JavaCompile) { task ->
