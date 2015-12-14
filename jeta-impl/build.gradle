@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-group = 'org.javameta'
+group = 'org.brooth.jeta'
 version = '0.1-SNAPSHOT'
 
 buildscript {
@@ -50,5 +50,5 @@ dependencies {
 tasks.withType(JavaCompile) { task ->
     def args = task.options.compilerArgs
     args << '-AjetaDebug=true'
-    args << '-AjetaMapMetasitoryPackage=org.javameta'
+    args << '-AjetaMapMetasitoryPackage=org.brooth.jeta'
 }

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-group = 'org.javameta'
+group = 'org.brooth.jeta'
 version = '0.1-SNAPSHOT'
 
 buildscript {
@@ -32,7 +32,7 @@ apply plugin: 'java'
 apply plugin: 'net.ltgt.apt'
 apply plugin: 'application'
 
-mainClassName = 'org.javameta.samples.validate.ValidatorSample'
+mainClassName = 'ValidatorSample'
 
 repositories {
     mavenLocal()
@@ -48,7 +48,7 @@ tasks.withType(JavaCompile) { task ->
     def args = task.options.compilerArgs
     args << '-AjetaDebug=true'
     args << '-AjetaFileComment=\nLicense text\n'
-    args << '-AjetaMapMetasitoryPackage=org.javameta.samples'
+    args << '-AjetaMapMetasitoryPackage=org.brooth.jeta.samples'
 }
 
 task runas(type:JavaExec) << {

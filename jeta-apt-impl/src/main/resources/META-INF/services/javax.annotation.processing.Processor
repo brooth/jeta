@@ -14,4 +14,4 @@
 #  limitations under the License.
 #
 
-org.javameta.apt.MetacodeProcessor
+org.brooth.jeta.apt.JetaProcessor

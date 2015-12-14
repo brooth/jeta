@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-group = 'org.javameta'
+group = 'org.brooth.jeta'
 version = '0.1-SNAPSHOT'
 
 apply plugin: 'java'
