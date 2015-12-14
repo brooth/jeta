@@ -20,5 +20,4 @@ include ':jeta-apt-api'
 include ':jeta-apt-impl'
 include ':jeta-api'
 include ':jeta-impl'
-include ':jeta-samples'
 
