@@ -20,6 +20,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.squareup.javapoet.*;
+
 import org.brooth.jeta.IMetacode;
 import org.brooth.jeta.apt.metasitory.MapMetasitoryWriter;
 import org.brooth.jeta.apt.metasitory.MetasitoryEnvironment;
@@ -34,16 +35,17 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
- * jetaDebug=true                                - debug output
- * jetaMetasitory=com.example.MyMetasitory       - set metasitory
- * jetaAdd={com.example.apt.MyCustomProcessor}   - add processor
- * jetaDisable=Meta.*,Log                        - exclude processors
+ * jetaDebug=true                                													- debug output
+ * jetaMetasitory=com.example.MyMetasitory       					- set metasitory
+ * jetaProcessor=com.example.apt.MyCustomProcessor   	- add custom processors (comma separated)
+ * jetaDisable=Meta.*,Log                        											- disable processors
  *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
@@ -95,6 +97,19 @@ public class JetaProcessor extends AbstractProcessor {
         processors.add(new ImplementationProcessor());
         processors.add(new MetaProcessor());
         processors.add(new MetaEntityProcessor());
+
+        String addProcessors = processingEnv.getOptions().get("jetaProcessors");
+        if(addProcessors != null) {
+            for (String addProcessor : addProcessors.split("," )) {
+                try {
+                    Class<?> processorClass = Class.forName(addProcessor.trim());
+                    processors.add((Processor) processorClass.newInstance());
+
+                 } catch(Exception e){
+                    throw new RuntimeException("Failed to load processor " + addProcessor, e);
+                }
+            }
+        }
     }
 
     @Override
