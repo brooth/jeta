@@ -31,7 +31,7 @@ apply plugin: 'eclipse'
 
 subprojects {
     def GROUP_ID = gradle.ext.GROUP_ID
-    def ARTIFACT_ID = rootProject.project.name
+    def ARTIFACT_ID = project.name
     def VERSION = gradle.ext.VERSION
     def VERSION_DESC = gradle.ext.VERSION_DESC
     def VERSION_VCS_TAG = VERSION
@@ -61,17 +61,13 @@ subprojects {
 
     bintray {
         user = 'brooth'
-        key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv("BINTRAY_API_KEY")
+        key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : '8fbb020ea81646ad57cad69035ce11b2c25c9e2f'
         publications = ['MyPublication']
 
         pkg {
             repo = 'maven'
             name = "$GROUP_ID:$ARTIFACT_ID"
             userOrg = 'brooth'
-            licenses = ['Apache-2.0']
-            websiteUrl = 'https://github.com/bintray/gradle-bintray-plugin'
-            issueTrackerUrl = 'https://github.com/brooth/jeta/issues'
-            vcsUrl = 'https://github.com/brooth/jeta.git'
 
             version {
                 name = VERSION
