@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-def GROUP_ID = 'org.brooth.jeta'
-def ARTIFACT_ID = 'jeta-apt'
-def VERSION = '0.1-alpha'
-def VERSION_DESC = 'First alpha version'
-def VERSION_VCS_TAG = VERSION
-
-group = GROUP_ID
-version = VERSION
-
 buildscript {
     repositories {
         jcenter()
@@ -38,10 +29,6 @@ buildscript {
 
 apply plugin: 'java'
 
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
-
 repositories{
     mavenLocal()
     mavenCentral()
@@ -52,35 +39,3 @@ dependencies {
     compile project(':jeta')
 }
 
-publishing {
-    publications {
-        MyPublication(MavenPublication) {
-            from components.java
-            groupId GROUP_ID
-            artifactId ARTIFACT_ID
-            version VERSION
-        }
-    }
-}
-
-bintray {
-    user = 'brooth'
-    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv("BINTRAY_API_KEY")
-    publications = ['MyPublication']
-
-    pkg {
-        repo = 'maven'
-        name = "$GROUP_ID:$ARTIFACT_ID"
-        userOrg = 'brooth'
-        licenses = ['Apache-2.0']
-        websiteUrl = 'https://github.com/bintray/gradle-bintray-plugin'
-        issueTrackerUrl = 'https://github.com/brooth/jeta/issues'
-        vcsUrl = 'https://github.com/brooth/jeta.git'
-
-        version {
-            name = VERSION
-            desc = VERSION_DESC
-            vcsTag = VERSION_VCS_TAG
-        }
-    }
-}

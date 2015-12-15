@@ -18,6 +18,10 @@ buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4'
     }
 }
 
@@ -26,8 +30,54 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 
 subprojects {
+    def GROUP_ID = gradle.ext.GROUP_ID
+    def ARTIFACT_ID = rootProject.project.name
+    def VERSION = gradle.ext.VERSION
+    def VERSION_DESC = gradle.ext.VERSION_DESC
+    def VERSION_VCS_TAG = VERSION
+
+    group = gradle.ext.GROUP_ID
+    version = gradle.ext.VERSION
+
     apply plugin: 'eclipse'
+
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.bintray'
 
     sourceCompatibility = JavaVersion.VERSION_1_7
     targetCompatibility = JavaVersion.VERSION_1_7
+
+    publishing {
+        publications {
+            MyPublication(MavenPublication) {
+                from components.java
+                groupId GROUP_ID
+                artifactId ARTIFACT_ID
+                version VERSION
+            }
+        }
+    }
+
+    bintray {
+        user = 'brooth'
+        key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv("BINTRAY_API_KEY")
+        publications = ['MyPublication']
+
+        pkg {
+            repo = 'maven'
+            name = "$GROUP_ID:$ARTIFACT_ID"
+            userOrg = 'brooth'
+            licenses = ['Apache-2.0']
+            websiteUrl = 'https://github.com/bintray/gradle-bintray-plugin'
+            issueTrackerUrl = 'https://github.com/brooth/jeta/issues'
+            vcsUrl = 'https://github.com/brooth/jeta.git'
+
+            version {
+                name = VERSION
+                desc = VERSION_DESC
+                vcsTag = VERSION_VCS_TAG
+            }
+        }
+    }
 }

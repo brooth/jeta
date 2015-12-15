@@ -19,8 +19,6 @@ package org.brooth.jeta.apt.metasitory;
 import org.brooth.jeta.apt.MetacodeContext;
 
 /**
- * todo: pass MetasitoryEnv to open() with logger;
- *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface MetasitoryWriter {
