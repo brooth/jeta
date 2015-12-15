@@ -46,7 +46,8 @@ public class LogProcessor extends SimpleProcessor {
         TypeName providerTypeName = ParameterizedTypeName.get(ClassName.get(NamedLoggerProvider.class),
                 WildcardTypeName.subtypeOf(Object.class));
 
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyLogger")
+        MethodSpec.Builder methodBuilder = MethodSpec.
+                methodBuilder("applyLogger")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(void.class)

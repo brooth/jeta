@@ -17,7 +17,7 @@
 rootProject.name = 'jeta-all'
 
 include ':jeta-apt-api'
-include ':jeta-apt-impl'
+include ':jeta-apt'
 include ':jeta-api'
-include ':jeta-impl'
+include ':jeta'
 

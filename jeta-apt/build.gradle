@@ -49,7 +49,7 @@ repositories{
 
 dependencies {
     compile project(':jeta-apt-api')
-    compile project(':jeta-impl')
+    compile project(':jeta')
 }
 
 publishing {
