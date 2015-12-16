@@ -28,7 +28,7 @@ import javax.lang.model.element.Modifier;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class SingletonProcessor extends SimpleProcessor {
+public class SingletonProcessor extends AbstractProcessor {
 
     public SingletonProcessor() {
         super(Singleton.class);

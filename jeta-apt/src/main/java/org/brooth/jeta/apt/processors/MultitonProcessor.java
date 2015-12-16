@@ -28,7 +28,7 @@ import javax.lang.model.element.Modifier;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MultitonProcessor extends SimpleProcessor {
+public class MultitonProcessor extends AbstractProcessor {
 
     public MultitonProcessor() {
         super(Multiton.class);

@@ -34,7 +34,7 @@ import java.util.Set;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class ProxyProcessor extends SimpleProcessor {
+public class ProxyProcessor extends AbstractProcessor {
 
     public ProxyProcessor() {
         super(Proxy.class);

@@ -34,7 +34,7 @@ import java.util.List;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
- */public class ObserverProcessor extends SimpleProcessor {
+ */public class ObserverProcessor extends AbstractProcessor {
 
     public ObserverProcessor() {
         super(Observer.class);

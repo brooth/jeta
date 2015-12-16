@@ -24,6 +24,19 @@ import java.util.Set;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface MetacodeContext {
+
+    /**
+     * TypeElement of the masters source
+     */
     public TypeElement masterElement();
+
+    /**
+     * All the metacode annotations used by masters type
+     */
     public Set<Class<? extends Annotation>> metacodeAnnotations();
+
+    /**
+     * true if masters source code hasn't been changed since metacode generated
+     */
+    boolean isUpToDate();
 }   

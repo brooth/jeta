@@ -34,7 +34,7 @@ import java.util.Set;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class TypeCollectorProcessor extends SimpleProcessor {
+public class TypeCollectorProcessor extends AbstractProcessor {
 
     public TypeCollectorProcessor() {
         super(TypeCollector.class);
@@ -93,5 +93,10 @@ public class TypeCollectorProcessor extends SimpleProcessor {
         methodBuilder.addStatement("return null");
         builder.addMethod(methodBuilder.build());
         return false;
+    }
+
+    @Override
+    public boolean ignoteUpToDate() {
+        return true;
     }
 }

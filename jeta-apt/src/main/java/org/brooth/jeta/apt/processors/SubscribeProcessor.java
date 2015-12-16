@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class SubscribeProcessor extends SimpleProcessor {
+public class SubscribeProcessor extends AbstractProcessor {
 
     public SubscribeProcessor() {
         super(Subscribe.class);

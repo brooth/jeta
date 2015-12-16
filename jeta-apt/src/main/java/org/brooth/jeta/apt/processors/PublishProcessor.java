@@ -29,7 +29,7 @@ import javax.lang.model.element.Modifier;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class PublishProcessor extends SimpleProcessor {
+public class PublishProcessor extends AbstractProcessor {
 
     public PublishProcessor() {
         super(Publish.class);

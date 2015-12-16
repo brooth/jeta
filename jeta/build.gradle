@@ -49,5 +49,6 @@ dependencies {
 tasks.withType(JavaCompile) { task ->
     def args = task.options.compilerArgs
     args << '-AjetaDebug=true'
+    args << "-AjetaUtdSrcDir=${sourceSets.test.java.srcDirs[0]}"
     args << '-AjetaMapMetasitoryPackage=org.brooth.jeta'
 }

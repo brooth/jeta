@@ -35,7 +35,7 @@ import java.util.List;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class ValidateProcessor extends SimpleProcessor {
+public class ValidateProcessor extends AbstractProcessor {
 
     public ValidateProcessor() {
         super(Validate.class);

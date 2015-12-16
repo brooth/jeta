@@ -62,6 +62,7 @@ public class MetaEntityTest extends BaseTest {
         Provider<MetaEntityOne> provider;
     }
 
+
     @Test
 	public void testSimpleInject() {
         logger.debug("testSimpleInject()");

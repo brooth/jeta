@@ -29,11 +29,11 @@ import java.util.Set;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public abstract class SimpleProcessor implements Processor {
+public abstract class AbstractProcessor implements Processor {
 
     protected Class<? extends Annotation> annotation;
 
-    public SimpleProcessor(Class<? extends Annotation> annotation) {
+    public AbstractProcessor(Class<? extends Annotation> annotation) {
         this.annotation = annotation;
     }
 
@@ -65,7 +65,7 @@ public abstract class SimpleProcessor implements Processor {
     }
 
     @Override
-    public boolean forceOverwriteMetacode() {
+    public boolean ignoteUpToDate() {
         return false;
     }
 }

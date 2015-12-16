@@ -30,7 +30,7 @@ import javax.lang.model.element.Modifier;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class LogProcessor extends SimpleProcessor {
+public class LogProcessor extends AbstractProcessor {
 
     public LogProcessor() {
         super(Log.class);

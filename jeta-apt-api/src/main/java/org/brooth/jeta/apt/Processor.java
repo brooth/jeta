@@ -29,32 +29,33 @@ import java.util.Set;
  */
 public interface Processor {
 
+    /**
+     * return false to disable processor
+     */
     boolean isEnabled(ProcessingEnvironment processingEnv);
 
-    /*
+    /**
      * @return true if next round is needed
      */
     boolean process(ProcessorEnvironment env, TypeSpec.Builder builder);
 
-    /*
+    /**
      * Tell to MetacodeProcessor the annotations, it should collect elements with.
      * All the elements will passed to this processor in generating metacode stage.
      */
     Set<Class<? extends Annotation>> collectElementsAnnotatedWith();
 
-    /*
+    /**
      * Ensure type elements (masters elements) associated with @param element
      * For those elements metacode will be generated.
      */
     Set<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element);
 
-    /*
-     * No mater if master's source code hasn't been changed since its meta code generated,
+    /**
+     * No mater if masters source code hasn't been changed since its meta code generated,
      * return true to rebuild it
-     *
-     * todo: impl
      */
-    boolean forceOverwriteMetacode();
+    boolean ignoteUpToDate();
     
 	/**
 	 * return true if current rounds set of annotations is needed in the next round

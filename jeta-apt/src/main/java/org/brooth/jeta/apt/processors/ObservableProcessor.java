@@ -31,7 +31,7 @@ import java.util.WeakHashMap;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class ObservableProcessor extends SimpleProcessor {
+public class ObservableProcessor extends AbstractProcessor {
 
     public ObservableProcessor() {
         super(Subject.class);

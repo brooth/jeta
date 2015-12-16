@@ -37,7 +37,7 @@ import java.util.Set;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class ObjectCollectorProcessor extends SimpleProcessor {
+public class ObjectCollectorProcessor extends AbstractProcessor {
 
     public ObjectCollectorProcessor() {
         super(ObjectCollector.class);
@@ -112,5 +112,10 @@ public class ObjectCollectorProcessor extends SimpleProcessor {
         methodBuilder.addStatement("return null");
         builder.addMethod(methodBuilder.build());
         return false;
+    }
+
+    @Override
+    public boolean ignoteUpToDate() {
+        return true;
     }
 }

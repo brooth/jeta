@@ -36,7 +36,7 @@ import java.util.Map;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MetaProcessor extends SimpleProcessor {
+public class MetaProcessor extends AbstractProcessor {
 
     private final Map<TypeElement, String> factoryElements = new HashMap<>();
 

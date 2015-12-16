@@ -38,7 +38,7 @@ import java.util.Set;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MetaEntityProcessor extends SimpleProcessor {
+public class MetaEntityProcessor extends AbstractProcessor {
 
     public MetaEntityProcessor() {
         super(MetaEntity.class);

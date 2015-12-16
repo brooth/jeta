@@ -31,7 +31,7 @@ import javax.lang.model.element.Modifier;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class ImplementationProcessor extends SimpleProcessor {
+public class ImplementationProcessor extends AbstractProcessor {
 
     public ImplementationProcessor() {
         super(Implementation.class);
@@ -81,5 +81,10 @@ public class ImplementationProcessor extends SimpleProcessor {
                 .build());
 
         return false;
+    }
+
+    @Override
+    public boolean ignoteUpToDate() {
+        return true;
     }
 }
