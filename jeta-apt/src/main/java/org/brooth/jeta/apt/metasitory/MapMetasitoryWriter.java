@@ -25,7 +25,6 @@ import org.brooth.jeta.apt.MetacodeContext;
 import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.metasitory.MapMetasitoryContainer;
 
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
@@ -41,7 +40,7 @@ import java.util.Map;
  */
 public class MapMetasitoryWriter implements MetasitoryWriter {
 
-    protected ProcessingEnvironment env;
+    protected MetasitoryEnvironment env;
     protected Logger logger;
 
     protected TypeSpec.Builder typeBuilder;
@@ -49,7 +48,7 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
 
     @Override
     public void open(MetasitoryEnvironment env) {
-        this.env = env.processingEnv();
+        this.env = env;
         logger = env.logger();
 
         typeBuilder = TypeSpec.classBuilder("MetasitoryContainer")
@@ -71,7 +70,7 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
     @Override
     public void write(MetacodeContext context) {
         String master = context.masterElement().toString();
-        String metacode = MetacodeUtils.getMetacodeOf(env.getElementUtils(), master);
+        String metacode = MetacodeUtils.getMetacodeOf(env.processingEnv().getElementUtils(), master);
         String annotations = Joiner.on(",").join(
                 Iterables.transform(context.metacodeAnnotations(), new Function<Class<? extends Annotation>, String>() {
                     @Override
@@ -92,25 +91,29 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
 
     @Override
     public void close() {
-        String metasitoryPackage = env.getOptions().get("jetaMapMetasitoryPackage");
+        String metasitoryPackage = env.jetaProperties().getProperty("metasitory.package");
         if (metasitoryPackage == null) {
-            logger.debug("jetaMapMetasitoryPackage not present. root package is used");
+            logger.debug("metasitory.package not present. root package is used");
             metasitoryPackage = "";
         }
 
         methodBuilder.addStatement("return result");
         typeBuilder.addMethod(methodBuilder.build());
 
-        JavaFile javaFile = JavaFile.builder(metasitoryPackage, typeBuilder.build()).build();
+        JavaFile.Builder builder = JavaFile.builder(metasitoryPackage, typeBuilder.build());
+        if (env.jetaProperties().containsKey("file.comment"))
+            builder.addFileComment(env.jetaProperties().getProperty("file.comment"));
+
         Writer out = null;
         try {
+
             String fileName = metasitoryPackage.isEmpty() ?
                     "MetasitoryContainer" : metasitoryPackage + ".MetasitoryContainer";
             logger.debug("writing metasitory to " + fileName);
 
-            JavaFileObject sourceFile = env.getFiler().createSourceFile(fileName);
+            JavaFileObject sourceFile = env.processingEnv().getFiler().createSourceFile(fileName);
             out = sourceFile.openWriter();
-            javaFile.writeTo(out);
+            builder.build().writeTo(out);
             out.close();
 
         } catch (IOException e) {

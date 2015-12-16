@@ -56,7 +56,7 @@ public class TestMetaHelper {
 
     public static TestMetaHelper getInstance() {
         if (instance == null)
-            instance = new TestMetaHelper("org.brooth.jeta");
+            instance = new TestMetaHelper("org.brooth.jeta.tests");
         return instance;
     }
 

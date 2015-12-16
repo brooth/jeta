@@ -96,7 +96,7 @@ public class TypeCollectorProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean ignoteUpToDate() {
+    public boolean ignoreMasterUpToDate(ProcessorEnvironment env) {
         return true;
     }
 }

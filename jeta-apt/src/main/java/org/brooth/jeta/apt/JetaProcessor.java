@@ -16,73 +16,33 @@
 
 package org.brooth.jeta.apt;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.squareup.javapoet.*;
+import org.brooth.jeta.IMetacode;
+import org.brooth.jeta.apt.metasitory.MapMetasitoryWriter;
+import org.brooth.jeta.apt.metasitory.MetasitoryEnvironment;
+import org.brooth.jeta.apt.metasitory.MetasitoryWriter;
+import org.brooth.jeta.apt.processors.*;
 
-import javax.annotation.Nullable;
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
+import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
-
-import org.brooth.jeta.IMetacode;
-import org.brooth.jeta.apt.metasitory.MapMetasitoryWriter;
-import org.brooth.jeta.apt.metasitory.MetasitoryEnvironment;
-import org.brooth.jeta.apt.metasitory.MetasitoryWriter;
-import org.brooth.jeta.apt.processors.ImplementationProcessor;
-import org.brooth.jeta.apt.processors.LogProcessor;
-import org.brooth.jeta.apt.processors.MetaEntityProcessor;
-import org.brooth.jeta.apt.processors.MetaProcessor;
-import org.brooth.jeta.apt.processors.MultitonProcessor;
-import org.brooth.jeta.apt.processors.ObjectCollectorProcessor;
-import org.brooth.jeta.apt.processors.ObservableProcessor;
-import org.brooth.jeta.apt.processors.ObserverProcessor;
-import org.brooth.jeta.apt.processors.ProxyProcessor;
-import org.brooth.jeta.apt.processors.PublishProcessor;
-import org.brooth.jeta.apt.processors.SingletonProcessor;
-import org.brooth.jeta.apt.processors.SubscribeProcessor;
-import org.brooth.jeta.apt.processors.TypeCollectorProcessor;
-import org.brooth.jeta.apt.processors.ValidateProcessor;
-
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
+import java.io.*;
+import java.lang.annotation.Annotation;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
- * jetaDebug=true                                  - debug output 
- * jetaMetasitory=com.example.MyMetasitory         - set metasitory 
- * jetaProcessor=com.example.apt.MyCustomProcessor - add custom processors (comma separated) 
- * jetaDisable=Meta.*,Log                          - disable processors
- * jetaUtdSrcDir=/path-to-source-dir               - check source code is up-to-date to skip metacode generationg
- * jetaTempDir=/path-to-temp-dir                   - directory where to same processing results
- *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 @SupportedAnnotationTypes("*")
@@ -91,7 +51,6 @@ public class JetaProcessor extends AbstractProcessor {
 
     public static final String METACODE_CLASS_POSTFIX = "_Metacode";
 
-    private ProcessingEnvironment env;
     private Messager logger;
     private Elements elementUtils;
 
@@ -103,30 +62,39 @@ public class JetaProcessor extends AbstractProcessor {
     private int round = 0;
     private int blankRounds = 0;
     private long ts;
-    private Properties utdProperties;
-    private String sourcepath;
+
+    private final Properties properties = new Properties();
+    private Properties utdProperties = null;
+    private String sourcePath = null;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        this.env = processingEnv;
         this.elementUtils = processingEnv.getElementUtils();
 
         logger = new Messager();
         logger.messager = processingEnv.getMessager();
-        logger.debug = Boolean.parseBoolean(Optional.fromNullable(env.getOptions().get("jetaDebug")).or("false"));
+        logger.debug = false;
         logger.debug("init");
 
         try {
-            processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH,
-                "org", "jeta.properties");
-            
-        } catch(Exception e){
-            throw new RuntimeException(e);
+            FileObject propertiesFileObject = processingEnv.getFiler().getResource(
+                    StandardLocation.SOURCE_PATH, "", "jeta.properties");
+
+            sourcePath = Paths.get(propertiesFileObject.toUri()).toAbsolutePath().
+                    toString().replace("jeta.properties", "");
+
+            InputStream is = propertiesFileObject.openInputStream();
+            properties.load(is);
+            is.close();
+
+        } catch (Exception e) {
+            logger.warn("jeta.properties not found, used default settings");
         }
 
-        if (processingEnv.getOptions().containsKey("jetaUtdSrcDir")) {
-            sourcepath = processingEnv.getOptions().get("jetaUtdSrcDir");
+        logger.debug = properties.getProperty("debug", "0").equals("true");
+
+        if (properties.getProperty("utd.enable", "true").equals("true")) {
             utdProperties = new Properties();
             File props = new File(getUtdPropertiesFilePath());
             if (props.exists())
@@ -157,7 +125,7 @@ public class JetaProcessor extends AbstractProcessor {
         processors.add(new MetaProcessor());
         processors.add(new MetaEntityProcessor());
 
-        String addProcessors = processingEnv.getOptions().get("jetaProcessors");
+        String addProcessors = properties.getProperty("processors.add");
         if (addProcessors != null) {
             for (String addProcessor : addProcessors.split(",")) {
                 try {
@@ -184,11 +152,7 @@ public class JetaProcessor extends AbstractProcessor {
 
         if (!metacodeContextList.isEmpty()) {
             if (round == 1) {
-                metasitoryWriter = new MapMetasitoryWriter();
-                MetasitoryEnvironmentImpl impl = new MetasitoryEnvironmentImpl();
-                impl.env = env;
-                impl.logger = logger;
-                metasitoryWriter.open(impl);
+                createMetasitoryWriter();
                 generateMetaTypeBuilders();
             }
 
@@ -206,8 +170,8 @@ public class JetaProcessor extends AbstractProcessor {
                     utdProperties.store(fos, null);
 
                 } catch (IOException e) {
-                    logger.warn("failed to save processing data for up-to-date feature usage, error: " 
-                        + e.getMessage());
+                    logger.warn("failed to save processing data for up-to-date feature usage, error: "
+                            + e.getMessage());
                 }
             }
         }
@@ -220,14 +184,46 @@ public class JetaProcessor extends AbstractProcessor {
         return true;
     }
 
-    private String getUtdPropertiesFilePath() {
-        String tmpDir = processingEnv.getOptions().containsKey("jetaTempDir")
-                ? processingEnv.getOptions().get("jetaTempDir") : System.getProperty("java.io.tmpdir");
-        if (!tmpDir.endsWith(File.separator))
-            tmpDir += File.separator;
+    private MetasitoryEnvironmentImpl createMetasitoryWriter() {
+        if (!properties.getProperty("metasitory.writer", "").isEmpty()) {
+            try {
+                String className = properties.getProperty("metasitory.writer");
+                metasitoryWriter = (MetasitoryWriter) Class.forName(className).newInstance();
 
-        String fileName = sourcepath.replaceAll("[^a-zA-Z_]", "_") + ".jetadata";
-        return tmpDir + fileName;
+            } catch (Exception e) {
+                throw new IllegalArgumentException("failed to create metasitory writer", e);
+            }
+
+        } else {
+            metasitoryWriter = new MapMetasitoryWriter();
+        }
+
+        MetasitoryEnvironmentImpl impl = new MetasitoryEnvironmentImpl();
+        impl.env = processingEnv;
+        impl.logger = logger;
+        impl.properties = properties;
+
+        metasitoryWriter.open(impl);
+        return impl;
+    }
+
+    private String getUtdPropertiesFilePath() {
+        String result = properties.getProperty("utd.file");
+        if (result != null) {
+            Path path = Paths.get(result);
+            if (!path.isAbsolute())
+                path = Paths.get(sourcePath + result).toAbsolutePath();
+
+            result = path.normalize().toAbsolutePath().toString();
+
+        } else {
+            result = System.getProperty("java.io.tmpdir");
+            if (!result.endsWith(File.separator))
+                result += File.separator;
+            result = result + sourcePath.replaceAll("[^a-zA-Z_]", "_") + ".utd";
+        }
+
+        return result;
     }
 
     protected void removeDisabledProcessors() {
@@ -244,32 +240,39 @@ public class JetaProcessor extends AbstractProcessor {
     private void generateMetaTypeBuilders() {
         logger.debug("generating meta type builders");
 
-        Iterator<MetacodeContextImpl> iter = metacodeContextList.iterator();
-        while (iter.hasNext() ) {
-            MetacodeContextImpl context  = iter.next();
-            if (utdProperties != null && !utdProperties.isEmpty()) {
-                try {
-                    String path  = processingEnv.getFiler().getResource(
-                            StandardLocation.SOURCE_OUTPUT,
-                            context.metacodePackage,
-                            context.metacodeSimpleName + ".java").toUri().getPath();
+        Properties utdPropertiesCopy = null;
+        if (utdProperties != null)
+            utdPropertiesCopy = (Properties) utdProperties.clone();
 
-                    if (utdProperties.containsKey(path)) {
-                        File sourceJavaFile = new File(getSourceJavaFile(context.masterElement));
-                        if (utdProperties.get(path).equals(String.valueOf(sourceJavaFile.lastModified()))) {
-                            logger.debug("    * " + context.metacodeCanonicalName + " up-to-date");
-                            utdProperties.remove(path);
-                            context.utd = true;
-                            context.processorEnvironments.clear();
-                            continue;
+        for (MetacodeContextImpl context : metacodeContextList) {
+            if (utdPropertiesCopy != null) {
+                if (utdPropertiesCopy.containsKey(context.metacodeCanonicalName)) {
+                    boolean cleanup = true;
+                    for (Processor processor : context.processorEnvironments.keySet())
+                        if (processor.ignoreMasterUpToDate(context.processorEnvironments.get(processor))) {
+                            cleanup = false;
+                            break;
                         }
+
+                    if (cleanup) {
+                        File sourceJavaFile = new File(getSourceJavaFile(context.masterElement));
+                        cleanup = utdPropertiesCopy.get(context.metacodeCanonicalName).equals(
+                                String.valueOf(sourceJavaFile.lastModified()));
                     }
 
-                } catch (IOException e1) {
-                    throw new RuntimeException(e1);
+                    if (cleanup) {
+                        logger.debug("    * " + context.metacodeCanonicalName + " up-to-date");
+                        utdPropertiesCopy.remove(context.metacodeCanonicalName);
+                        context.utd = true;
+                        context.processorEnvironments.clear();
+
+                        // todo: add to classpath?
+
+                        continue;
+                    }
                 }
             }
-            
+
             logger.debug("    + " + context.metacodeCanonicalName);
             ClassName masterClassName = ClassName.get(context.masterElement);
             TypeSpec.Builder builder = TypeSpec.classBuilder(context.metacodeSimpleName)
@@ -284,10 +287,38 @@ public class JetaProcessor extends AbstractProcessor {
 
             context.builder = builder;
         }
+
+        if (utdPropertiesCopy != null && !utdPropertiesCopy.isEmpty()) {
+            if (properties.getProperty("utd.cleanup", "true").equals("true")) {
+                for (Object key : utdPropertiesCopy.keySet()) {
+                    String metacodeCanonicalName = (String) key;
+                    int dot = metacodeCanonicalName.lastIndexOf('.');
+
+                    try {
+                        FileObject file = processingEnv.getFiler().getResource(
+                                StandardLocation.SOURCE_OUTPUT,
+                                (dot > 0 ? metacodeCanonicalName.substring(0, dot) : ""),
+                                (dot > 0 ? metacodeCanonicalName.substring(dot + 1) : metacodeCanonicalName) + ".java");
+
+                        if (new File(file.toUri()).delete()) {
+                            logger.debug("    - " + metacodeCanonicalName + " removed");
+                            utdProperties.remove(metacodeCanonicalName);
+
+                        } else {
+                            logger.warn("failed to cleanup metacode file: " + metacodeCanonicalName);
+                        }
+
+                    } catch (IOException e) {
+                        logger.warn("failed to cleanup metacode file: " + metacodeCanonicalName + " error: " + e.getMessage());
+                    }
+                }
+            }
+            utdPropertiesCopy.clear();
+        }
     }
 
     private String getSourceJavaFile(Element element) {
-        return sourcepath + File.separator
+        return sourcePath + File.separator
                 + MetacodeUtils.sourceElementOf(element).toString().replace(".", File.separator) + ".java";
     }
 
@@ -296,8 +327,8 @@ public class JetaProcessor extends AbstractProcessor {
         Iterator<MetacodeContextImpl> iterator = metacodeContextList.iterator();
         while (iterator.hasNext()) {
             MetacodeContextImpl context = iterator.next();
-            Iterator<Map.Entry<Processor, ProcessorEnvironmentImpl>> processorEnvIterator = 
-                context.processorEnvironments.entrySet().iterator();
+            Iterator<Map.Entry<Processor, ProcessorEnvironmentImpl>> processorEnvIterator =
+                    context.processorEnvironments.entrySet().iterator();
 
             while (processorEnvIterator.hasNext()) {
                 Map.Entry<Processor, ProcessorEnvironmentImpl> entry = processorEnvIterator.next();
@@ -318,16 +349,16 @@ public class JetaProcessor extends AbstractProcessor {
 
             if (context.processorEnvironments.isEmpty()) {
                 // up-to-date?
-                if(context.builder != null) {
-                    String pkg = env.getElementUtils().getPackageOf(context.masterElement).getQualifiedName().toString();
+                if (context.builder != null) {
+                    String pkg = processingEnv.getElementUtils().getPackageOf(context.masterElement).getQualifiedName().toString();
                     JavaFile.Builder fileBuilder = JavaFile.builder(pkg, context.builder.build()).indent("\t");
-                    if (env.getOptions().containsKey("jetaFileComment"))
-                        fileBuilder.addFileComment(env.getOptions().get("jetaFileComment"));
+                    if (properties.containsKey("file.comment"))
+                        fileBuilder.addFileComment(properties.getProperty("file.comment"));
 
                     Writer out = null;
                     try {
                         JavaFileObject sourceFile = processingEnv.getFiler()
-                            .createSourceFile(context.metacodeCanonicalName);
+                                .createSourceFile(context.metacodeCanonicalName);
                         JavaFile javaFile = fileBuilder.build();
                         out = sourceFile.openWriter();
                         javaFile.writeTo(out);
@@ -335,7 +366,7 @@ public class JetaProcessor extends AbstractProcessor {
 
                         if (utdProperties != null) {
                             File sourceJavaFile = new File(getSourceJavaFile(context.masterElement));
-                            utdProperties.put(sourceFile.toUri().getPath(), String.valueOf(sourceJavaFile.lastModified()));
+                            utdProperties.put(context.metacodeCanonicalName, String.valueOf(sourceJavaFile.lastModified()));
                         }
 
                     } catch (IOException e) {
@@ -387,7 +418,7 @@ public class JetaProcessor extends AbstractProcessor {
                     logger.debug("found element: " + element.toString());
 
                     // go through element's masters
-                    for (TypeElement masterTypeElement : processor.applicableMastersOfElement(env, element)) {
+                    for (TypeElement masterTypeElement : processor.applicableMastersOfElement(processingEnv, element)) {
                         logger.debug("applicable master: " + masterTypeElement.toString());
 
                         MetacodeContextImpl context = Iterables.find(metacodeContextList,
@@ -404,7 +435,7 @@ public class JetaProcessor extends AbstractProcessor {
                         ProcessorEnvironmentImpl processorEnvironment = context.processorEnvironments.get(processor);
                         if (processorEnvironment == null) {
                             processorEnvironment = new ProcessorEnvironmentImpl();
-                            processorEnvironment.processingEnvironment = env;
+                            processorEnvironment.processingEnvironment = processingEnv;
                             processorEnvironment.metacodeContext = context;
                             processorEnvironment.elements = new ArrayList<>();
                             processorEnvironment.logger = logger;
@@ -457,13 +488,11 @@ public class JetaProcessor extends AbstractProcessor {
     }
 
     private static class MetacodeContextImpl implements MetacodeContext {
-        @Nullable
         private TypeSpec.Builder builder;
         private Map<Processor, ProcessorEnvironmentImpl> processorEnvironments = new HashMap<>();
 
         private final TypeElement masterElement;
 
-        private final String metacodePackage;
         private final String metacodeSimpleName;
         private final String metacodeCanonicalName;
         private final Set<Class<? extends Annotation>> metacodeAnnotations;
@@ -476,7 +505,6 @@ public class JetaProcessor extends AbstractProcessor {
 
             metacodeCanonicalName = MetacodeUtils.getMetacodeOf(elementUtils, masterElement.toString());
             int i = metacodeCanonicalName.lastIndexOf('.');
-            metacodePackage = i > 0 ? metacodeCanonicalName.substring(0, i) : "";
             metacodeSimpleName = i >= 0 ? metacodeCanonicalName.substring(i + 1) : metacodeCanonicalName;
         }
 
@@ -534,6 +562,7 @@ public class JetaProcessor extends AbstractProcessor {
     private static class MetasitoryEnvironmentImpl implements MetasitoryEnvironment {
         private ProcessingEnvironment env;
         private Logger logger;
+        private Properties properties;
 
         public ProcessingEnvironment processingEnv() {
             return env;
@@ -541,6 +570,11 @@ public class JetaProcessor extends AbstractProcessor {
 
         public Logger logger() {
             return logger;
+        }
+
+        @Override
+        public Properties jetaProperties() {
+            return properties;
         }
     }
 }

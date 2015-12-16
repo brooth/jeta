@@ -18,6 +18,7 @@ package org.brooth.jeta.apt.processors;
 
 import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.Processor;
+import org.brooth.jeta.apt.ProcessorEnvironment;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -65,7 +66,7 @@ public abstract class AbstractProcessor implements Processor {
     }
 
     @Override
-    public boolean ignoteUpToDate() {
+    public boolean ignoreMasterUpToDate(ProcessorEnvironment env) {
         return false;
     }
 }

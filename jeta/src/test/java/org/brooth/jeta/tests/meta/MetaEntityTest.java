@@ -62,9 +62,8 @@ public class MetaEntityTest extends BaseTest {
         Provider<MetaEntityOne> provider;
     }
 
-
     @Test
-	public void testSimpleInject() {
+    public void testSimpleInject() {
         logger.debug("testSimpleInject()");
 
         MetaEntityHolder holder = new MetaEntityHolder();
@@ -94,7 +93,7 @@ public class MetaEntityTest extends BaseTest {
         String value;
     }
 
-    @MetaEntity(of=MetaEntityTwo.class)
+    @MetaEntity(of = MetaEntityTwo.class)
     public static class MetaEntityTwoProvider {
         @Constructor
         public MetaEntityTwo get() {
@@ -108,7 +107,7 @@ public class MetaEntityTest extends BaseTest {
         String value;
     }
 
-    @MetaEntity(of=MetaEntityThree.class)
+    @MetaEntity(of = MetaEntityThree.class)
     public static class MetaEntityThreeProvider {
         @Constructor
         public static MetaEntityThree get() {
@@ -122,7 +121,7 @@ public class MetaEntityTest extends BaseTest {
         String value;
     }
 
-    @MetaEntity(of=MetaEntityFour.class, staticConstructor="getInstance")
+    @MetaEntity(of = MetaEntityFour.class, staticConstructor = "getInstance")
     public static class MetaEntityFourProvider {
 
         public static MetaEntityFourProvider getInstance() {
@@ -147,7 +146,7 @@ public class MetaEntityTest extends BaseTest {
     }
 
     @Test
-	public void testMetaProvider() {
+    public void testMetaProvider() {
         logger.debug("testMetaProvider()");
 
         MetaProviderHolder holder = new MetaProviderHolder();
@@ -181,14 +180,17 @@ public class MetaEntityTest extends BaseTest {
         @Factory
         public interface MetaFactory {
             MetaEntityFive get(String value);
+
             Class<? extends MetaEntityFive> getClazz();
+
             Lazy<MetaEntityFive> getLazy(String value);
+
             Provider<MetaEntityFive> getProvider(String value);
         }
     }
 
     @Test
-	public void testMetaFactory() {
+    public void testMetaFactory() {
         logger.debug("testMetaFactory()");
 
         MetaFactoryHolder holder = new MetaFactoryHolder();
@@ -216,14 +218,14 @@ public class MetaEntityTest extends BaseTest {
         }
     }
 
-    @MetaEntity(ext=MetaEntitySix.class, priority=Integer.MIN_VALUE)
+    @MetaEntity(ext = MetaEntitySix.class, priority = Integer.MIN_VALUE)
     public static class WeakMetaEntitySixExt extends MetaEntitySix {
         public String getValue() {
             throw new IllegalStateException();
         }
     }
 
-    @MetaEntity(ext=MetaEntitySix.class, priority=Integer.MAX_VALUE)
+    @MetaEntity(ext = MetaEntitySix.class, priority = Integer.MAX_VALUE)
     public static class MetaEntitySixExt extends MetaEntitySix {
         public String getValue() {
             return super.getValue() + " ext";
@@ -239,14 +241,14 @@ public class MetaEntityTest extends BaseTest {
         }
     }
 
-    @MetaEntity(ext=MetaEntitySeven.class)
+    @MetaEntity(ext = MetaEntitySeven.class)
     public static class MetaEntitySevenExt extends MetaEntitySeven {
         public String getValue() {
             return super.getValue() + " ext";
         }
     }
 
-    @MetaEntity(ext=MetaEntitySevenExt.class)
+    @MetaEntity(ext = MetaEntitySevenExt.class)
     public static class MetaEntitySevenExtExt extends MetaEntitySevenExt {
         public String getValue() {
             return super.getValue() + " ext";
@@ -261,7 +263,7 @@ public class MetaEntityTest extends BaseTest {
     }
 
     @Test
-	public void testMetaExt() {
+    public void testMetaExt() {
         logger.debug("testMetaExt()");
 
         ExtMetaHolder holder = new ExtMetaHolder();
@@ -277,7 +279,7 @@ public class MetaEntityTest extends BaseTest {
     // test ClassForNameMetasitory here. there are compatable entities right above
 
     @Test
-	public void testClassForNameMetasitory() {
+    public void testClassForNameMetasitory() {
         logger.debug("testClassForNameMetasitor()");
 
         ClassForNameMetasitory metasitory = new ClassForNameMetasitory();

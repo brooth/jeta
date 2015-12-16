@@ -35,6 +35,13 @@ repositories {
     mavenCentral()
 }
 
+/*
+ * gradle doesn't provide by default
+ */
+compileTestJava {
+    options.sourcepath = files('src/test/java')
+}
+
 dependencies {
     compile project(':jeta-api')
     compile 'com.google.guava:guava:18.0'
@@ -44,11 +51,4 @@ dependencies {
     testCompile group: 'junit', name: 'junit-dep', version: '4.10'
     testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '1.9.+'
-}
-
-tasks.withType(JavaCompile) { task ->
-    def args = task.options.compilerArgs
-    args << '-AjetaDebug=true'
-    args << "-AjetaUtdSrcDir=${sourceSets.test.java.srcDirs[0]}"
-    args << '-AjetaMapMetasitoryPackage=org.brooth.jeta'
 }

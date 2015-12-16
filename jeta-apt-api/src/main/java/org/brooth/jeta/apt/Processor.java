@@ -55,7 +55,7 @@ public interface Processor {
      * No mater if masters source code hasn't been changed since its meta code generated,
      * return true to rebuild it
      */
-    boolean ignoteUpToDate();
+    boolean ignoreMasterUpToDate(ProcessorEnvironment env);
     
 	/**
 	 * return true if current rounds set of annotations is needed in the next round

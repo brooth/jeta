@@ -19,6 +19,7 @@ package org.brooth.jeta.apt.metasitory;
 import org.brooth.jeta.apt.Logger;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import java.util.Properties;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -26,4 +27,5 @@ import javax.annotation.processing.ProcessingEnvironment;
 public interface MetasitoryEnvironment {
     ProcessingEnvironment processingEnv();
     Logger logger();
+    Properties jetaProperties();
 }

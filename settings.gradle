@@ -22,6 +22,6 @@ include ':jeta-api'
 include ':jeta'
 
 gradle.ext.GROUP_ID = 'org.brooth.jeta'
-gradle.ext.VERSION = '0.1-alpha'
+gradle.ext.VERSION = '0.2-alpha'
 gradle.ext.VERSION_DESC = 'First alpha version'
 gradle.ext.VERSION_VCS_TAG = gradle.VERSION

@@ -84,7 +84,7 @@ public class ImplementationProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean ignoteUpToDate() {
+    public boolean ignoreMasterUpToDate(ProcessorEnvironment env) {
         return true;
     }
 }
