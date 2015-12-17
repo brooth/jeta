@@ -50,13 +50,6 @@ public abstract class AbstractProcessor implements UtdProcessor {
 
     @Override
     public boolean isEnabled(ProcessingEnvironment processingEnv) {
-        String jetaDisable = processingEnv.getOptions().get("jetaDisable");
-        if (jetaDisable != null) {
-            for (String disable : jetaDisable.split(","))
-                if (annotation.getSimpleName().matches(disable))
-                    return false;
-        }
-
         return true;
     }
 

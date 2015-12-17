@@ -36,7 +36,7 @@ repositories {
 }
 
 /*
- * gradle doesn't provide by default
+ * gradle doesn't provide 'sourcepath' by default
  */
 compileTestJava {
     options.sourcepath = files('src/test/java')

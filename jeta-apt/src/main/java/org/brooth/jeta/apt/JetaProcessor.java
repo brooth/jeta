@@ -67,6 +67,8 @@ public class JetaProcessor extends AbstractProcessor {
 
     private final Properties properties = new Properties();
     private Properties utdProperties = null;
+
+    private String relateToPath = null;
     private String sourcePath = null;
 
     @Override
@@ -79,19 +81,72 @@ public class JetaProcessor extends AbstractProcessor {
         logger.debug = false;
         logger.debug("init");
 
-        try {
-            FileObject propertiesFileObject = processingEnv.getFiler().getResource(
-                    StandardLocation.SOURCE_PATH, "", "jeta.properties");
+        loadProperties(processingEnv);
+        addProcessors();
+    }
 
-            sourcePath = Paths.get(propertiesFileObject.toUri()).toAbsolutePath().
-                    toString().replace("jeta.properties", "");
+    private void loadProperties(ProcessingEnvironment processingEnv) {
+        Path propertiesPath = null;
+        String propertiesName = "jeta.properties";
+        if (processingEnv.getOptions().containsKey("jetaProperties")) {
+            String filePath = processingEnv.getOptions().get("jetaProperties");
+            try {
+                propertiesPath = Paths.get(filePath);
+                if (!propertiesPath.isAbsolute())
+                    propertiesPath = propertiesPath.toAbsolutePath().normalize();
 
-            InputStream is = propertiesFileObject.openInputStream();
-            properties.load(is);
-            is.close();
+                propertiesName = propertiesPath.getFileName().toString();
 
-        } catch (Exception e) {
-            logger.warn("jeta.properties not found, used default settings");
+            } catch (Exception e) {
+                throw new IllegalArgumentException("failed to load properties from " + filePath);
+            }
+
+        } else {
+            try {
+                FileObject propertiesFileObject =
+                        processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH, "", propertiesName);
+                propertiesPath = Paths.get(propertiesFileObject.toUri());
+
+            } catch (Exception e) {
+                logger.warn("jeta.properties not found, used default settings");
+            }
+        }
+
+        if (propertiesPath != null) {
+            try {
+                InputStream is = Files.newInputStream(propertiesPath);
+                properties.load(is);
+                is.close();
+
+            } catch (IOException e) {
+                throw new RuntimeException("failed to load properties", e);
+            }
+        }
+
+        if (propertiesPath == null) {
+            relateToPath = Paths.get(".").toAbsolutePath().toString();
+            if (!relateToPath.endsWith(File.separator))
+                relateToPath += File.separator;
+
+        } else {
+            relateToPath = propertiesPath.toString().replace(propertiesName, "");
+        }
+
+        if (properties.containsKey("sourcepath")) {
+            sourcePath = properties.getProperty("sourcepath");
+            Path path = Paths.get(sourcePath);
+            if (!path.isAbsolute()) {
+                if (propertiesPath != null)
+                    path = Paths.get(propertiesPath.toString().replace(propertiesName, sourcePath));
+
+                sourcePath = path.toAbsolutePath().normalize().toString();
+            }
+
+            if (!sourcePath.endsWith(File.separator))
+                sourcePath += File.separator;
+
+        } else if (sourcePath == null) {
+            sourcePath = relateToPath;
         }
 
         logger.debug = "true".equals(properties.getProperty("debug"));
@@ -108,8 +163,6 @@ public class JetaProcessor extends AbstractProcessor {
                     utdProperties = null;
                 }
         }
-
-        addProcessors();
     }
 
     protected void addProcessors() {
@@ -179,10 +232,23 @@ public class JetaProcessor extends AbstractProcessor {
     }
 
     protected void removeDisabledProcessors() {
+        String[] disabled = properties.getProperty("processors.disable", "").split(",");
         Iterator<Processor> iter = processors.iterator();
         while (iter.hasNext()) {
             Processor processor = iter.next();
-            if (!processor.isEnabled(processingEnv)) {
+            boolean enabled = processor.isEnabled(processingEnv);
+
+            if (enabled && disabled.length > 0) {
+                Set<Class<? extends Annotation>> annotations = processor.collectElementsAnnotatedWith();
+                for (String disable : disabled)
+                    for (Class<? extends Annotation> annotation : annotations)
+                        if (annotation.getSimpleName().matches(disable.trim())) {
+                            enabled = false;
+                            break;
+                        }
+            }
+
+            if (!enabled) {
                 logger.debug("processor " + processor.getClass().getCanonicalName() + " disabled");
                 iter.remove();
             }
@@ -289,6 +355,9 @@ public class JetaProcessor extends AbstractProcessor {
 
                     if (context.utd) {
                         File sourceJavaFile = new File(getSourceJavaFile(context.masterElement));
+                        if (!sourceJavaFile.exists())
+                            throw new IllegalStateException("can't find source file: " + sourceJavaFile.getPath() +
+                                    ", set 'sourcepath' property to the source dir path");
                         context.utd = utdPropertiesCopy.get(context.metacodeCanonicalName).equals(
                                 String.valueOf(sourceJavaFile.lastModified()));
                     }
@@ -445,7 +514,7 @@ public class JetaProcessor extends AbstractProcessor {
         if (result != null) {
             Path path = Paths.get(result);
             if (!path.isAbsolute())
-                path = Paths.get(sourcePath + result).toAbsolutePath();
+                path = Paths.get(relateToPath + result).toAbsolutePath();
 
             if (Files.notExists(path) && !path.toFile().mkdirs())
                 throw new RuntimeException("not valid utd.dir property", new IOException("failed to create utd.dir structure"));
@@ -483,8 +552,7 @@ public class JetaProcessor extends AbstractProcessor {
     }
 
     private String getSourceJavaFile(Element element) {
-        return sourcePath + File.separator
-                + MetacodeUtils.sourceElementOf(element).toString().replace(".", File.separator) + ".java";
+        return sourcePath + MetacodeUtils.sourceElementOf(element).toString().replace(".", File.separator) + ".java";
     }
 
     private static class ProcessorEnvironmentImpl implements ProcessorEnvironment {
