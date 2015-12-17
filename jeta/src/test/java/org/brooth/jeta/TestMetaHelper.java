@@ -80,10 +80,6 @@ public class TestMetaHelper {
         return new ImplementationController<>(getInstance().metasitory, of);
     }
 
-    public static <I> I getImplementation(Class<I> of) {
-        return implementationController(of).getImplementation();
-    }
-
     public static void createPublisher(Object master) {
         new PublisherController<>(getInstance().metasitory, master).createPublisher();
     }
@@ -106,10 +102,6 @@ public class TestMetaHelper {
 
     public static void validate(Object master) throws ValidationException {
         validationController(master).validate();
-    }
-
-    public static List<String> validateSafe(Object master) {
-        return validationController(master).validateSafe();
     }
 
     public static void createProxy(Object master, Object real) {

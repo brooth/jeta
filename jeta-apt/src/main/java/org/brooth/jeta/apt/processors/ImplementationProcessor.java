@@ -27,7 +27,6 @@ import org.brooth.jeta.util.ImplementationMetacode;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
-import java.io.File;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -85,7 +84,7 @@ public class ImplementationProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean isUpToDate(ProcessorEnvironment env, File masterSourceJavaFile, long prevGenLastModified) {
-        return false;
+    public boolean ignoreUpToDate(ProcessorEnvironment env) {
+        return true;
     }
 }

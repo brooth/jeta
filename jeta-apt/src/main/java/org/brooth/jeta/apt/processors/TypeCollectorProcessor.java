@@ -26,7 +26,6 @@ import org.brooth.jeta.collector.TypeCollectorMetacode;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
-import java.io.File;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +96,7 @@ public class TypeCollectorProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean isUpToDate(ProcessorEnvironment env, File masterSourceJavaFile, long prevGenLastModified) {
-        return false;
+    public boolean ignoreUpToDate(ProcessorEnvironment env) {
+        return true;
     }
 }

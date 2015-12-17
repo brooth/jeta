@@ -61,7 +61,7 @@ public abstract class AbstractProcessor implements UtdProcessor {
     }
 
     @Override
-    public boolean isUpToDate(ProcessorEnvironment env, File masterSourceJavaFile, long prevGenLastModified) {
-        return masterSourceJavaFile.lastModified() == prevGenLastModified;
+    public boolean ignoreUpToDate(ProcessorEnvironment env) {
+        return false;
     }
 }

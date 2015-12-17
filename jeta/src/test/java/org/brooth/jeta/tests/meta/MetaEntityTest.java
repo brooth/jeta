@@ -51,7 +51,6 @@ public class MetaEntityTest extends BaseTest {
         String value = "one";
     }
 
-
     public static class MetaEntityHolder {
         @Meta
         MetaEntityOne entity;
@@ -81,7 +80,6 @@ public class MetaEntityTest extends BaseTest {
         assertThat(holder.provider, notNullValue());
         assertThat(holder.provider.get().value, is("one"));
 
-        assertTrue(holder.entity == holder.entity);
         assertTrue(holder.lazy.get() == holder.lazy.get());
         assertFalse(holder.provider.get() == holder.provider.get());
 
