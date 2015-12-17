@@ -17,8 +17,8 @@
 package org.brooth.jeta.apt.processors;
 
 import org.brooth.jeta.apt.MetacodeUtils;
-import org.brooth.jeta.apt.Processor;
 import org.brooth.jeta.apt.ProcessorEnvironment;
+import org.brooth.jeta.apt.UtdProcessor;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -30,7 +30,7 @@ import java.util.Set;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public abstract class AbstractProcessor implements Processor {
+public abstract class AbstractProcessor implements UtdProcessor {
 
     protected Class<? extends Annotation> annotation;
 

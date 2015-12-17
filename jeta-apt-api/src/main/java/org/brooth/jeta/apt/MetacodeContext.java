@@ -34,9 +34,4 @@ public interface MetacodeContext {
      * All the metacode annotations used by masters type
      */
     public Set<Class<? extends Annotation>> metacodeAnnotations();
-
-    /**
-     * true if masters source code hasn't been changed since metacode generated
-     */
-    boolean isUpToDate();
 }   
