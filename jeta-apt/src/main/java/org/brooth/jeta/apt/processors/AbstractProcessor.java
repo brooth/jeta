@@ -23,8 +23,10 @@ import org.brooth.jeta.apt.UtdProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -59,7 +61,7 @@ public abstract class AbstractProcessor implements UtdProcessor {
     }
 
     @Override
-    public boolean ignoreMasterUpToDate(ProcessorEnvironment env) {
-        return false;
+    public boolean isUpToDate(ProcessorEnvironment env, File masterSourceJavaFile, long prevGenLastModified) {
+        return masterSourceJavaFile.lastModified() == prevGenLastModified;
     }
 }

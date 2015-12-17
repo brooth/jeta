@@ -29,6 +29,7 @@ import org.brooth.jeta.util.Provider;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -115,7 +116,7 @@ public class ObjectCollectorProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean ignoreMasterUpToDate(ProcessorEnvironment env) {
-        return true;
+    public boolean isUpToDate(ProcessorEnvironment env, File masterSourceJavaFile, long prevGenLastModified) {
+        return false;
     }
 }

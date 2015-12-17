@@ -1,14 +1,15 @@
 package org.brooth.jeta.apt;
 
+import java.io.File;
+
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface UtdProcessor extends Processor {
 
     /**
-     * No mater if masters source code hasn't been changed since its meta code generated,
-     * return true to rebuild it
+     * If masters source code hasn't been changed since its meta code generated,
+     * return true to avoid regenerating
      */
-    boolean ignoreMasterUpToDate(ProcessorEnvironment env);
-
+    boolean isUpToDate(ProcessorEnvironment env, File masterSourceJavaFile, long prevGenLastModified);
 }

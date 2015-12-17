@@ -346,9 +346,20 @@ public class JetaProcessor extends AbstractProcessor {
                 if (utdPropertiesCopy.containsKey(context.metacodeCanonicalName)) {
                     context.utd = true;
                     for (Processor processor : context.processorEnvironments.keySet())
-                        if (!(processor instanceof UtdProcessor) ||
-                                ((UtdProcessor) processor).ignoreMasterUpToDate(
-                                        context.processorEnvironments.get(processor))) {
+                        if (processor instanceof UtdProcessor) {
+                            File sourceJavaFile = new File(getSourceJavaFile(context.masterElement));
+                            if (!sourceJavaFile.exists())
+                                throw new IllegalStateException("can't find source file: " + sourceJavaFile.getPath() +
+                                        ", set 'sourcepath' property to the source dir path");
+
+                            if (!((UtdProcessor) processor).isUpToDate(context.processorEnvironments.get(processor),
+                                    sourceJavaFile,
+                                    Long.parseLong(utdPropertiesCopy.getProperty(context.metacodeCanonicalName)))) {
+                                context.utd = false;
+                                break;
+                            }
+
+                        } else {
                             context.utd = false;
                             break;
                         }

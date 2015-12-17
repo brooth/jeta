@@ -51,6 +51,7 @@ public class MetaEntityTest extends BaseTest {
         String value = "one";
     }
 
+
     public static class MetaEntityHolder {
         @Meta
         MetaEntityOne entity;
