@@ -276,7 +276,6 @@ public class MetaEntityTest extends BaseTest {
     }
 
     // test ClassForNameMetasitory here. there are compatable entities right above
-
     @Test
     public void testClassForNameMetasitory() {
         logger.debug("testClassForNameMetasitor()");

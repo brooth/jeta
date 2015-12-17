@@ -21,6 +21,7 @@ package org.brooth.jeta.apt;
  */
 public interface Logger {
 	void debug(String msg);
+	void note(String msg);
 	void warn(String msg);
 	void error(String msg);
 }
