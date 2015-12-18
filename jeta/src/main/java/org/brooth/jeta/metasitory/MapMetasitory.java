@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MapMetasitory implements Metasitory<MapMetasitory> {
+public class MapMetasitory implements Metasitory {
 
     public static final int SUPPORTED_CRITERIA_VERSION = 1;
 
@@ -81,10 +81,12 @@ public class MapMetasitory implements Metasitory<MapMetasitory> {
     }
 
     @Override
-    public void add(MapMetasitory other) {
+    public void add(Metasitory other) {
+        if (!(other instanceof MapMetasitory))
+            throw new UnsupportedOperationException("Only other MapMetasitory is supported");
         try {
             writeLock.lock();
-            meta.putAll(other.meta);
+            meta.putAll(((MapMetasitory) other).meta);
 
         } finally {
             writeLock.unlock();

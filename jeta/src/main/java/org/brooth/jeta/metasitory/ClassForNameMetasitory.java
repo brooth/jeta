@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class ClassForNameMetasitory implements Metasitory<ClassForNameMetasitory> {
+public class ClassForNameMetasitory implements Metasitory {
 
     @Override
     public List<IMetacode<?>> search(Criteria c) {
@@ -60,7 +60,7 @@ public class ClassForNameMetasitory implements Metasitory<ClassForNameMetasitory
     }
 
     @Override
-    public void add(ClassForNameMetasitory other) {
+    public void add(Metasitory other) {
         throw new UnsupportedOperationException("Do you understand what this class for?");
     }
 }

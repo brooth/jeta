@@ -26,9 +26,9 @@ import java.util.Collection;
  *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface Metasitory<O extends Metasitory> {
+public interface Metasitory {
     Collection<IMetacode<?>> search(Criteria criteria);
 
-    void add(O other);
+    void add(Metasitory other);
 }
 
