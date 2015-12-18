@@ -24,14 +24,14 @@ import java.util.List;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class ClassForNameMetasitory implements Metasitory {
+public class ClassForNameMetasitory implements Metasitory<ClassForNameMetasitory> {
 
     @Override
     public List<IMetacode<?>> search(Criteria c) {
         if (c.getUsesAny() != null)
-            throw new UnsupportedOperationException("Criteria.usesAny not supported. Criteria.masterEq only.");
+            throw new UnsupportedOperationException("Criteria.usesAny not supported.");
         if (c.getUsesAll() != null)
-            throw new UnsupportedOperationException("Criteria.usesAll not supported. Criteria.masterEq only.");
+            throw new UnsupportedOperationException("Criteria.usesAll not supported.");
 
         Class<?> masterClass = c.getMasterEq() != null ? c.getMasterEq() : c.getMasterEqDeep();
         Class<?> metacodeClass;
@@ -51,12 +51,17 @@ public class ClassForNameMetasitory implements Metasitory {
                 throw new IllegalArgumentException("Failed to initiate class " + metacodeClass, e);
             }
 
-            if(c.getMasterEqDeep() != null)
+            if (c.getMasterEqDeep() != null)
                 masterClass = masterClass.getSuperclass();
-            else 
+            else
                 break;
         }
         return result;
+    }
+
+    @Override
+    public void add(ClassForNameMetasitory other) {
+        throw new UnsupportedOperationException("Do you understand what this class for?");
     }
 }
 

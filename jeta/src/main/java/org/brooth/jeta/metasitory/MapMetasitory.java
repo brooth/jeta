@@ -26,15 +26,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Support ordering through containers. So, items from first container go first
  *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MapMetasitory implements Metasitory {
+public class MapMetasitory implements Metasitory<MapMetasitory> {
 
     public static final int SUPPORTED_CRITERIA_VERSION = 1;
+
+    private ReadWriteLock lock = new ReentrantReadWriteLock();
+    private Lock readLock = lock.readLock();
+    private Lock writeLock = lock.writeLock();
 
     private Map<Class<?>, MapMetasitoryContainer.Context> meta;
 
@@ -60,23 +67,46 @@ public class MapMetasitory implements Metasitory {
             throw new IllegalArgumentException("Failed to initiate class " + clazz, e);
         }
 
-        if (meta == null)
-            meta = container.get();
-        else
-            meta.putAll(container.get());
+        try {
+            writeLock.lock();
+
+            if (meta == null)
+                meta = container.get();
+            else
+                meta.putAll(container.get());
+
+        } finally {
+            writeLock.unlock();
+        }
     }
 
-    @SuppressWarnings("unused")
-	@Override
+    @Override
+    public void add(MapMetasitory other) {
+        try {
+            writeLock.lock();
+            meta.putAll(other.meta);
+
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    @Override
     public Collection<IMetacode<?>> search(Criteria criteria) {
         if (Criteria.VERSION > SUPPORTED_CRITERIA_VERSION)
             throw new IllegalArgumentException("Criteria version " + Criteria.VERSION + " not supported");
 
         Map<Class<?>, MapMetasitoryContainer.Context> selection = meta;
-        selection = masterEq(selection, criteria);
-        selection = masterEqDeep(selection, criteria);
-        selection = usesAll(selection, criteria);
-        selection = usesAny(selection, criteria);
+        try {
+            readLock.lock();
+            selection = masterEq(selection, criteria);
+            selection = masterEqDeep(selection, criteria);
+            selection = usesAll(selection, criteria);
+            selection = usesAny(selection, criteria);
+
+        } finally {
+            readLock.unlock();
+        }
 
         if (selection.isEmpty())
             return Collections.emptyList();
