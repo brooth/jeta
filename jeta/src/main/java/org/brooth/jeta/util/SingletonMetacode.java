@@ -20,5 +20,5 @@ package org.brooth.jeta.util;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface SingletonMetacode<M> {
-    void applySingleton();
+    M getSingleton();
 }

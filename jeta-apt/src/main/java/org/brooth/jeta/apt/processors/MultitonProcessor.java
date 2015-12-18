@@ -22,6 +22,8 @@ import org.brooth.jeta.apt.ProcessorEnvironment;
 import org.brooth.jeta.util.Multiton;
 import org.brooth.jeta.util.MultitonMetacode;
 
+import java.util.HashMap;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
@@ -40,37 +42,44 @@ public class MultitonProcessor extends AbstractProcessor {
         ClassName masterClassName = ClassName.get(context.masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(MultitonMetacode.class), masterClassName));
+        TypeName mapTypeName = ParameterizedTypeName.get(
+                ClassName.get(HashMap.class), TypeName.OBJECT, masterClassName);
 
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applyMultiton")
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getMultiton")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .returns(void.class)
+                .returns(masterClassName)
                 .addParameter(TypeName.OBJECT, "key");
 
-        for (Element element : env.elements()) {
-            String fieldName = element.getSimpleName().toString();
-            String monitorFiledName = fieldName + "_MONITOR";
+        Element element = env.elements().iterator().next();
 
-            builder.addField(FieldSpec.builder(Object.class, monitorFiledName)
-                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                    .initializer("new Object()")
-                    .build());
+        builder.addField(FieldSpec.builder(Object.class, "MULTITON_MONITOR")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("new Object()")
+                .build());
 
-            String initStr = element.getAnnotation(Multiton.class).staticConstructor();
-            if (initStr.isEmpty())
-                initStr = "new $T(key)";
-            else
-                initStr = "$T." + initStr + "(key)";
+        builder.addField(FieldSpec.builder(mapTypeName, "multiton")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("new $T()", mapTypeName)
+                .build());
 
-            methodBuilder
-                    .beginControlFlow("if(!$T.$L.containsKey(key))", masterClassName, fieldName)
-                    .beginControlFlow("synchronized ($L)", monitorFiledName)
-                    .beginControlFlow("if(!$T.$L.containsKey(key))", masterClassName, fieldName)
-                    .addStatement("$T.$L.put(key, " + initStr + ")", masterClassName, fieldName, masterClassName)
-                    .endControlFlow()
-                    .endControlFlow()
-                    .endControlFlow();
-        }
+        String initStr = element.getAnnotation(Multiton.class).staticConstructor();
+        if (initStr.isEmpty())
+            initStr = "new $T(key)";
+        else
+            initStr = "$T." + initStr + "(key)";
+
+        methodBuilder
+            .addStatement("$T result = multiton.get(key)", masterClassName)
+            .beginControlFlow("if(result == null)")
+            .beginControlFlow("synchronized (MULTITON_MONITOR)")
+            .beginControlFlow("if(!multiton.containsKey(key))")
+            .addStatement("result = " + initStr,  masterClassName)
+            .addStatement("multiton.put(key, result)")
+            .endControlFlow()
+            .endControlFlow()
+            .endControlFlow()
+            .addStatement("return result");
 
         builder.addMethod(methodBuilder.build());
         return false;

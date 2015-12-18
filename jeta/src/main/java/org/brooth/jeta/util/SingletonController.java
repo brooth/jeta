@@ -17,6 +17,7 @@
 package org.brooth.jeta.util;
 
 import com.google.common.collect.Iterables;
+
 import org.brooth.jeta.IMetacode;
 import org.brooth.jeta.MasterClassController;
 import org.brooth.jeta.metasitory.Criteria;
@@ -25,25 +26,26 @@ import org.brooth.jeta.metasitory.Metasitory;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class SingletonController extends MasterClassController<Object, IMetacode<?>> {
+public class SingletonController<M> extends MasterClassController<M, IMetacode<?>> {
 
-    public SingletonController(Metasitory metasitory, Class<? extends Object> masterClass) {
+    public SingletonController(Metasitory metasitory, Class<M> masterClass) {
         super(metasitory, masterClass);
     }
 
     @Override
     protected Criteria criteria() {
-        return new Criteria.Builder().masterEq(masterClass).build();
+       return new Criteria.Builder().masterEq(masterClass).usesAny(Singleton.class).build();
     }
 
-    public void createSingleton() {
+    @SuppressWarnings("unchecked")
+    public SingletonMetacode<M> getMetacode() {
         if (metacodes.size() > 1)
             throw new IllegalStateException("More than one metacode returned fot Criteria.masterEq");
 
         IMetacode<?> singleton = Iterables.getFirst(metacodes, null);
-        if (singleton == null || !(singleton instanceof SingletonMetacode))
+        if (singleton == null)
             throw new IllegalStateException(masterClass.getCanonicalName() + " has not singleton meta code. No @Singleton annotation on it?");
 
-        ((SingletonMetacode<?>) singleton).applySingleton();
+        return ((SingletonMetacode<M>) singleton);
     }
 }

@@ -20,5 +20,5 @@ package org.brooth.jeta.util;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface MultitonMetacode<M> {
-    void applyMultiton(Object key);
+    M getMultiton(Object key);
 }

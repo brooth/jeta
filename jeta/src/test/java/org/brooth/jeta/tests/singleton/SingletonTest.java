@@ -16,18 +16,23 @@
 
 package org.brooth.jeta.tests.singleton;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
 import org.brooth.jeta.TestMetaHelper;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.util.Multiton;
+import org.brooth.jeta.util.MultitonMetacode;
 import org.brooth.jeta.util.Singleton;
+import org.brooth.jeta.util.SingletonMetacode;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -37,44 +42,41 @@ public class SingletonTest extends BaseTest {
     @Log
     Logger logger;
 
+    @Singleton
     public static class SingletonHolder {
-        @Singleton
-        static SingletonHolder instance;
+        static SingletonMetacode<SingletonHolder> singleton = 
+            TestMetaHelper.getSingleton(SingletonHolder.class);
+
+        static volatile int instances = 0;
 
         SingletonHolder() {
-            assertNull(instance);
+            assertThat(instances++, is(0));
         }
 
         private static SingletonHolder getInstance() {
-            if (instance == null)
-                TestMetaHelper.createSingleton(SingletonHolder.class);
-
-            return instance;
+            return singleton.getSingleton();
         }
     }
 
+    @Multiton(staticConstructor = "newInstance")
     public static class MultitonHolder {
-        @Multiton(staticConstructor = "newInstance")
-        static Map<Object, MultitonHolder> multiton = new HashMap<>();
+        static MultitonMetacode<MultitonHolder> multiton = 
+            TestMetaHelper.getMultiton(MultitonHolder.class);
 
+        private static List<String> instances = new ArrayList<>();
         private String key;
 
         public static MultitonHolder getInstance(String key) {
-            if (!multiton.containsKey(key))
-                TestMetaHelper.createMultitonInstance(MultitonHolder.class, key);
-
-            return multiton.get(key);
+            return multiton.getMultiton(key);
         }
 
-        static MultitonHolder newInstance(Object key) {
-            assertFalse(multiton.containsKey(key));
+        static MultitonHolder newInstance(Object obj) {
+            String key = (String) obj;
+            assertFalse(instances.contains(key));
+            instances.add(key);
             MultitonHolder holder = new MultitonHolder();
-            holder.key = (String) key;
+            holder.key = key;
             return holder;
-        }
-
-        public String getKey() {
-            return key;
         }
     }
 
@@ -113,7 +115,7 @@ public class SingletonTest extends BaseTest {
                 public void run() {
                     MultitonHolder instance = MultitonHolder.getInstance("one");
                     assertNotNull(instance);
-                    logger.debug("[%s] instance: %s, key: %s", Thread.currentThread().getName(), instance.toString(), instance.getKey());
+                    logger.debug("[%s] instance: %s, key: %s", Thread.currentThread().getName(), instance.toString(), instance.key);
                 }
             });
             twoThreads[i] = new Thread(new Runnable() {
@@ -121,7 +123,7 @@ public class SingletonTest extends BaseTest {
                 public void run() {
                     MultitonHolder instance = MultitonHolder.getInstance("two");
                     assertNotNull(instance);
-                    logger.debug("[%s] instance: %s, key: %s", Thread.currentThread().getName(), instance.toString(), instance.getKey());
+                    logger.debug("[%s] instance: %s, key: %s", Thread.currentThread().getName(), instance.toString(), instance.key);
                 }
             });
         }

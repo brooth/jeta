@@ -41,35 +41,38 @@ public class SingletonProcessor extends AbstractProcessor {
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(SingletonMetacode.class), masterClassName));
 
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applySingleton")
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("getSingleton")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
-                .returns(void.class);
+                .returns(masterClassName);
 
-        for (Element element : env.elements()) {
-            String fieldName = element.getSimpleName().toString();
-            String monitorFiledName = fieldName + "_MONITOR";
+        Element element = env.elements().iterator().next();
 
-            builder.addField(FieldSpec.builder(Object.class, monitorFiledName)
-                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                    .initializer("new Object()")
-                    .build());
+        builder.addField(FieldSpec.builder(Object.class, "SINGLETON_MONITOR")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("new Object()")
+                .build());
 
-            String initStr = element.getAnnotation(Singleton.class).staticConstructor();
-            if (initStr.isEmpty())
-                initStr = "new $T()";
-            else
-                initStr = "$T." + initStr + "()";
+        builder.addField(FieldSpec.builder(masterClassName, "singleton")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .initializer("null")
+                .build());
 
-            methodBuilder
-                    .beginControlFlow("if($T.$L == null)", masterClassName, fieldName)
-                    .beginControlFlow("synchronized ($L)", monitorFiledName)
-                    .beginControlFlow("if($T.$L == null)", masterClassName, fieldName)
-                    .addStatement("$T.$L = " + initStr, masterClassName, fieldName, masterClassName)
-                    .endControlFlow()
-                    .endControlFlow()
-                    .endControlFlow();
-        }
+        String initStr = element.getAnnotation(Singleton.class).staticConstructor();
+        if (initStr.isEmpty())
+            initStr = "new $T()";
+        else
+            initStr = "$T." + initStr + "()";
+
+        methodBuilder
+            .beginControlFlow("if(singleton == null)")
+            .beginControlFlow("synchronized (SINGLETON_MONITOR)")
+            .beginControlFlow("if(singleton == null)")
+            .addStatement("singleton = " + initStr, masterClassName)
+            .endControlFlow()
+            .endControlFlow()
+            .endControlFlow()
+            .addStatement("return singleton");
 
         builder.addMethod(methodBuilder.build());
         return false;

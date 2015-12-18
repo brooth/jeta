@@ -33,8 +33,10 @@ import org.brooth.jeta.pubsub.SubscriberController;
 import org.brooth.jeta.pubsub.SubscriptionHandler;
 import org.brooth.jeta.util.ImplementationController;
 import org.brooth.jeta.util.MultitonController;
+import org.brooth.jeta.util.MultitonMetacode;
 import org.brooth.jeta.util.Provider;
 import org.brooth.jeta.util.SingletonController;
+import org.brooth.jeta.util.SingletonMetacode;
 import org.brooth.jeta.validate.ValidationController;
 import org.brooth.jeta.validate.ValidationException;
 
@@ -120,11 +122,11 @@ public class TestMetaHelper {
         new LogController(getInstance().metasitory, master).createLogger(getInstance().loggerProvider);
     }
 
-    public static void createSingleton(Class<?> masterClass) {
-        new SingletonController(getInstance().metasitory, masterClass).createSingleton();
+    public static <M> SingletonMetacode<M> getSingleton(Class<M> masterClass) {
+        return new SingletonController<>(getInstance().metasitory, masterClass).getMetacode();
     }
 
-    public static void createMultitonInstance(Class<?> masterClass, Object key) {
-        new MultitonController<>(getInstance().metasitory, masterClass).createInstance(key);
+    public static <M> MultitonMetacode<M> getMultiton(Class<M> masterClass) {
+        return new MultitonController<>(getInstance().metasitory, masterClass).getMetacode();
     }
 }
