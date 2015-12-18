@@ -54,7 +54,7 @@ public class MetacodeUtils {
     public static String extractClassName(Runnable invoke) {
         try {
             invoke.run();
-            throw new IllegalArgumentException("invoke doesn't throws MirroredTypesException");
+            throw new IllegalArgumentException("invoke doesn't throw MirroredTypesException");
 
         } catch (MirroredTypesException e) {
             return e.getTypeMirrors().get(0).toString();
@@ -64,7 +64,7 @@ public class MetacodeUtils {
     public static List<String> extractClassesNames(Runnable invoke) {
         try {
             invoke.run();
-            throw new IllegalArgumentException("invoke doesn't throws MirroredTypesException");
+            throw new IllegalArgumentException("invoke doesn't throw MirroredTypesException");
 
         } catch (MirroredTypesException e) {
             return Lists.transform(e.getTypeMirrors(), new Function<TypeMirror, String>() {
