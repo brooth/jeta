@@ -61,7 +61,7 @@ subprojects {
 
     bintray {
         user = 'brooth'
-        key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : '8fbb020ea81646ad57cad69035ce11b2c25c9e2f'
+        key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('bintrayApiKey')
         publications = ['MyPublication']
 
         pkg {
