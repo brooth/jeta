@@ -16,19 +16,17 @@
 
 package org.brooth.jeta.apt.processors;
 
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
-
-import org.brooth.jeta.apt.MetacodeUtils;
-import org.brooth.jeta.apt.ProcessorEnvironment;
-import org.brooth.jeta.util.Implementation;
-import org.brooth.jeta.util.ImplementationMetacode;
-
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.RoundContext;
+import org.brooth.jeta.util.Implementation;
+import org.brooth.jeta.util.ImplementationMetacode;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -40,8 +38,8 @@ public class ImplementationProcessor extends AbstractProcessor {
     }
 
     @Override
-	public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
-        Element element = env.elements().iterator().next();
+	public boolean process(TypeSpec.Builder builder, RoundContext context) {
+        Element element = context.elements().iterator().next();
         final Implementation annotation = element.getAnnotation(Implementation.class);
         String implOfClassStr = MetacodeUtils.extractClassName(new Runnable() {
             @Override
@@ -64,7 +62,7 @@ public class ImplementationProcessor extends AbstractProcessor {
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(implOfClassName)
-                .addStatement("return " + initStr, ClassName.get(env.metacodeContext().masterElement()))
+                .addStatement("return " + initStr, ClassName.get(context.metacodeContext().masterElement()))
                 .build());
 
         builder.addMethod(MethodSpec.methodBuilder("getImplementationOf")
@@ -86,7 +84,7 @@ public class ImplementationProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean ignoreUpToDate(ProcessorEnvironment env) {
+    public boolean ignoreUpToDate() {
         return true;
     }
 }

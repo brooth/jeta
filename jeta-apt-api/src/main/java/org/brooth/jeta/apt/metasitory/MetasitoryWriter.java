@@ -17,12 +17,13 @@
 package org.brooth.jeta.apt.metasitory;
 
 import org.brooth.jeta.apt.MetacodeContext;
+import org.brooth.jeta.apt.ProcessingContext;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface MetasitoryWriter {
-	void open(MetasitoryEnvironment env);
+	void open(ProcessingContext env);
 
 	void write(MetacodeContext context);
 

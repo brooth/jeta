@@ -1,7 +1,6 @@
 package org.brooth.jeta.apt;
 
 import com.google.common.base.Joiner;
-import org.brooth.jeta.apt.metasitory.MetasitoryEnvironment;
 import org.brooth.jeta.apt.metasitory.MetasitoryWriter;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -17,7 +16,7 @@ class EchoMetasitoryWriter implements MetasitoryWriter {
     protected Logger logger;
 
     @Override
-    public void open(MetasitoryEnvironment env) {
+    public void open(ProcessingContext env) {
         this.env = env.processingEnv();
         this.logger = env.logger();
         logger.debug("open()");

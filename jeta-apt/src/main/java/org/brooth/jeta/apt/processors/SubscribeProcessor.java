@@ -16,34 +16,17 @@
 
 package org.brooth.jeta.apt.processors;
 
-import java.util.List;
-
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.Elements;
-
-import org.brooth.jeta.apt.MetacodeContext;
-import org.brooth.jeta.apt.MetacodeUtils;
-import org.brooth.jeta.observer.EventObserver;
-import org.brooth.jeta.pubsub.IdsFilter;
-import org.brooth.jeta.pubsub.MetaFilter;
-import org.brooth.jeta.pubsub.Subscribe;
-import org.brooth.jeta.pubsub.SubscriberMetacode;
-import org.brooth.jeta.pubsub.SubscriptionHandler;
-import org.brooth.jeta.pubsub.TopicsFilter;
-
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Joiner;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
+import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.RoundContext;
+import org.brooth.jeta.observer.EventObserver;
+import org.brooth.jeta.pubsub.*;
+
+import javax.lang.model.element.*;
+import javax.lang.model.util.Elements;
+import java.util.List;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -55,9 +38,8 @@ public class SubscribeProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
-        MetacodeContext context = env.metacodeContext();
-        ClassName masterClassName = ClassName.get(context.masterElement());
+    public boolean process(TypeSpec.Builder builder, RoundContext context) {
+        ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(SubscriberMetacode.class), masterClassName));
         ClassName handlerClassName = ClassName.get(SubscriptionHandler.class);
@@ -69,9 +51,9 @@ public class SubscribeProcessor extends AbstractProcessor {
                 .addParameter(masterClassName, "master", Modifier.FINAL)
                 .addStatement("$T handler = new $T()", handlerClassName, handlerClassName);
 
-        Elements elementUtils = env.processingEnv().getElementUtils();
+        Elements elementUtils = processingContext.processingEnv().getElementUtils();
 
-        for (Element element : env.elements()) {
+        for (Element element : context.elements()) {
             final Subscribe annotation = element.getAnnotation(Subscribe.class);
             String publisherClass = MetacodeUtils.extractClassName(new Runnable() {
                 @Override
@@ -81,7 +63,7 @@ public class SubscribeProcessor extends AbstractProcessor {
             });
             ClassName observableTypeName = ClassName.bestGuess(publisherClass);
             ClassName metacodeTypeName = ClassName.bestGuess(MetacodeUtils.
-                    getMetacodeOf(env.processingEnv().getElementUtils(), publisherClass));
+                    getMetacodeOf(processingContext.processingEnv().getElementUtils(), publisherClass));
 
             List<? extends VariableElement> params = ((ExecutableElement) element).getParameters();
             if (params.size() != 1)

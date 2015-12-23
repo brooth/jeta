@@ -47,8 +47,11 @@ dependencies {
     compile 'com.google.guava:guava:18.0'
 
     testApt project(':jeta-apt')
+    testApt 'javax.inject:javax.inject:1'
+
     testCompile group: 'org.hamcrest', name: 'hamcrest-core', version: '1.3'
     testCompile group: 'junit', name: 'junit-dep', version: '4.10'
     testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: '1.3'
     testCompile group: 'org.mockito', name: 'mockito-core', version: '1.9.+'
+    testCompile 'javax.inject:javax.inject:1'
 }

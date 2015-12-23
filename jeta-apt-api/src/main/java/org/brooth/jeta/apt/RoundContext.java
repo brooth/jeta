@@ -1,13 +1,12 @@
 package org.brooth.jeta.apt;
 
-import java.util.List;
-
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
+import java.util.Collection;
 
 public interface RoundContext {
 
-	List<Element> elements();
+	Collection<Element> elements();
 
 	MetacodeContext metacodeContext();
 	

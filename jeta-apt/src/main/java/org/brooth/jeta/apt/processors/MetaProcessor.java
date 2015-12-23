@@ -16,36 +16,20 @@
 
 package org.brooth.jeta.apt.processors;
 
-import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
-
-import org.brooth.jeta.apt.MetacodeContext;
+import com.google.common.base.Joiner;
+import com.squareup.javapoet.*;
 import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.meta.InjectMetacode;
 import org.brooth.jeta.meta.Meta;
 import org.brooth.jeta.meta.MetaEntityFactory;
 import org.brooth.jeta.util.Factory;
 
-import com.google.common.base.Joiner;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.*;
+import javax.lang.model.type.TypeMirror;
+import java.lang.annotation.Annotation;
+import java.util.*;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -62,32 +46,31 @@ public class MetaProcessor extends AbstractProcessor {
 
     @Override
     public Set<Class<? extends Annotation>> collectElementsAnnotatedWith() {
-        String alias = env.processorProperties().getProperty("meta.alias", "");
-    	if(alias.isEmpty()) {
-    		try {
-				Class<?> aliasClass = Class.forName(alias);
-				if(Annotation.class.isAssignableFrom(aliasClass))
-					throw new IllegalArgumentException(alias + " is not a annotation type.");
-			
-				HashSet<Class<? extends Annotation>> set = new HashSet<>();
-				set.add(annotation);
-				@SuppressWarnings("unchecked")
-				Class<? extends Annotation> aliasAnnotation = (Class<? extends Annotation>)aliasClass;
-				set.add(aliasAnnotation);
-				return set;
-				
-    		} catch (ClassNotFoundException e) {
-				throw new RuntimeException("Failed to load meta alias annotation " + alias, e);
-			}
-    	}
-    	
+        String alias = processingContext.processingProperties().getProperty("meta.alias", "");
+        if (!alias.isEmpty()) {
+            try {
+                Class<?> aliasClass = Class.forName(alias);
+                if (aliasClass.isAssignableFrom(Annotation.class))
+                    throw new IllegalArgumentException(alias + " is not a annotation type.");
+
+                HashSet<Class<? extends Annotation>> set = new HashSet<>();
+                set.add(annotation);
+                @SuppressWarnings("unchecked")
+                Class<? extends Annotation> aliasAnnotation = (Class<? extends Annotation>) aliasClass;
+                set.add(aliasAnnotation);
+                return set;
+
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("Failed to load meta alias annotation " + alias, e);
+            }
+        }
+
         return super.collectElementsAnnotatedWith();
     }
 
     @Override
-    public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
-        MetacodeContext context = env.metacodeContext();
-        ClassName masterClassName = ClassName.get(context.masterElement());
+    public boolean process(TypeSpec.Builder builder, RoundContext context) {
+        ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(InjectMetacode.class), masterClassName));
 
@@ -110,7 +93,7 @@ public class MetaProcessor extends AbstractProcessor {
                     .addModifiers(Modifier.PUBLIC)
                     .returns(void.class);
 
-            for (Element element : env.elements()) {
+            for (Element element : context.elements()) {
                 String elementTypeStr = element.asType().toString();
                 String fieldNameStr = element.getSimpleName().toString();
                 String fieldStatement = null;
@@ -125,7 +108,7 @@ public class MetaProcessor extends AbstractProcessor {
                 if (fieldStatement == null)
                     continue;
 
-                addReturnStatement(methodBuilder, env.processingEnv(), element.asType(),
+                addReturnStatement(methodBuilder, processingContext.processingEnv(), element.asType(),
                         Collections.<TypeMirror, String>emptyMap(), fieldStatement);
             }
 
@@ -133,7 +116,7 @@ public class MetaProcessor extends AbstractProcessor {
         }
 
         for (TypeElement element : factoryElements.keySet())
-            buildFactoryImpl(builder, env.processingEnv(), element, factoryElements.get(element));
+            buildFactoryImpl(builder, processingContext.processingEnv(), element, factoryElements.get(element));
 
         return false;
     }

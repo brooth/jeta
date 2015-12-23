@@ -16,9 +16,13 @@
 
 package org.brooth.jeta.util;
 
+import java.util.concurrent.ExecutionException;
+
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface MultitonMetacode<M> {
     M getMultiton(Object key);
+
+    M getMultitonSafe(Object key) throws ExecutionException, InterruptedException;
 }

@@ -16,16 +16,15 @@
 
 package org.brooth.jeta.apt.processors;
 
-import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.Set;
+import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.ProcessingContext;
+import org.brooth.jeta.apt.UtdProcessor;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-
-import org.brooth.jeta.apt.MetacodeUtils;
-import org.brooth.jeta.apt.ProcessorEnvironment;
-import org.brooth.jeta.apt.UtdProcessor;
+import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -34,15 +33,15 @@ public abstract class AbstractProcessor implements UtdProcessor {
 
     protected Class<? extends Annotation> annotation;
     
-    protected ProcessorEnvironment env;
+    protected ProcessingContext processingContext;
 
     public AbstractProcessor(Class<? extends Annotation> annotation) {
         this.annotation = annotation;
     }
     
     @Override
-    public void init(ProcessorEnvironment env) {
-    	this.env = env;
+    public void init(ProcessingContext processingContext) {
+    	this.processingContext = processingContext;
     }
 
     @Override
@@ -66,7 +65,7 @@ public abstract class AbstractProcessor implements UtdProcessor {
     }
 
     @Override
-    public boolean ignoreUpToDate(ProcessorEnvironment env) {
+    public boolean ignoreUpToDate() {
         return false;
     }
 }

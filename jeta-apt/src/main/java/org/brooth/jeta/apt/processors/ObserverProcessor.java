@@ -16,27 +16,20 @@
 
 package org.brooth.jeta.apt.processors;
 
-import java.util.List;
-
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.VariableElement;
-
-import org.brooth.jeta.apt.MetacodeContext;
+import com.google.common.base.CaseFormat;
+import com.squareup.javapoet.*;
 import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.observer.EventObserver;
 import org.brooth.jeta.observer.Observer;
 import org.brooth.jeta.observer.ObserverHandler;
 import org.brooth.jeta.observer.ObserverMetacode;
 
-import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.VariableElement;
+import java.util.List;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -47,9 +40,8 @@ import com.squareup.javapoet.TypeSpec;
     }
 
     @Override
-    public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
-        MetacodeContext context = env.metacodeContext();
-        ClassName masterClassName = ClassName.get(context.masterElement());
+    public boolean process(TypeSpec.Builder builder, RoundContext context) {
+        ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(ObserverMetacode.class), masterClassName));
         ClassName handlerClassName = ClassName.get(ObserverHandler.class);
@@ -63,7 +55,7 @@ import com.squareup.javapoet.TypeSpec;
                 .addParameter(Class.class, "observableClass")
                 .addStatement("$T handler = new $T()", handlerClassName, handlerClassName);
 
-        for (Element element : env.elements()) {
+        for (Element element : context.elements()) {
             final Observer annotation = element.getAnnotation(Observer.class);
             String observableClass = MetacodeUtils.extractClassName(new Runnable() {
                 @Override
@@ -73,7 +65,7 @@ import com.squareup.javapoet.TypeSpec;
             });
             ClassName observableTypeName = ClassName.bestGuess(observableClass);
             ClassName metacodeTypeName = ClassName.bestGuess(MetacodeUtils.
-                    getMetacodeOf(env.processingEnv().getElementUtils(), observableClass));
+                    getMetacodeOf(processingContext.processingEnv().getElementUtils(), observableClass));
 
             List<? extends VariableElement> params = ((ExecutableElement) element).getParameters();
             if (params.size() != 1)

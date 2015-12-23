@@ -23,6 +23,7 @@ import com.squareup.javapoet.*;
 import org.brooth.jeta.apt.Logger;
 import org.brooth.jeta.apt.MetacodeContext;
 import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.ProcessingContext;
 import org.brooth.jeta.metasitory.MapMetasitoryContainer;
 
 import javax.lang.model.element.Modifier;
@@ -40,14 +41,14 @@ import java.util.Map;
  */
 public class MapMetasitoryWriter implements MetasitoryWriter {
 
-    protected MetasitoryEnvironment env;
+    protected ProcessingContext env;
     protected Logger logger;
 
     protected TypeSpec.Builder typeBuilder;
     protected MethodSpec.Builder methodBuilder;
 
     @Override
-    public void open(MetasitoryEnvironment env) {
+    public void open(ProcessingContext env) {
         this.env = env;
         logger = env.logger();
 
@@ -91,7 +92,7 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
 
     @Override
     public void close() {
-        String metasitoryPackage = env.processorProperties().getProperty("metasitory.package");
+        String metasitoryPackage = env.processingProperties().getProperty("metasitory.package");
         if (metasitoryPackage == null) {
             logger.debug("metasitory.package not present. root package is used");
             metasitoryPackage = "";
@@ -101,8 +102,8 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
         typeBuilder.addMethod(methodBuilder.build());
 
         JavaFile.Builder builder = JavaFile.builder(metasitoryPackage, typeBuilder.build());
-        if (env.processorProperties().containsKey("file.comment"))
-            builder.addFileComment(env.processorProperties().getProperty("file.comment"));
+        if (env.processingProperties().containsKey("file.comment"))
+            builder.addFileComment(env.processingProperties().getProperty("file.comment"));
 
         Writer out = null;
         try {

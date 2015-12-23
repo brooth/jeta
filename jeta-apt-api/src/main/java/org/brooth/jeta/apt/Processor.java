@@ -29,7 +29,7 @@ import com.squareup.javapoet.TypeSpec;
  */
 public interface Processor {
 
-	void init(ProcessorEnvironment env);
+	void init(ProcessingContext processingContext);
 	
     /**
      * return false to disable processor

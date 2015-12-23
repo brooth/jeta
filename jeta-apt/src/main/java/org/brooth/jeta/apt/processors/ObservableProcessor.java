@@ -16,24 +16,16 @@
 
 package org.brooth.jeta.apt.processors;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
-
-import org.brooth.jeta.apt.MetacodeContext;
+import com.google.common.base.CaseFormat;
+import com.squareup.javapoet.*;
+import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.observer.ObservableMetacode;
 import org.brooth.jeta.observer.Subject;
 
-import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -45,9 +37,8 @@ public class ObservableProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
-        MetacodeContext context = env.metacodeContext();
-        ClassName masterClassName = ClassName.get(context.masterElement());
+    public boolean process(TypeSpec.Builder builder, RoundContext context) {
+        ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(ObservableMetacode.class), masterClassName));
 
@@ -57,7 +48,7 @@ public class ObservableProcessor extends AbstractProcessor {
                 .returns(void.class)
                 .addParameter(masterClassName, "master");
 
-        for (Element element : env.elements()) {
+        for (Element element : context.elements()) {
             String fieldName = element.getSimpleName().toString();
 
             String monitorFiledName = fieldName + "_MONITOR";

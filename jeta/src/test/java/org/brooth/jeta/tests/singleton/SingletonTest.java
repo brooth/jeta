@@ -16,14 +16,6 @@
 
 package org.brooth.jeta.tests.singleton;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
 import org.brooth.jeta.TestMetaHelper;
@@ -33,6 +25,14 @@ import org.brooth.jeta.util.MultitonMetacode;
 import org.brooth.jeta.util.Singleton;
 import org.brooth.jeta.util.SingletonMetacode;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -85,13 +85,17 @@ public class SingletonTest extends BaseTest {
         logger.debug("testSingleton()");
 
         Thread[] threads = new Thread[10];
+        final boolean[] successes = new boolean[threads.length];
+
         for (int i = 0; i < threads.length; i++) {
+            final int finalI = i;
             threads[i] = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     SingletonHolder instance = SingletonHolder.getInstance();
-                    assertNotNull(instance);
+                    assert instance != null;
                     logger.debug("[%s] instance: %s", Thread.currentThread().getName(), instance.toString());
+                    successes[finalI] = true;
                 }
             });
         }
@@ -100,6 +104,10 @@ public class SingletonTest extends BaseTest {
             thread.start();
 
         sleepQuietly(500);
+
+        for (int i = 0; i < threads.length; i++) {
+            assertTrue(successes[i]);
+        }
     }
 
     @Test
@@ -107,23 +115,28 @@ public class SingletonTest extends BaseTest {
         logger.debug("testMultiton()");
 
         Thread[] oneThreads = new Thread[10];
+        final boolean[] oneThreadSuccesses = new boolean[oneThreads.length];
         Thread[] twoThreads = new Thread[oneThreads.length];
+        final boolean[] twoThreadSuccesses = new boolean[oneThreads.length];
 
         for (int i = 0; i < oneThreads.length; i++) {
+            final int finalI = i;
             oneThreads[i] = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     MultitonHolder instance = MultitonHolder.getInstance("one");
-                    assertNotNull(instance);
+                    assert instance != null;
                     logger.debug("[%s] instance: %s, key: %s", Thread.currentThread().getName(), instance.toString(), instance.key);
+                    oneThreadSuccesses[finalI] = true;
                 }
             });
             twoThreads[i] = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     MultitonHolder instance = MultitonHolder.getInstance("two");
-                    assertNotNull(instance);
+                    assert instance != null;
                     logger.debug("[%s] instance: %s, key: %s", Thread.currentThread().getName(), instance.toString(), instance.key);
+                    twoThreadSuccesses[finalI] = true;
                 }
             });
         }
@@ -134,5 +147,10 @@ public class SingletonTest extends BaseTest {
         }
 
         sleepQuietly(500);
+
+        for (int i = 0; i < oneThreads.length; i++) {
+            assertTrue(oneThreadSuccesses[i]);
+            assertTrue(twoThreadSuccesses[i]);
+        }
     }
 }

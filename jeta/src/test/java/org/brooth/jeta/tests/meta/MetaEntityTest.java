@@ -31,6 +31,7 @@ import org.brooth.jeta.util.Lazy;
 import org.brooth.jeta.util.Provider;
 import org.junit.Test;
 
+import javax.inject.Inject;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -67,6 +68,43 @@ public class MetaEntityTest extends BaseTest {
         logger.debug("testSimpleInject()");
 
         MetaEntityHolder holder = new MetaEntityHolder();
+        TestMetaHelper.injectMeta(holder);
+        assertThat(holder.entity, notNullValue());
+        assertThat(holder.entity.value, is("one"));
+
+        assertThat(holder.clazz, notNullValue());
+        assertEquals(holder.clazz, MetaEntityOne.class);
+
+        assertThat(holder.lazy, notNullValue());
+        assertThat(holder.lazy.get().value, is("one"));
+
+        assertThat(holder.provider, notNullValue());
+        assertThat(holder.provider.get().value, is("one"));
+
+        assertTrue(holder.lazy.get() == holder.lazy.get());
+        assertFalse(holder.provider.get() == holder.provider.get());
+
+        assertFalse(holder.entity == holder.lazy.get());
+        assertFalse(holder.entity == holder.provider.get());
+        assertFalse(holder.lazy.get() == holder.provider.get());
+    }
+
+    public static class MetaAliasEntityHolder {
+        @Inject
+        MetaEntityOne entity;
+        @Inject
+        Class<? extends MetaEntityOne> clazz;
+        @Inject
+        Lazy<MetaEntityOne> lazy;
+        @Inject
+        Provider<MetaEntityOne> provider;
+    }
+
+    @Test
+    public void testAliasInject() {
+        logger.debug("testAliasInject()");
+
+        MetaAliasEntityHolder holder = new MetaAliasEntityHolder();
         TestMetaHelper.injectMeta(holder);
         assertThat(holder.entity, notNullValue());
         assertThat(holder.entity.value, is("one"));

@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package org.brooth.jeta.apt.metasitory;
+package org.brooth.jeta.apt;
 
-import org.brooth.jeta.apt.Logger;
+import java.util.Properties;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import java.util.Properties;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface MetasitoryEnvironment {
+public interface ProcessingContext {
 	ProcessingEnvironment processingEnv();
 
-	Properties processorProperties();
+	Properties processingProperties();
 
 	Logger logger();
 }

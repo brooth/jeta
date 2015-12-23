@@ -16,27 +16,20 @@
 
 package org.brooth.jeta.apt.processors;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.squareup.javapoet.*;
+import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.RoundContext;
+import org.brooth.jeta.validate.MetaValidator;
+import org.brooth.jeta.validate.Validate;
+import org.brooth.jeta.validate.ValidatorMetacode;
 
-import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-
-import org.brooth.jeta.apt.MetacodeContext;
-import org.brooth.jeta.apt.MetacodeUtils;
-import org.brooth.jeta.validate.MetaValidator;
-import org.brooth.jeta.validate.Validate;
-import org.brooth.jeta.validate.ValidatorMetacode;
-
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -48,9 +41,8 @@ public class ValidateProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
-        MetacodeContext context = env.metacodeContext();
-        ClassName masterClassName = ClassName.get(context.masterElement());
+    public boolean process(TypeSpec.Builder builder, RoundContext context) {
+        ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(ValidatorMetacode.class), masterClassName));
 
@@ -64,9 +56,9 @@ public class ValidateProcessor extends AbstractProcessor {
                 .addParameter(masterClassName, "master", Modifier.FINAL)
                 .addStatement("$T errors = new $T()", listTypeName, arrayListTypeName);
 
-        Elements elementUtils = env.processingEnv().getElementUtils();
+        Elements elementUtils = processingContext.processingEnv().getElementUtils();
         int i = 0;
-        for (Element element : env.elements()) {
+        for (Element element : context.elements()) {
             String fieldNameStr = element.getSimpleName().toString();
 
             final Validate annotation = element.getAnnotation(Validate.class);

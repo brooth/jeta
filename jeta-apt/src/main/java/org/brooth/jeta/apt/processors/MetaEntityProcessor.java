@@ -16,36 +16,23 @@
 
 package org.brooth.jeta.apt.processors;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
+import com.squareup.javapoet.*;
 import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.meta.IMetaEntity;
 import org.brooth.jeta.meta.MetaEntity;
 import org.brooth.jeta.meta.MetaEntityMetacode;
 import org.brooth.jeta.util.Constructor;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.WildcardTypeName;
+import javax.annotation.Nullable;
+import javax.lang.model.element.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -57,11 +44,11 @@ public class MetaEntityProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
-        TypeElement element = (TypeElement) env.elements().iterator().next();
+    public boolean process(TypeSpec.Builder builder, RoundContext context) {
+        TypeElement element = (TypeElement) context.elements().iterator().next();
         ClassName elementClassName = ClassName.get(element);
         MetaEntity annotation = element.getAnnotation(MetaEntity.class);
-        String masterTypeStr = env.metacodeContext().masterElement().toString();
+        String masterTypeStr = context.metacodeContext().masterElement().toString();
 
         String ofTypeStr = getOfClass(annotation);
         if (ofTypeStr.equals(Void.class.getCanonicalName()))
@@ -90,7 +77,7 @@ public class MetaEntityProcessor extends AbstractProcessor {
         // emit MetaEntity interface
         if (ofTypeEqElementType && !annotation.minor()) {
             ClassName superClassName = extTypeStr == null ? ClassName.get(IMetaEntity.class)
-                    : ClassName.bestGuess(MetacodeUtils.getMetacodeOf(env.processingEnv().getElementUtils(), extTypeStr)
+                    : ClassName.bestGuess(MetacodeUtils.getMetacodeOf(processingContext.processingEnv().getElementUtils(), extTypeStr)
                             + ".MetaEntity");
 
             TypeSpec.Builder interfaceBuilder = TypeSpec.interfaceBuilder("MetaEntity")
@@ -124,7 +111,7 @@ public class MetaEntityProcessor extends AbstractProcessor {
         // and not an interface/scheme)
         if (isProvider && element.getKind() != ElementKind.INTERFACE) {
             ClassName implOfClassName = ClassName
-                    .bestGuess(MetacodeUtils.getMetacodeOf(env.processingEnv().getElementUtils(),
+                    .bestGuess(MetacodeUtils.getMetacodeOf(processingContext.processingEnv().getElementUtils(),
                             ofTypeEqElementType ? masterTypeStr : ofTypeStr) + ".MetaEntity");
 
             TypeSpec.Builder implBuilder = TypeSpec.classBuilder("MetaEntityImpl")
@@ -226,7 +213,7 @@ public class MetaEntityProcessor extends AbstractProcessor {
         String ofClass = getOfClass(annotation);
 
         if (!annotation.minor() && !ofClass.equals(Void.class.getCanonicalName())) {
-            TypeElement of = env.processingEnv().getElementUtils().getTypeElement(ofClass);
+            TypeElement of = processingContext.processingEnv().getElementUtils().getTypeElement(ofClass);
             TypeElement master = masters.iterator().next();
             if (!master.equals(of))
                 masters = Sets.newHashSet(master, of);

@@ -16,31 +16,19 @@
 
 package org.brooth.jeta.apt.processors;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeMirror;
-
-import org.brooth.jeta.apt.MetacodeContext;
-import org.brooth.jeta.apt.MetacodeUtils;
-import org.brooth.jeta.proxy.Proxy;
-import org.brooth.jeta.proxy.ProxyMetacode;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
+import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.RoundContext;
+import org.brooth.jeta.proxy.Proxy;
+import org.brooth.jeta.proxy.ProxyMetacode;
+
+import javax.lang.model.element.*;
+import javax.lang.model.type.TypeMirror;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -52,9 +40,8 @@ public class ProxyProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
-        MetacodeContext context = env.metacodeContext();
-        ClassName masterClassName = ClassName.get(context.masterElement());
+    public boolean process(TypeSpec.Builder builder, RoundContext context) {
+        ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(ProxyMetacode.class), masterClassName));
 
@@ -65,7 +52,7 @@ public class ProxyProcessor extends AbstractProcessor {
                 .addParameter(masterClassName, "master")
                 .addParameter(Object.class, "real", Modifier.FINAL);
 
-        for (Element element : env.elements()) {
+        for (Element element : context.elements()) {
             String realFieldName = element.getSimpleName().toString();
             ClassName realClassName = ClassName.bestGuess(element.asType().toString());
             final Proxy annotation = element.getAnnotation(Proxy.class);
@@ -75,7 +62,7 @@ public class ProxyProcessor extends AbstractProcessor {
                     annotation.value();
                 }
             });
-            TypeElement proxyTypeElement = env.processingEnv().getElementUtils().getTypeElement(proxyClassNameStr);
+            TypeElement proxyTypeElement = processingContext.processingEnv().getElementUtils().getTypeElement(proxyClassNameStr);
             ClassName proxyClassName = ClassName.bestGuess(proxyClassNameStr);
 
             TypeSpec.Builder proxyTypeSpecBuilder = TypeSpec.anonymousClassBuilder("")
@@ -87,7 +74,7 @@ public class ProxyProcessor extends AbstractProcessor {
                             .addStatement("return ($T) real", realClassName)
                             .build());
 
-            TypeElement realTypeElement = (TypeElement) env.processingEnv().getTypeUtils().asElement(element.asType());
+            TypeElement realTypeElement = (TypeElement) processingContext.processingEnv().getTypeUtils().asElement(element.asType());
             Set<ExecutableElement> toImplementMethods = new HashSet<>();
             for (Element subElement : ((TypeElement) realTypeElement).getEnclosedElements()) {
                 if (subElement.getKind() == ElementKind.METHOD)
