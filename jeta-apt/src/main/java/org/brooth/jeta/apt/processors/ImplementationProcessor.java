@@ -16,17 +16,19 @@
 
 package org.brooth.jeta.apt.processors;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+
 import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.ProcessorEnvironment;
 import org.brooth.jeta.util.Implementation;
 import org.brooth.jeta.util.ImplementationMetacode;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -38,7 +40,7 @@ public class ImplementationProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+	public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
         Element element = env.elements().iterator().next();
         final Implementation annotation = element.getAnnotation(Implementation.class);
         String implOfClassStr = MetacodeUtils.extractClassName(new Runnable() {

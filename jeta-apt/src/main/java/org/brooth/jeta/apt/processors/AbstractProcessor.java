@@ -16,18 +16,16 @@
 
 package org.brooth.jeta.apt.processors;
 
+import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.Set;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+
 import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.ProcessorEnvironment;
 import org.brooth.jeta.apt.UtdProcessor;
-
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Set;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -35,9 +33,16 @@ import java.util.Set;
 public abstract class AbstractProcessor implements UtdProcessor {
 
     protected Class<? extends Annotation> annotation;
+    
+    protected ProcessorEnvironment env;
 
     public AbstractProcessor(Class<? extends Annotation> annotation) {
         this.annotation = annotation;
+    }
+    
+    @Override
+    public void init(ProcessorEnvironment env) {
+    	this.env = env;
     }
 
     @Override
@@ -46,12 +51,12 @@ public abstract class AbstractProcessor implements UtdProcessor {
     }
 
     @Override
-    public Set<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element) {
+    public Set<TypeElement> applicableMastersOfElement(Element element) {
         return Collections.singleton(MetacodeUtils.typeElementOf(element));
     }
 
     @Override
-    public boolean isEnabled(ProcessingEnvironment processingEnv) {
+    public boolean isEnabled() {
         return true;
     }
 

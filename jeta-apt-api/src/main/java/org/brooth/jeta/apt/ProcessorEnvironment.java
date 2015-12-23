@@ -16,24 +16,17 @@
 
 package org.brooth.jeta.apt;
 
+import java.util.Properties;
+
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import java.util.List;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface ProcessorEnvironment {
-    ProcessingEnvironment processingEnv();
+	ProcessingEnvironment processingEnv();
 
-    RoundEnvironment roundEnv();
+	Properties processorProperties();
 
-    List<Element> elements();
-
-    MetacodeContext metacodeContext();
-
-    Logger logger();
-
-    int round();
+	Logger logger();
 }

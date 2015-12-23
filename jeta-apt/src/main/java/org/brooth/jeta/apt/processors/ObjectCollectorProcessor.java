@@ -16,23 +16,31 @@
 
 package org.brooth.jeta.apt.processors;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.squareup.javapoet.*;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
+
 import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.ProcessorEnvironment;
 import org.brooth.jeta.collector.ObjectCollector;
 import org.brooth.jeta.collector.ObjectCollectorMetacode;
 import org.brooth.jeta.util.Provider;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -44,7 +52,7 @@ public class ObjectCollectorProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+    public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
         final Element element = env.elements().iterator().next();
         builder.addSuperinterface(ClassName.get(ObjectCollectorMetacode.class));
 
@@ -67,8 +75,8 @@ public class ObjectCollectorProcessor extends AbstractProcessor {
             }
         });
         for (String annotationStr : annotationsStr) {
-            Set<? extends Element> annotatedElements =
-                    env.roundEnv().getElementsAnnotatedWith(env.processingEnv().getElementUtils().getTypeElement(annotationStr));
+            Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(
+            		env.processingEnv().getElementUtils().getTypeElement(annotationStr));
 
             annotatedElements = FluentIterable
                     .from(annotatedElements)

@@ -16,18 +16,34 @@
 
 package org.brooth.jeta.apt.processors;
 
-import com.google.common.base.CaseFormat;
-import com.google.common.base.Joiner;
-import com.squareup.javapoet.*;
+import java.util.List;
+
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.util.Elements;
+
 import org.brooth.jeta.apt.MetacodeContext;
 import org.brooth.jeta.apt.MetacodeUtils;
-import org.brooth.jeta.apt.ProcessorEnvironment;
 import org.brooth.jeta.observer.EventObserver;
-import org.brooth.jeta.pubsub.*;
+import org.brooth.jeta.pubsub.IdsFilter;
+import org.brooth.jeta.pubsub.MetaFilter;
+import org.brooth.jeta.pubsub.Subscribe;
+import org.brooth.jeta.pubsub.SubscriberMetacode;
+import org.brooth.jeta.pubsub.SubscriptionHandler;
+import org.brooth.jeta.pubsub.TopicsFilter;
 
-import javax.lang.model.element.*;
-import javax.lang.model.util.Elements;
-import java.util.List;
+import com.google.common.base.CaseFormat;
+import com.google.common.base.Joiner;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -39,7 +55,7 @@ public class SubscribeProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+    public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
         MetacodeContext context = env.metacodeContext();
         ClassName masterClassName = ClassName.get(context.masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(

@@ -91,7 +91,7 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
 
     @Override
     public void close() {
-        String metasitoryPackage = env.jetaProperties().getProperty("metasitory.package");
+        String metasitoryPackage = env.processorProperties().getProperty("metasitory.package");
         if (metasitoryPackage == null) {
             logger.debug("metasitory.package not present. root package is used");
             metasitoryPackage = "";
@@ -101,8 +101,8 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
         typeBuilder.addMethod(methodBuilder.build());
 
         JavaFile.Builder builder = JavaFile.builder(metasitoryPackage, typeBuilder.build());
-        if (env.jetaProperties().containsKey("file.comment"))
-            builder.addFileComment(env.jetaProperties().getProperty("file.comment"));
+        if (env.processorProperties().containsKey("file.comment"))
+            builder.addFileComment(env.processorProperties().getProperty("file.comment"));
 
         Writer out = null;
         try {

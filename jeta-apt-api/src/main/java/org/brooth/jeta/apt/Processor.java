@@ -16,28 +16,30 @@
 
 package org.brooth.jeta.apt;
 
-import com.squareup.javapoet.TypeSpec;
-
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
 import java.util.Set;
+
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+
+import com.squareup.javapoet.TypeSpec;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface Processor {
 
+	void init(ProcessorEnvironment env);
+	
     /**
      * return false to disable processor
      */
-    boolean isEnabled(ProcessingEnvironment processingEnv);
+    boolean isEnabled();
 
     /**
      * @return true if next round is needed
      */
-    boolean process(ProcessorEnvironment env, TypeSpec.Builder builder);
+    boolean process(TypeSpec.Builder builder, RoundContext context);
 
     /**
      * Tell to MetacodeProcessor the annotations, it should collect elements with.
@@ -49,7 +51,7 @@ public interface Processor {
      * Ensure type elements (masters elements) associated with @param element
      * For those elements metacode will be generated.
      */
-    Set<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element);
+    Set<TypeElement> applicableMastersOfElement(Element element);
 
 	/**
 	 * return true if current rounds set of annotations is needed in the next round

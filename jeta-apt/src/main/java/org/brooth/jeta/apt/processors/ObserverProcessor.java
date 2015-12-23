@@ -16,21 +16,27 @@
 
 package org.brooth.jeta.apt.processors;
 
-import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.*;
+import java.util.List;
+
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.VariableElement;
+
 import org.brooth.jeta.apt.MetacodeContext;
 import org.brooth.jeta.apt.MetacodeUtils;
-import org.brooth.jeta.apt.ProcessorEnvironment;
 import org.brooth.jeta.observer.EventObserver;
 import org.brooth.jeta.observer.Observer;
 import org.brooth.jeta.observer.ObserverHandler;
 import org.brooth.jeta.observer.ObserverMetacode;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.VariableElement;
-import java.util.List;
+import com.google.common.base.CaseFormat;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -41,7 +47,7 @@ import java.util.List;
     }
 
     @Override
-    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+    public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
         MetacodeContext context = env.metacodeContext();
         ClassName masterClassName = ClassName.get(context.masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(

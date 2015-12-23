@@ -25,7 +25,9 @@ import java.util.Properties;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface MetasitoryEnvironment {
-    ProcessingEnvironment processingEnv();
-    Logger logger();
-    Properties jetaProperties();
+	ProcessingEnvironment processingEnv();
+
+	Properties processorProperties();
+
+	Logger logger();
 }

@@ -16,14 +16,19 @@
 
 package org.brooth.jeta.apt.processors;
 
-import com.squareup.javapoet.*;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
+
 import org.brooth.jeta.apt.MetacodeContext;
-import org.brooth.jeta.apt.ProcessorEnvironment;
 import org.brooth.jeta.util.Singleton;
 import org.brooth.jeta.util.SingletonMetacode;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -35,7 +40,7 @@ public class SingletonProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+    public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
         MetacodeContext context = env.metacodeContext();
         ClassName masterClassName = ClassName.get(context.masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(

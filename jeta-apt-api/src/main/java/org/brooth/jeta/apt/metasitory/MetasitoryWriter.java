@@ -22,7 +22,9 @@ import org.brooth.jeta.apt.MetacodeContext;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface MetasitoryWriter {
-    void open(MetasitoryEnvironment env);
-    void write(MetacodeContext context);
-    void close();
+	void open(MetasitoryEnvironment env);
+
+	void write(MetacodeContext context);
+
+	void close();
 }

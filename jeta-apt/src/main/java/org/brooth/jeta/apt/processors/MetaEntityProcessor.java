@@ -16,24 +16,36 @@
 
 package org.brooth.jeta.apt.processors;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
-import com.squareup.javapoet.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+
 import org.brooth.jeta.apt.MetacodeUtils;
-import org.brooth.jeta.apt.ProcessorEnvironment;
 import org.brooth.jeta.meta.IMetaEntity;
 import org.brooth.jeta.meta.MetaEntity;
 import org.brooth.jeta.meta.MetaEntityMetacode;
 import org.brooth.jeta.util.Constructor;
 
-import javax.annotation.Nullable;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -45,7 +57,7 @@ public class MetaEntityProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(ProcessorEnvironment env, TypeSpec.Builder builder) {
+    public boolean process(TypeSpec.Builder builder, RoundEnvironment roundEnv, int round) {
         TypeElement element = (TypeElement) env.elements().iterator().next();
         ClassName elementClassName = ClassName.get(element);
         MetaEntity annotation = element.getAnnotation(MetaEntity.class);
@@ -208,13 +220,13 @@ public class MetaEntityProcessor extends AbstractProcessor {
     }
 
     @Override
-    public Set<TypeElement> applicableMastersOfElement(ProcessingEnvironment env, Element element) {
-        Set<TypeElement> masters = super.applicableMastersOfElement(env, element);
+    public Set<TypeElement> applicableMastersOfElement(Element element) {
+        Set<TypeElement> masters = super.applicableMastersOfElement(element);
         MetaEntity annotation = element.getAnnotation(MetaEntity.class);
         String ofClass = getOfClass(annotation);
 
         if (!annotation.minor() && !ofClass.equals(Void.class.getCanonicalName())) {
-            TypeElement of = env.getElementUtils().getTypeElement(ofClass);
+            TypeElement of = env.processingEnv().getElementUtils().getTypeElement(ofClass);
             TypeElement master = masters.iterator().next();
             if (!master.equals(of))
                 masters = Sets.newHashSet(master, of);
