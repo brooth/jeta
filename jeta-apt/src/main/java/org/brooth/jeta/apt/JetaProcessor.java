@@ -167,27 +167,27 @@ public class JetaProcessor extends AbstractProcessor {
     }
 
     protected void addProcessors() {
-        processors.add(new ObservableProcessor());
-        processors.add(new ObserverProcessor());
-        processors.add(new ProxyProcessor());
-        processors.add(new PublishProcessor());
-        processors.add(new SubscribeProcessor());
-        processors.add(new ValidateProcessor());
-        processors.add(new TypeCollectorProcessor());
-        processors.add(new ObjectCollectorProcessor());
-        processors.add(new LogProcessor());
-        processors.add(new SingletonProcessor());
-        processors.add(new MultitonProcessor());
-        processors.add(new ImplementationProcessor());
-        processors.add(new MetaProcessor());
-        processors.add(new MetaEntityProcessor());
+        addProcessor(new ObservableProcessor());
+        addProcessor(new ObserverProcessor());
+        addProcessor(new ProxyProcessor());
+        addProcessor(new PublishProcessor());
+        addProcessor(new SubscribeProcessor());
+        addProcessor(new ValidateProcessor());
+        addProcessor(new TypeCollectorProcessor());
+        addProcessor(new ObjectCollectorProcessor());
+        addProcessor(new LogProcessor());
+        addProcessor(new SingletonProcessor());
+        addProcessor(new MultitonProcessor());
+        addProcessor(new ImplementationProcessor());
+        addProcessor(new MetaProcessor());
+        addProcessor(new MetaEntityProcessor());
 
         String addProcessors = properties.getProperty("processors.add");
         if (addProcessors != null) {
             for (String addProcessor : addProcessors.split(",")) {
                 try {
                     Class<?> processorClass = Class.forName(addProcessor.trim());
-                    processors.add((Processor) processorClass.newInstance());
+                    addProcessor((Processor) processorClass.newInstance());
 
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to load processor " + addProcessor, e);
@@ -202,6 +202,14 @@ public class JetaProcessor extends AbstractProcessor {
             processorEnv.logger = logger;
             processor.init(processorEnv);
         }
+    }
+
+    protected void addProcessor(Processor processor) {
+        processors.add(processor);
+    }
+
+    protected boolean removeProcessor(Processor processor) {
+        return processors.remove(processor);
     }
 
     @Override
