@@ -99,7 +99,7 @@ public class JetaProcessor extends AbstractProcessor {
                 propertiesName = propertiesPath.getFileName().toString();
 
             } catch (Exception e) {
-                throw new IllegalArgumentException("failed to load properties from " + filePath);
+                throw new IllegalArgumentException("failed to load properties from file " + filePath);
             }
 
         } else {
@@ -120,7 +120,7 @@ public class JetaProcessor extends AbstractProcessor {
                 is.close();
 
             } catch (IOException e) {
-                throw new RuntimeException("failed to load properties", e);
+                throw new RuntimeException("failed to load properties from file " + propertiesPath, e);
             }
         }
 
