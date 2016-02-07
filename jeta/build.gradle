@@ -23,7 +23,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4'
-        classpath 'net.ltgt.gradle:gradle-apt-plugin:0.4'
+        classpath 'net.ltgt.gradle:gradle-apt-plugin:0.5'
     }
 }
 
