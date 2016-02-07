@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-package org.brooth.jeta.pubsub;
+package org.brooth.jeta.eventbus;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface PublisherMetacode<M> {
-    void applyPublisher(M master);
+public @interface Subscribe {
+
+    Class<? extends Filter>[] filters() default {};
+
+    int[] ids() default {};
+
+    String[] topics() default {};
+
+    int priority() default 0;
 }

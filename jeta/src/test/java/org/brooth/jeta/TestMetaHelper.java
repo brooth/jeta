@@ -16,27 +16,23 @@
 
 package org.brooth.jeta;
 
-import org.brooth.jeta.meta.MetaController;
-import org.brooth.jeta.meta.MetaEntityFactory;
 import org.brooth.jeta.collector.ObjectCollectorController;
 import org.brooth.jeta.collector.TypeCollectorController;
+import org.brooth.jeta.eventbus.BaseEventBus;
+import org.brooth.jeta.eventbus.EventBus;
+import org.brooth.jeta.eventbus.SubscriberController;
+import org.brooth.jeta.eventbus.SubscriptionHandler;
 import org.brooth.jeta.log.LogController;
 import org.brooth.jeta.log.NamedLoggerProvider;
+import org.brooth.jeta.meta.MetaController;
+import org.brooth.jeta.meta.MetaEntityFactory;
 import org.brooth.jeta.metasitory.MapMetasitory;
 import org.brooth.jeta.metasitory.Metasitory;
 import org.brooth.jeta.observer.ObservableController;
 import org.brooth.jeta.observer.ObserverController;
 import org.brooth.jeta.observer.ObserverHandler;
 import org.brooth.jeta.proxy.ProxyController;
-import org.brooth.jeta.pubsub.PublisherController;
-import org.brooth.jeta.pubsub.SubscriberController;
-import org.brooth.jeta.pubsub.SubscriptionHandler;
-import org.brooth.jeta.util.ImplementationController;
-import org.brooth.jeta.util.MultitonController;
-import org.brooth.jeta.util.MultitonMetacode;
-import org.brooth.jeta.util.Provider;
-import org.brooth.jeta.util.SingletonController;
-import org.brooth.jeta.util.SingletonMetacode;
+import org.brooth.jeta.util.*;
 import org.brooth.jeta.validate.ValidationController;
 import org.brooth.jeta.validate.ValidationException;
 
@@ -51,8 +47,8 @@ public class TestMetaHelper {
     private static TestMetaHelper instance;
 
     private final Metasitory metasitory;
-
     private final MetaEntityFactory metaEntityFactory;
+    private final BaseEventBus bus;
 
     private NamedLoggerProvider<Logger> loggerProvider;
 
@@ -65,6 +61,7 @@ public class TestMetaHelper {
     private TestMetaHelper(String metaPackage) {
         metasitory = new MapMetasitory(metaPackage);
         metaEntityFactory = new MetaEntityFactory(metasitory);
+        bus = new BaseEventBus();
 
         loggerProvider = new NamedLoggerProvider<Logger>() {
             @Override
@@ -82,12 +79,12 @@ public class TestMetaHelper {
         return new ImplementationController<>(getInstance().metasitory, of);
     }
 
-    public static void createPublisher(Object master) {
-        new PublisherController<>(getInstance().metasitory, master).createPublisher();
+    public static EventBus getEventBus() {
+        return getInstance().bus;
     }
 
     public static SubscriptionHandler registerSubscriber(Object master) {
-        return new SubscriberController<>(getInstance().metasitory, master).registerSubscriber();
+        return new SubscriberController<>(getInstance().metasitory, master).registerSubscriber(getEventBus());
     }
 
     public static void createObservable(Object master) {

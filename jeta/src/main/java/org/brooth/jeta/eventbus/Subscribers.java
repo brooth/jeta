@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.brooth.jeta.pubsub;
+package org.brooth.jeta.eventbus;
 
 import org.brooth.jeta.observer.EventObserver;
 import org.brooth.jeta.observer.Observers;

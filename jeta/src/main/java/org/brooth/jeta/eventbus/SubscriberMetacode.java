@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-package org.brooth.jeta.pubsub;
+package org.brooth.jeta.eventbus;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public @interface Subscribe {
-
-    Class<?>[] value();
-
-    Class<? extends Filter>[] filters() default {};
-
-    int[] ids() default {};
-
-    String[] topics() default {};
-
-    int priority() default 0;
+public interface SubscriberMetacode<M> {
+    SubscriptionHandler applySubscribers(EventBus bus, M master);
 }

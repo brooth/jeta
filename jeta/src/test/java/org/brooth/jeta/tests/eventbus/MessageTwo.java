@@ -14,9 +14,9 @@
  *  limitations under the License.
  */
 
-package org.brooth.jeta.tests.pubsub;
+package org.brooth.jeta.tests.eventbus;
 
-import org.brooth.jeta.pubsub.BaseMessage;
+import org.brooth.jeta.eventbus.BaseMessage;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)

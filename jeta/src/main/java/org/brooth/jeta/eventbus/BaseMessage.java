@@ -14,25 +14,42 @@
  * limitations under the License.
  */
 
-package org.brooth.jeta.pubsub;
+package org.brooth.jeta.eventbus;
 
-import org.brooth.jeta.MasterController;
-import org.brooth.jeta.metasitory.Metasitory;
+import javax.annotation.Nullable;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class SubscriberController<M> extends MasterController<M, SubscriberMetacode<M>> {
+public class BaseMessage implements Message {
 
-    public SubscriberController(Metasitory metasitory, M master) {
-        super(metasitory, master);
+    protected int id = 0;
+    protected String topic;
+
+    public BaseMessage() {
     }
 
-    public SubscriptionHandler registerSubscriber() {
-        SubscriptionHandler handler = new SubscriptionHandler();
-        for (SubscriberMetacode<M> metacode : metacodes)
-            handler.add(metacode.applySubscribers(master));
+    public BaseMessage(int id) {
+        this.id = id;
+    }
 
-        return handler;
+    public BaseMessage(int id, String topic) {
+        this.id = id;
+        this.topic = topic;
+    }
+
+    public BaseMessage(String topic) {
+        this.topic = topic;
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Nullable
+    @Override
+    public String getTopic() {
+        return topic;
     }
 }

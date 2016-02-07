@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.brooth.jeta.pubsub;
+package org.brooth.jeta.eventbus;
 
 import org.brooth.jeta.observer.ObserverHandler;
 import org.brooth.jeta.observer.Observers;
@@ -26,8 +26,8 @@ public class SubscriptionHandler {
 
     private final ObserverHandler handler = new ObserverHandler();
 
-    public void add(Class<?> publisherClass, Class<?> eventClass, Observers.Handler<?> handler) {
-        this.handler.add(publisherClass, eventClass, handler);
+    public void add(Class<?> eventClass, Observers.Handler<?> handler) {
+        this.handler.add(EventBus.class, eventClass, handler);
     }
 
     public void add(SubscriptionHandler other) {
@@ -40,10 +40,6 @@ public class SubscriptionHandler {
 
     public int unregister(Class<?> eventClass) {
         return handler.unregister(eventClass);
-    }
-
-    public int unregisterAll(Class<?> publisherClass) {
-        return handler.unregisterAll(publisherClass);
     }
 
     public int unregisterAll() {

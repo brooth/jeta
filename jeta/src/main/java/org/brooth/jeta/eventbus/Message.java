@@ -14,42 +14,17 @@
  * limitations under the License.
  */
 
-package org.brooth.jeta.pubsub;
+package org.brooth.jeta.eventbus;
 
 import javax.annotation.Nullable;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class BaseMessage implements Message {
+public interface Message {
+	
+	int getId();
 
-    protected int id = 0;
-    protected String topic;
-
-    public BaseMessage() {
-    }
-
-    public BaseMessage(int id) {
-        this.id = id;
-    }
-
-    public BaseMessage(int id, String topic) {
-        this.id = id;
-        this.topic = topic;
-    }
-
-    public BaseMessage(String topic) {
-        this.topic = topic;
-    }
-
-    @Override
-    public int getId() {
-        return id;
-    }
-
-    @Nullable
-    @Override
-    public String getTopic() {
-        return topic;
-    }
+	@Nullable
+	String getTopic();
 }

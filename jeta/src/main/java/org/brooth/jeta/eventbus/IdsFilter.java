@@ -14,14 +14,26 @@
  * limitations under the License.
  */
 
-package org.brooth.jeta.pubsub;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
+package org.brooth.jeta.eventbus;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-@Target(ElementType.FIELD)
-public @interface Publish {
+public class IdsFilter implements Filter {
+
+    private int[] ids;
+
+    public IdsFilter(int... ids) {
+        this.ids = ids;
+    }
+
+    @Override
+    public boolean accepts(Object master, String methodName, Message msg) {
+        int msgId = msg.getId();
+        for (int id : ids)
+            if (msgId == id)
+                return true;
+
+        return false;
+    }
 }

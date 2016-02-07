@@ -170,7 +170,6 @@ public class JetaProcessor extends AbstractProcessor {
         addProcessor(new ObservableProcessor());
         addProcessor(new ObserverProcessor());
         addProcessor(new ProxyProcessor());
-        addProcessor(new PublishProcessor());
         addProcessor(new SubscribeProcessor());
         addProcessor(new ValidateProcessor());
         addProcessor(new TypeCollectorProcessor());

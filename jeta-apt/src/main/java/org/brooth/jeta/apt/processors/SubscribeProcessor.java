@@ -16,13 +16,12 @@
 
 package org.brooth.jeta.apt.processors;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.base.Joiner;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.RoundContext;
+import org.brooth.jeta.eventbus.*;
 import org.brooth.jeta.observer.EventObserver;
-import org.brooth.jeta.pubsub.*;
 
 import javax.lang.model.element.*;
 import javax.lang.model.util.Elements;
@@ -43,11 +42,13 @@ public class SubscribeProcessor extends AbstractProcessor {
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(SubscriberMetacode.class), masterClassName));
         ClassName handlerClassName = ClassName.get(SubscriptionHandler.class);
+        ClassName busClassName = ClassName.get(EventBus.class);
 
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("applySubscribers")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(handlerClassName)
+                .addParameter(busClassName, "bus")
                 .addParameter(masterClassName, "master", Modifier.FINAL)
                 .addStatement("$T handler = new $T()", handlerClassName, handlerClassName);
 
@@ -55,26 +56,10 @@ public class SubscribeProcessor extends AbstractProcessor {
 
         for (Element element : context.elements()) {
             final Subscribe annotation = element.getAnnotation(Subscribe.class);
-            String publisherClass = MetacodeUtils.extractClassName(new Runnable() {
-                @Override
-                public void run() {
-                    annotation.value();
-                }
-            });
-            ClassName observableTypeName = ClassName.bestGuess(publisherClass);
-            ClassName metacodeTypeName = ClassName.bestGuess(MetacodeUtils.
-                    getMetacodeOf(processingContext.processingEnv().getElementUtils(), publisherClass));
-
             List<? extends VariableElement> params = ((ExecutableElement) element).getParameters();
             if (params.size() != 1)
                 throw new IllegalArgumentException("Subscriber method must have one parameter (event)");
             TypeName eventTypeName = TypeName.get(params.get(0).asType());
-
-
-            String methodHashName = "get" +
-                    CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL,
-                            CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, eventTypeName.toString())
-                                    .replaceAll("\\.", "_")) + "Subscribers";
 
             MethodSpec.Builder onEventMethodBuilder = MethodSpec.methodBuilder("onEvent")
                     .addAnnotation(Override.class)
@@ -148,9 +133,8 @@ public class SubscribeProcessor extends AbstractProcessor {
                     .addMethod(onEventMethodSpec)
                     .build();
 
-            methodBuilder.addStatement("handler.add($T.class, $T.class,\n$T.$L().\nregister($L, $L))",
-                            observableTypeName, eventTypeName, metacodeTypeName, methodHashName, 
-                            eventObserverTypeSpec, annotation.priority());
+            methodBuilder.addStatement("handler.add($T.class,\nbus.register($T.class, $L, $L))",
+                    eventTypeName, eventTypeName, eventObserverTypeSpec, annotation.priority());
         }
 
         methodBuilder.addStatement("return handler");

@@ -14,13 +14,13 @@
  *  limitations under the License.
  */
 
-package org.brooth.jeta.tests.pubsub;
+package org.brooth.jeta.tests.eventbus;
 
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
 import org.brooth.jeta.TestMetaHelper;
+import org.brooth.jeta.eventbus.*;
 import org.brooth.jeta.log.Log;
-import org.brooth.jeta.pubsub.*;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 
@@ -30,20 +30,10 @@ import static org.hamcrest.Matchers.*;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class PublishSubscribeTest extends BaseTest {
+public class EventBusTest extends BaseTest {
 
     @Log
     Logger logger;
-
-    public static class PublisherHolder {
-        @Publish
-        protected Subscribers<MessageOne> subscribers;
-    }
-
-    public static class PublisherTwoHolder {
-        @Publish
-        protected Subscribers<MessageTwo> subscribers;
-    }
 
     public static class SubscribeHolder {
         @Log
@@ -59,14 +49,14 @@ public class PublishSubscribeTest extends BaseTest {
             TestMetaHelper.createLogger(this);
         }
 
-        @Subscribe(PublisherHolder.class)
+        @Subscribe
         void onMessageOne(MessageOne message) {
             logger.debug("onMessageOne(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneInvokes++;
             lastMessageOne = message;
         }
 
-        @Subscribe(PublisherTwoHolder.class)
+        @Subscribe
         void onMessageTwo(MessageTwo message) {
             logger.debug("onMessageTwo(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageTwoInvokes++;
@@ -78,29 +68,22 @@ public class PublishSubscribeTest extends BaseTest {
     public void testSimpleNotify() {
         logger.debug("testSimpleNotify()");
 
-        PublisherHolder publisher = new PublisherHolder();
-        TestMetaHelper.createPublisher(publisher);
-        SubscribeHolder subscriber = new SubscribeHolder();
+        final SubscribeHolder subscriber = new SubscribeHolder();
         SubscriptionHandler handler = TestMetaHelper.registerSubscriber(subscriber);
 
-        publisher.subscribers.notify(new MessageOne(1, "one"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(1, "one"));
         assertThat(subscriber.onMessageOneInvokes, is(1));
         MatcherAssert.assertThat(subscriber.lastMessageOne.getTopic(), is("one"));
         MatcherAssert.assertThat(subscriber.lastMessageOne.getId(), is(1));
 
         handler.unregisterAll();
-        publisher.subscribers.notify(new MessageOne(1, "none"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(1, "none"));
         assertThat(subscriber.onMessageOneInvokes, is(1));
     }
 
     @Test
     public void testAsyncNotify() {
         logger.debug("testAsyncNotify()");
-
-        final PublisherHolder publisher = new PublisherHolder();
-        TestMetaHelper.createPublisher(publisher);
-        final PublisherTwoHolder publisherTwo = new PublisherTwoHolder();
-        TestMetaHelper.createPublisher(publisherTwo);
 
         SubscribeHolder subscriber = new SubscribeHolder();
         SubscriptionHandler handler = TestMetaHelper.registerSubscriber(subscriber);
@@ -110,8 +93,8 @@ public class PublishSubscribeTest extends BaseTest {
             threads[i] = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    publisher.subscribers.notify(new MessageOne(1, "one"));
-                    publisherTwo.subscribers.notify(new MessageTwo(2, "two"));
+                    TestMetaHelper.getEventBus().publish(new MessageOne(1, "one"));
+                    TestMetaHelper.getEventBus().publish(new MessageTwo(2, "two"));
                 }
             });
         }
@@ -137,7 +120,7 @@ public class PublishSubscribeTest extends BaseTest {
             TestMetaHelper.createLogger(this);
         }
 
-        @Subscribe(value = PublisherHolder.class, priority = Integer.MAX_VALUE)
+        @Subscribe(priority = Integer.MAX_VALUE)
         void onMessageOne(MessageOne message) {
             logger.debug("onMessageOne(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneInvokes++;
@@ -156,7 +139,7 @@ public class PublishSubscribeTest extends BaseTest {
             TestMetaHelper.createLogger(this);
         }
 
-        @Subscribe(value = PublisherHolder.class, priority = Integer.MIN_VALUE)
+        @Subscribe(priority = Integer.MIN_VALUE)
         void onMessageOne(MessageOne message) {
             logger.debug("onMessageOne(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneInvokes++;
@@ -168,22 +151,19 @@ public class PublishSubscribeTest extends BaseTest {
     public void testPriority() {
         logger.debug("testPriority()");
 
-        PublisherHolder publisher = new PublisherHolder();
-        TestMetaHelper.createPublisher(publisher);
-
         LowPrioritySubscribeHolder low = new LowPrioritySubscribeHolder();
-        TestMetaHelper.registerSubscriber(low);
+        SubscriptionHandler handler = TestMetaHelper.registerSubscriber(low);
 
-        publisher.subscribers.notify(new MessageOne(2, "one"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(2, "one"));
         assertThat(low.onMessageOneInvokes, is(1));
 
         HighPrioritySubscribeHolder high = new HighPrioritySubscribeHolder();
-        TestMetaHelper.registerSubscriber(high);
-        publisher.subscribers.notify(new MessageOne(1, "two"));
+        handler.add(TestMetaHelper.registerSubscriber(high));
+        TestMetaHelper.getEventBus().publish(new MessageOne(1, "two"));
         assertThat(high.onMessageOneInvokes, is(1));
         assertThat(low.onMessageOneInvokes, is(2));
 
-        publisher.subscribers.clear();
+        handler.unregisterAll();
     }
 
     public static class IdFilterSubscribeHolder {
@@ -197,14 +177,14 @@ public class PublishSubscribeTest extends BaseTest {
             TestMetaHelper.createLogger(this);
         }
 
-        @Subscribe(value = PublisherHolder.class, ids = 1)
+        @Subscribe(ids = 1)
         void onMessageOneId1(MessageOne message) {
             logger.debug("onMessageOneId1(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneId1Invokes++;
             MatcherAssert.assertThat(message.getId(), is(1));
         }
 
-        @Subscribe(value = PublisherHolder.class, ids = {2, 4})
+        @Subscribe(ids = {2, 4})
         void onMessageOneId2(MessageOne message) {
             logger.debug("onMessageOneId2(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneId2Invokes++;
@@ -216,29 +196,26 @@ public class PublishSubscribeTest extends BaseTest {
     public void testIdFilter() {
         logger.debug("testIdFilter()");
 
-        PublisherHolder publisher = new PublisherHolder();
-        TestMetaHelper.createPublisher(publisher);
-
         IdFilterSubscribeHolder subscriber = new IdFilterSubscribeHolder();
-        TestMetaHelper.registerSubscriber(subscriber);
+        SubscriptionHandler handler = TestMetaHelper.registerSubscriber(subscriber);
 
-        publisher.subscribers.notify(new MessageOne(1, "one"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(1, "one"));
         assertThat(subscriber.onMessageOneId1Invokes, is(1));
         assertThat(subscriber.onMessageOneId2Invokes, is(0));
 
-        publisher.subscribers.notify(new MessageOne(2, "two"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(2, "two"));
         assertThat(subscriber.onMessageOneId1Invokes, is(1));
         assertThat(subscriber.onMessageOneId2Invokes, is(1));
 
-        publisher.subscribers.notify(new MessageOne(3, "none"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(3, "none"));
         assertThat(subscriber.onMessageOneId1Invokes, is(1));
         assertThat(subscriber.onMessageOneId2Invokes, is(1));
 
-        publisher.subscribers.notify(new MessageOne(4, "four"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(4, "four"));
         assertThat(subscriber.onMessageOneId1Invokes, is(1));
         assertThat(subscriber.onMessageOneId2Invokes, is(2));
 
-        publisher.subscribers.clear();
+        handler.unregisterAll();
     }
 
     public static class TopicFilterSubscribeHolder {
@@ -252,14 +229,14 @@ public class PublishSubscribeTest extends BaseTest {
             TestMetaHelper.createLogger(this);
         }
 
-        @Subscribe(value = PublisherHolder.class, topics = "one")
+        @Subscribe(topics = "one")
         void onMessageOneTopicOne(MessageOne message) {
             logger.debug("onMessageOneTopicOne(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneTopicOneInvokes++;
             MatcherAssert.assertThat(message.getId(), is(1));
         }
 
-        @Subscribe(value = PublisherHolder.class, topics = {"two", "four"})
+        @Subscribe(topics = {"two", "four"})
         void onMessageOneTopicTwo(MessageOne message) {
             logger.debug("onMessageOneTopicTwo(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneTopicTwoInvokes++;
@@ -271,45 +248,42 @@ public class PublishSubscribeTest extends BaseTest {
     public void testTopicFilter() {
         logger.debug("testTopicFilter()");
 
-        PublisherHolder publisher = new PublisherHolder();
-        TestMetaHelper.createPublisher(publisher);
-
         TopicFilterSubscribeHolder subscriber = new TopicFilterSubscribeHolder();
-        TestMetaHelper.registerSubscriber(subscriber);
+        SubscriptionHandler handler = TestMetaHelper.registerSubscriber(subscriber);
 
-        publisher.subscribers.notify(new MessageOne(1, "one"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(1, "one"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(0));
 
-        publisher.subscribers.notify(new MessageOne(2, "two"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(2, "two"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(1));
 
-        publisher.subscribers.notify(new MessageOne(3, "none"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(3, "none"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(1));
 
-        publisher.subscribers.notify(new MessageOne(4, "four"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(4, "four"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(2));
 
-        publisher.subscribers.notify(new MessageOne(5, "twofour"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(5, "twofour"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(2));
 
-        publisher.subscribers.notify(new MessageOne(6, "two "));
+        TestMetaHelper.getEventBus().publish(new MessageOne(6, "two "));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(2));
 
-        publisher.subscribers.notify(new MessageOne(7, " four"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(7, " four"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(2));
 
-        publisher.subscribers.notify(new MessageOne(8, "tw.*"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(8, "tw.*"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(2));
 
-        publisher.subscribers.clear();
+        handler.unregisterAll();
     }
 
     public static class OddIdFilter implements Filter {
@@ -337,21 +311,21 @@ public class PublishSubscribeTest extends BaseTest {
             TestMetaHelper.createLogger(this);
         }
 
-        @Subscribe(value = PublisherHolder.class, filters = OddIdFilter.class)
+        @Subscribe(filters = OddIdFilter.class)
         void onMessageOneOdd(MessageOne message) {
             logger.debug("onMessageOneOdd(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneOddInvokes++;
             MatcherAssert.assertThat(message.getId() % 2, is(not(0)));
         }
 
-        @Subscribe(value = PublisherHolder.class, filters = EvenIdFilter.class)
+        @Subscribe(filters = EvenIdFilter.class)
         void onMessageOneEvent(MessageOne message) {
             logger.debug("onMessageOneEvent(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneEventInvokes++;
             MatcherAssert.assertThat(message.getId() % 2, is(0));
         }
 
-        @Subscribe(value = PublisherHolder.class, filters = {OddIdFilter.class, EvenIdFilter.class})
+        @Subscribe(filters = {OddIdFilter.class, EvenIdFilter.class})
         void onMessageOneNone(MessageOne message) {
             logger.debug("onMessageOneNone(id: %d, topic: %s)", message.getId(), message.getTopic());
             assertThat(true, is(false));
@@ -362,29 +336,26 @@ public class PublishSubscribeTest extends BaseTest {
     public void testCustomFilter() {
         logger.debug("testCustomFilter()");
 
-        PublisherHolder publisher = new PublisherHolder();
-        TestMetaHelper.createPublisher(publisher);
-
         CustomFilterSubscribeHolder subscriber = new CustomFilterSubscribeHolder();
-        TestMetaHelper.registerSubscriber(subscriber);
+        SubscriptionHandler handler = TestMetaHelper.registerSubscriber(subscriber);
 
-        publisher.subscribers.notify(new MessageOne(1, "one"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(1, "one"));
         assertThat(subscriber.onMessageOneOddInvokes, is(1));
         assertThat(subscriber.onMessageOneEventInvokes, is(0));
 
-        publisher.subscribers.notify(new MessageOne(2, "two"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(2, "two"));
         assertThat(subscriber.onMessageOneOddInvokes, is(1));
         assertThat(subscriber.onMessageOneEventInvokes, is(1));
 
-        publisher.subscribers.notify(new MessageOne(3, "none"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(3, "none"));
         assertThat(subscriber.onMessageOneOddInvokes, is(2));
         assertThat(subscriber.onMessageOneEventInvokes, is(1));
 
-        publisher.subscribers.notify(new MessageOne(4, "four"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(4, "four"));
         assertThat(subscriber.onMessageOneOddInvokes, is(2));
         assertThat(subscriber.onMessageOneEventInvokes, is(2));
 
-        publisher.subscribers.clear();
+        handler.unregisterAll();
     }
 
     @MetaFilter(emitExpression = "$e.getId() % 2 != 0")
@@ -406,21 +377,21 @@ public class PublishSubscribeTest extends BaseTest {
             TestMetaHelper.createLogger(this);
         }
 
-        @Subscribe(value = PublisherHolder.class, filters = OddIdMetaFilter.class)
+        @Subscribe(filters = OddIdMetaFilter.class)
         void onMessageOneOdd(MessageOne message) {
             logger.debug("onMessageOneOdd(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneOddInvokes++;
             MatcherAssert.assertThat(message.getId() % 2, is(not(0)));
         }
 
-        @Subscribe(value = PublisherHolder.class, filters = EvenIdMetaFilter.class)
+        @Subscribe(filters = EvenIdMetaFilter.class)
         void onMessageOneEvent(MessageOne message) {
             logger.debug("onMessageOneEvent(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneEventInvokes++;
             MatcherAssert.assertThat(message.getId() % 2, is(0));
         }
 
-        @Subscribe(value = PublisherHolder.class, filters = {OddIdMetaFilter.class, EvenIdMetaFilter.class})
+        @Subscribe(filters = {OddIdMetaFilter.class, EvenIdMetaFilter.class})
         void onMessageOneNone(MessageOne message) {
             logger.debug("onMessageOneNone(id: %d, topic: %s)", message.getId(), message.getTopic());
             assertThat(true, is(false));
@@ -431,28 +402,25 @@ public class PublishSubscribeTest extends BaseTest {
     public void testMetaFilter() {
         logger.debug("testMetaFilter()");
 
-        PublisherHolder publisher = new PublisherHolder();
-        TestMetaHelper.createPublisher(publisher);
-
         MetaFilterSubscribeHolder subscriber = new MetaFilterSubscribeHolder();
-        TestMetaHelper.registerSubscriber(subscriber);
+        SubscriptionHandler handler = TestMetaHelper.registerSubscriber(subscriber);
 
-        publisher.subscribers.notify(new MessageOne(1, "one"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(1, "one"));
         assertThat(subscriber.onMessageOneOddInvokes, is(1));
         assertThat(subscriber.onMessageOneEventInvokes, is(0));
 
-        publisher.subscribers.notify(new MessageOne(2, "two"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(2, "two"));
         assertThat(subscriber.onMessageOneOddInvokes, is(1));
         assertThat(subscriber.onMessageOneEventInvokes, is(1));
 
-        publisher.subscribers.notify(new MessageOne(3, "none"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(3, "none"));
         assertThat(subscriber.onMessageOneOddInvokes, is(2));
         assertThat(subscriber.onMessageOneEventInvokes, is(1));
 
-        publisher.subscribers.notify(new MessageOne(4, "four"));
+        TestMetaHelper.getEventBus().publish(new MessageOne(4, "four"));
         assertThat(subscriber.onMessageOneOddInvokes, is(2));
         assertThat(subscriber.onMessageOneEventInvokes, is(2));
 
-        publisher.subscribers.clear();
+        handler.unregisterAll();
     }
 }

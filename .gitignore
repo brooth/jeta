@@ -12,3 +12,4 @@
 build/
 bin/
 .apt_generated/
+.idea/

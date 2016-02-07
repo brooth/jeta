@@ -14,31 +14,25 @@
  * limitations under the License.
  */
 
-package org.brooth.jeta.pubsub;
+package org.brooth.jeta.eventbus;
 
-import java.util.Objects;
+import org.brooth.jeta.MasterController;
+import org.brooth.jeta.metasitory.Metasitory;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class TopicsFilter implements Filter {
+public class SubscriberController<M> extends MasterController<M, SubscriberMetacode<M>> {
 
-    private String[] topics;
-
-    public TopicsFilter(String... topics) {
-        this.topics = topics;
+    public SubscriberController(Metasitory metasitory, M master) {
+        super(metasitory, master);
     }
 
-    @Override
-    public boolean accepts(Object master, String methodName, Message msg) {
-        String topic = msg.getTopic();
-        if (topic == null)
-            return false;
+    public SubscriptionHandler registerSubscriber(EventBus bus) {
+        SubscriptionHandler handler = new SubscriptionHandler();
+        for (SubscriberMetacode<M> metacode : metacodes)
+            handler.add(metacode.applySubscribers(bus, master));
 
-        for (String s : topics)
-            if (Objects.equals(topic, s))
-                return true;
-
-        return false;
+        return handler;
     }
 }

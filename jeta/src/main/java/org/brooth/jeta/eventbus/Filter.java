@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package org.brooth.jeta.pubsub;
-
-import org.brooth.jeta.MasterController;
-import org.brooth.jeta.metasitory.Metasitory;
+package org.brooth.jeta.eventbus;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class PublisherController<M> extends MasterController<M, PublisherMetacode<M>> {
-
-    public PublisherController(Metasitory metasitory, M master) {
-        super(metasitory, master);
-    }
-
-    public void createPublisher() {
-        for (PublisherMetacode<M> observable : metacodes)
-            observable.applyPublisher(master);
-    }
+public interface Filter {
+    boolean accepts(Object master, String methodName, Message msg);
 }

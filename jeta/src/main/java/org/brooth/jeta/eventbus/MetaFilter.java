@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.brooth.jeta.pubsub;
+package org.brooth.jeta.eventbus;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)

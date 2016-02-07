@@ -14,20 +14,17 @@
  *  limitations under the License.
  */
 
-package org.brooth.jeta.tests.pubsub;
+package org.brooth.jeta.eventbus;
 
-import org.brooth.jeta.pubsub.BaseMessage;
+import org.brooth.jeta.observer.EventObserver;
+import org.brooth.jeta.observer.Observers;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MessageOne extends BaseMessage {
+public interface EventBus {
 
-    public MessageOne(int id, String topic) {
-        super(id, topic);
-    }
+    <E extends Message> Observers.Handler<E> register(Class<E> eventClass, EventObserver<E> observer, int priority);
 
-    public void incId() {
-        id++;
-    }
+    <E extends Message> void publish(E event);
 }
