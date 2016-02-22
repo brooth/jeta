@@ -1,5 +1,354 @@
 Jeta
 ====
+`Jeta` - is a Open Source library built upon `javax.annotation.processing` tool that brings meta programming to Java. Jeta aims to reduce boilerplate and increase error detection at compile-time.
+
+Examples:
+--------
+Jeta has some ready to use annotations that covers most frequently used cases. Custom annotations also available. See [jeta-samples project][jeta-samples] to find more details.
+
+### @Log
+Whatever logging tool is used in your project it can be provided via `@Log` annotation:
+```java
+class LogSample {
+    @Log
+    Logger logger;
+}
+```
+instead of:
+```java
+class LogSample {
+    private static final Logger logger = LoggerFactory.getLogger(LogSample.class);
+}
+```
+The second  approach instigates copy-paste. The programmers often forget to replace the class name so many loggers have incorrect names.
+
+### @Observer, @Subject, @Subscribe
+Jeta makes [observer pattens][observer-pattern] easy to use:
+```java
+class Observable {
+    @Subject
+    Observers<Event> observers;
+
+    public Observable() {
+        MetaHelper.createObservable(this);
+    }
+
+    private void fire(Event event) {
+        observers.notify(event);
+    }
+}
+```
+
+```java
+class Observer {
+    public Observer() {
+        //..
+        MetaHelper.registerObserver(this, observable);
+    }
+
+    @Observer(Observable.class)
+    void onEvent(Event event) {
+        //...
+    }
+}
+```
+
+instead of:
+```java
+interface IObserver {
+    void onEvent(Event event);
+}
+```
+```java
+class Observable {
+    List<IObserver> observers;
+
+    //...
+
+    public void addObserver(IObserver observer) {
+        observers.add(observer);
+    }
+
+    public void removeObserver(IObserver observer) {
+        observers.remove(observer);
+    }
+
+    private void fire(Event event) {
+        for(IObserver o : observers)
+            o.onEvent(event);
+    }
+}
+```
+
+```java
+class Observer implements IObserver {
+    public Observer() {
+        //..
+        observable.addObserver(this);
+    }
+
+    @Override
+    void onEvent(Event event) {
+        //...
+    }
+}
+```
+
+Note that `Jeta` doesn't provide `MetaHelper` class. You should create your own helper class depending on your needs. You can use `MetaHelper` class from [jeta-samples][jeta-samples] as a prototype.
+
+[Publish–subscribe (event bus) pattern] [pubsub-pattern] also available:
+
+```java
+class Publisher {
+    private void fire(Message msg) {
+        MetaHelper.getEventBus().publish(msg);
+    }
+}
+```
+```java
+class Subscriber {
+    public Subscriber() {
+        MetaHelper.registerSubscriber(this);
+    }
+
+    @Subscribe
+    protected void onMessage(Message msg) {
+        //...
+    }
+}
+```
+See [jeta-samples project][jeta-samples] for additional event bus features.
+
+### @Meta, @MetaEntity
+Jeta provides [dependency injection][di-pattern] with some advantages. The dependencies can be extended in sub-modules (e.g. test module). It is possible to inject dependencies with parameters.
+```java
+@MetaEntity
+class Producer {
+    //...
+}
+```
+
+```java
+class Consumer {
+    @Meta
+    Producer producer;
+
+    public Consumer() {
+        MetaHelper.injectMeta(this);
+    }
+}
+```
+
+In the test module `Producer` can be easily replaced with `TestProducer`:
+```java
+@MetaEntity(ext=Producer.class)
+class TestProducer extends Producer {
+    //...
+}
+```
+
+Note that you can use `@javax.inject.Inject` instead of `@Meta`. See [jeta-samples][jeta-samples] to know how.
+
+Jeta provides dependency injection with parameters:
+```java
+@MetaEntity
+class Producer {
+    public Producer(String s, double d) {
+        //...
+    }
+}
+```
+
+```java
+class Consumer {
+    @Meta
+    MetaFactory factory;
+
+    @Factory
+    interface MetaFactory {
+        Producer getProducer(String s, double d);
+    }
+
+    public Consumer() {
+        MetaHelper.injectMeta(this);
+        Producer p = factory.getProducer("abc", 0.75);
+    }
+}
+```
+
+### @TypeCollector, @ObjectCollector
+When in the project there are many scattered classes they can be assembled with TypeCollector:
+```java
+package com.example.collector.abc;
+
+@Handler
+class HandlerA {
+    //...
+}
+```
+```java
+package com.example.collector.bcd.abc;
+
+@Handler
+class HandlerB {
+    //...
+}
+```
+
+All the handlers can be found with jeta collectors:
+```java
+class CollectorSample {
+    //...
+    private void collectHandlers() {
+        handlers = MetaHelper.collectTypes(getClass(), Handler.class);
+    }
+}
+```
+
+instead of:
+```xml
+<handlers>
+    <handler class="com.example.collector.abc.HandlerA"/>
+    <handler class="com.example.collector.bcd.abc.HandlerB"/>
+</handlers>
+```
+```java
+class CollectorSample {
+    //...
+    private void collectHandlers() {
+        // XML parsing, Class.forName(), etc
+    }
+}
+```
+In the second approach you have to remember to amend the xml file each time you create new handler. No validation also, so incorrect entered class name fails at runtime.
+
+@ObjectCollector also can be used to provide the instances of the collected objects. See [jeta-samples][jeta-samples] for more details.
+
+### @Implementation
+In case of a library or module, might be case when an implementation is unknown at compile-time and being defined only in the end-product:
+```java
+abstract class FooBuilder {
+    public abstract Foo build();
+}
+```
+
+```java
+class FooFactory {
+    public static Foo get() {
+        FooBuilder builder = MetaHelper.getImplementation(FooBuilder.class);
+        if (builder == null)
+            throw new IllegalStateException("Foo builder not defined");
+
+        return builder.build();
+    }
+}
+```
+
+In the end-product:
+```java
+@Implementation(FooBuilder.class)
+class FooBuilderImpl extends FooBuilder {
+    public Foo build() {
+        //...
+    }
+}
+```
+
+### @Validate, @Singleton, @Multiton, Custom Annotations and more.
+See [jeta-samples][jeta-samples] to find more.
 
 
-in progress...
+Configuration:
+--------------
+Jeta is configured via `jeta.properties` file (not required but recommended).
+You should put this file in the root of the source directory. In this case you need to declare in your `build.gradle`:
+```groovy
+compileJava {
+    options.sourcepath = files('src/main/java')
+}
+```
+
+Other way to provide the path to your `jeta.properties` is annotation processor option. Some `apt` plugins provides the ability to declare those options:
+```groovy
+apt {
+    arguments {
+        jetaProperties "$project.projectDir/src/main/java/jeta.properties"
+    }
+}
+```
+
+### jeta.properties:
+
+It's highly recommended to define `metasitory package` (project's package). This package is used by Jeta to generate `metasitory` class.
+```
+metasitory.package=com.company.project
+```
+
+If you need to keep some annotations without processing you can turn their processors off (note that you can use reg-exp in the annotation names):
+```
+processors.disable=Meta.*,Log
+```
+
+To speed up annotation processing, turn `utd` feature on. This option says to Jeta to use already generated code in case the source code has not been changed:
+```
+utd.enable=true
+
+# delete generated file if its source file has been removed
+utd.cleanup=true
+
+# absolute or relative to this file path where utd data is stored
+utd.dir=../../../build/jeta-utd-files
+
+# output info about utd states
+# + added or replaced
+# - removed
+# * up-to-date
+debug.utd_states=true
+```
+
+Output debug information:
+```
+debug=true
+debug.built_time=true
+```
+More options can be found in [jeta-samples project][jeta-samples]
+
+Installation (gradle):
+----------------------
+
+```groovy
+repositories {
+    maven {
+        url  "http://dl.bintray.com/brooth/maven"
+    }
+}
+
+dependencies {
+    apt 'org.brooth.jeta:jeta-apt:0.1-beta'
+    compile 'org.brooth.jeta:jeta:0.1-beta'
+}
+```
+
+Complete installation script and samples are available in [jeta-samples project][jeta-samples]
+
+License
+-------
+
+    Copyright 2015 Oleg Khalidov
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+ 
+[jeta-samples]: https://github.com/brooth/jeta-samples
+[observer-pattern]: https://en.wikipedia.org/wiki/Observer_pattern
+[pubsub-pattern]: https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern
+[di-pattern]: https://en.wikipedia.org/wiki/Dependency_injection
