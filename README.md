@@ -176,7 +176,7 @@ class TestProducer extends Producer {
 }
 ```
 
-Note that you can use `@Inject` instead of `@Meta` (see Configuration):
+Note that you can use `@Inject` instead of `@Meta`. Add this option to `jeta.properties` (see Configuration):
 ```
 meta.alias=javax.inject.Inject
 ```
@@ -202,7 +202,7 @@ class HandlerB {
 }
 ```
 
-All the handlers can be found with jeta collectors:
+All the handlers can be found:
 ```java
 class CollectorSample {
     void collectHandlers() {
@@ -231,7 +231,7 @@ In the second approach you have to remember to amend the xml file each time you 
 @ObjectCollector also can be used to provide the instances of the collected objects. See [jeta-samples][jeta-samples] to find details.
 
 ### @Implementation
-In case of a library or module, there might be case when an implementation is unknown at compile-time and being defined only in the end-product:
+In a library or module, there might be a case when an implementation is unknown at compile-time but being defined only in the end-product:
 ```java
 abstract class FooBuilder {
     public abstract Foo build();
@@ -260,7 +260,7 @@ class FooBuilderImpl extends FooBuilder {
 }
 ```
 
-### @Validate, @Singleton, @Multiton, Custom Annotations and more.
+### @Validate, @Singleton, @Multiton, @Proxy, Custom Annotations and more.
 See [jeta-samples][jeta-samples] to find more.
 
 Installation (gradle):
@@ -294,7 +294,7 @@ compileJava {
 }
 ```
 
-Other way to provide the path to your `jeta.properties` is annotation processor option. Some `apt` plugins provides the ability to declare those options:
+Other way to provide the path to your `jeta.properties` is annotation processor options. Some `apt` plugins provides the ability to declare those options:
 ```groovy
 apt {
     arguments {
