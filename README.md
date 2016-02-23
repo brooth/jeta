@@ -2,9 +2,11 @@ Jeta
 ====
 `Jeta` - is a Open Source library built upon `javax.annotation.processing` tool that brings meta programming to Java. Jeta aims to reduce boilerplate and increase error detection at compile-time.
 
+For android developers [Androjeta][androjeta] highly recommended.
+
 Examples:
 --------
-Jeta has some ready to use annotations that covers most frequently used cases. Custom annotations also available. See [jeta-samples project][jeta-samples] to find more details.
+Jeta provides ready to use annotations that handle most frequently used cases. Custom annotations also available. See [jeta-samples project][jeta-samples] to find more information.
 
 ### @Log
 Whatever logging tool is used in your project it can be provided via `@Log` annotation:
@@ -38,7 +40,6 @@ class Observable {
     }
 }
 ```
-
 ```java
 class Observer {
     Observable observable;
@@ -79,7 +80,6 @@ class Observable {
     }
 }
 ```
-
 ```java
 class Observer implements IObserver {
     Observable observable;
@@ -129,7 +129,6 @@ class Producer {
     //...
 }
 ```
-
 ```java
 class Consumer {
     @Meta
@@ -150,7 +149,6 @@ class Producer {
     }
 }
 ```
-
 ```java
 class Consumer {
     @Meta
@@ -177,7 +175,7 @@ class TestProducer extends Producer {
 ```
 
 Note that you can use `@Inject` instead of `@Meta`. Add this option to `jeta.properties` (see Configuration):
-```
+```properties
 meta.alias=javax.inject.Inject
 ```
 
@@ -231,13 +229,12 @@ In the second approach you have to remember to amend the xml file each time you 
 @ObjectCollector also can be used to provide the instances of the collected objects. See [jeta-samples][jeta-samples] to find details.
 
 ### @Implementation
-In a library or module, there might be a case when an implementation is unknown at compile-time but being defined only in the end-product:
+In a library or module, there might be the case when an implementation is unknown at compile-time and being defined only in the end-product:
 ```java
 abstract class FooBuilder {
     public abstract Foo build();
 }
 ```
-
 ```java
 class FooFactory {
     public static Foo get() {
@@ -303,20 +300,19 @@ apt {
 }
 ```
 
-### jeta.properties:
-
+#### jeta.properties:
 It's highly recommended to define `metasitory package` (project's package). This package is used by Jeta to generate `metasitory` class.
-```
+```properties
 metasitory.package=com.company.project
 ```
 
 If you need to keep some annotations without processing you can turn their processors off (note that you can use reg-exp in the annotation names):
-```
+```properties
 processors.disable=Meta.*,Log
 ```
 
 To speed up annotation processing, turn `utd` feature on. This option says to Jeta to use already generated code in case the source code has not been changed:
-```
+```properties
 utd.enable=true
 
 # delete generated file if its source file has been removed
@@ -333,7 +329,7 @@ debug.utd_states=true
 ```
 
 Output debug information:
-```
+```properties
 debug=true
 debug.built_time=true
 ```
@@ -361,3 +357,4 @@ License
 [pubsub-pattern]: https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern
 [di-pattern]: https://en.wikipedia.org/wiki/Dependency_injection
 [apt-plugins]: https://plugins.gradle.org/search?term=apt
+[androjeta]: https://github.com/brooth/androjeta
