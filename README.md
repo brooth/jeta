@@ -41,8 +41,10 @@ class Observable {
 
 ```java
 class Observer {
+    Observable observable;
+
     public Observer() {
-        //..
+        observable = new Observable();
         MetaHelper.registerObserver(this, observable);
     }
 
@@ -63,8 +65,6 @@ interface IObserver {
 class Observable {
     List<IObserver> observers;
 
-    //...
-
     public void addObserver(IObserver observer) {
         observers.add(observer);
     }
@@ -82,8 +82,10 @@ class Observable {
 
 ```java
 class Observer implements IObserver {
+    Observable observable;
+
     public Observer() {
-        //..
+        observable = new Observable();
         observable.addObserver(this);
     }
 
@@ -139,17 +141,7 @@ class Consumer {
 }
 ```
 
-In the test module `Producer` can be easily replaced with `TestProducer`:
-```java
-@MetaEntity(ext=Producer.class)
-class TestProducer extends Producer {
-    //...
-}
-```
-
-Note that you can use `@javax.inject.Inject` instead of `@Meta`. See [jeta-samples][jeta-samples] to know how.
-
-Jeta provides dependency injection with parameters:
+With parameters:
 ```java
 @MetaEntity
 class Producer {
@@ -176,8 +168,23 @@ class Consumer {
 }
 ```
 
+In the test module `Producer` can be easily replaced with `TestProducer`:
+```java
+@MetaEntity(ext=Producer.class)
+class TestProducer extends Producer {
+    //...
+}
+```
+
+Note that you can use `@Inject` instead of `@Meta` (see Configuration):
+```
+meta.alias=javax.inject.Inject
+```
+
+Static injection, providers, class injection and more in [jeta-samples][jeta-samples]
+
 ### @TypeCollector, @ObjectCollector
-When in the project there are many scattered classes they can be assembled with TypeCollector:
+If in your project there are many scattered classes and need to assemble them together:
 ```java
 package com.example.collector.abc;
 
@@ -198,9 +205,8 @@ class HandlerB {
 All the handlers can be found with jeta collectors:
 ```java
 class CollectorSample {
-    //...
-    private void collectHandlers() {
-        handlers = MetaHelper.collectTypes(getClass(), Handler.class);
+    void collectHandlers() {
+        handlers = MetaHelper.collectTypes(CollectorSample.class, Handler.class);
     }
 }
 ```
@@ -222,10 +228,10 @@ class CollectorSample {
 ```
 In the second approach you have to remember to amend the xml file each time you create new handler. No validation also, so incorrect entered class name fails at runtime.
 
-@ObjectCollector also can be used to provide the instances of the collected objects. See [jeta-samples][jeta-samples] for more details.
+@ObjectCollector also can be used to provide the instances of the collected objects. See [jeta-samples][jeta-samples] to find details.
 
 ### @Implementation
-In case of a library or module, might be case when an implementation is unknown at compile-time and being defined only in the end-product:
+In case of a library or module, there might be case when an implementation is unknown at compile-time and being defined only in the end-product:
 ```java
 abstract class FooBuilder {
     public abstract Foo build();
@@ -257,6 +263,26 @@ class FooBuilderImpl extends FooBuilder {
 ### @Validate, @Singleton, @Multiton, Custom Annotations and more.
 See [jeta-samples][jeta-samples] to find more.
 
+Installation (gradle):
+----------------------
+
+```groovy
+repositories {
+    maven {
+        url  "http://dl.bintray.com/brooth/maven"
+    }
+}
+
+dependencies {
+    apt 'org.brooth.jeta:jeta-apt:0.1-beta'
+    compile 'org.brooth.jeta:jeta:0.1-beta'
+}
+```
+
+Note that `Jeta` is a annotation processing tool so you need an `apt` plugin also:
+[gradle apt plugins][apt-plugins]
+
+Complete installation script and samples are available in [jeta-samples project][jeta-samples]
 
 Configuration:
 --------------
@@ -313,24 +339,6 @@ debug.built_time=true
 ```
 More options can be found in [jeta-samples project][jeta-samples]
 
-Installation (gradle):
-----------------------
-
-```groovy
-repositories {
-    maven {
-        url  "http://dl.bintray.com/brooth/maven"
-    }
-}
-
-dependencies {
-    apt 'org.brooth.jeta:jeta-apt:0.1-beta'
-    compile 'org.brooth.jeta:jeta:0.1-beta'
-}
-```
-
-Complete installation script and samples are available in [jeta-samples project][jeta-samples]
-
 License
 -------
 
@@ -352,3 +360,4 @@ License
 [observer-pattern]: https://en.wikipedia.org/wiki/Observer_pattern
 [pubsub-pattern]: https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern
 [di-pattern]: https://en.wikipedia.org/wiki/Dependency_injection
+[apt-plugins]: https://plugins.gradle.org/search?term=apt
