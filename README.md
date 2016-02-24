@@ -2,9 +2,9 @@ Jeta
 ====
 `Jeta` - is a Open Source library built upon `javax.annotation.processing` tool that brings meta programming to Java. Jeta aims to reduce boilerplate and increase error detection at compile-time.
 
-For android developers [Androjeta][androjeta] highly recommended.
+For android developers [Androjeta][androjeta] is recommended.
 
-Examples:
+Usage:
 --------
 Jeta provides ready to use annotations that handle most frequently used cases. Custom annotations also available. See [jeta-samples project][jeta-samples] to find more information.
 
@@ -25,7 +25,7 @@ class LogSample {
 The second  approach instigates copy-paste. The programmers often forget to replace the class name so many loggers have incorrect names.
 
 ### @Observer, @Subject, @Subscribe
-Jeta makes [observer pattens][observer-pattern] easy to use:
+Easy to use [observer pattens][observer-pattern]:
 ```java
 class Observable {
     @Subject
@@ -174,7 +174,7 @@ class TestProducer extends Producer {
 }
 ```
 
-Note that you can use `@Inject` instead of `@Meta`. Add this option to `jeta.properties` (see Configuration):
+You can use `@Inject` instead of `@Meta`. Add the option below to `jeta.properties` (see [Configuration][jeta#configuration]):
 ```properties
 meta.alias=javax.inject.Inject
 ```
@@ -182,7 +182,7 @@ meta.alias=javax.inject.Inject
 Static injection, providers, class injection and more in [jeta-samples][jeta-samples]
 
 ### @TypeCollector, @ObjectCollector
-If in your project there are many scattered classes and need to assemble them together:
+Jeta collectors assemble scattered classes:
 ```java
 package com.example.collector.abc;
 
@@ -202,6 +202,7 @@ class HandlerB {
 
 All the handlers can be found:
 ```java
+@TypeCollector(Handler.class)
 class CollectorSample {
     void collectHandlers() {
         handlers = MetaHelper.collectTypes(CollectorSample.class, Handler.class);
@@ -218,18 +219,17 @@ instead of:
 ```
 ```java
 class CollectorSample {
-    //...
-    private void collectHandlers() {
+    void collectHandlers() {
         // XML parsing, Class.forName(), etc
     }
 }
 ```
-In the second approach you have to remember to amend the xml file each time you create new handler. No validation also, so incorrect entered class name fails at runtime.
+In the second approach you have to remember to amend the xml file each time you create new handler. No validation also, so incorrect entered class name induces `ClassNotFoundException` at runtime.
 
 @ObjectCollector also can be used to provide the instances of the collected objects. See [jeta-samples][jeta-samples] to find details.
 
 ### @Implementation
-In a library or module, there might be the case when an implementation is unknown at compile-time and being defined only in the end-product:
+In a library or module, there might be a case when an implementation is unknown at compile-time and being defined in the end-product only:
 ```java
 abstract class FooBuilder {
     public abstract Foo build();
@@ -306,12 +306,12 @@ It's highly recommended to define `metasitory package` (project's package). This
 metasitory.package=com.company.project
 ```
 
-If you need to keep some annotations without processing you can turn their processors off (note that you can use reg-exp in the annotation names):
+If you need to keep some annotations without processing you can turn their processors off (reg-exp is allowed in the annotation names):
 ```properties
 processors.disable=Meta.*,Log
 ```
 
-To speed up annotation processing, turn `utd` feature on. This option says to Jeta to use already generated code in case the source code has not been changed:
+To speed up annotation processing, it's recommended to turn `utd` feature on. This option says to Jeta to use already generated code in case the source code hasn't been changed:
 ```properties
 utd.enable=true
 
@@ -358,3 +358,4 @@ License
 [di-pattern]: https://en.wikipedia.org/wiki/Dependency_injection
 [apt-plugins]: https://plugins.gradle.org/search?term=apt
 [androjeta]: https://github.com/brooth/androjeta
+[jeta#configuration]: :https://github.com/brooth/jeta#configuration
