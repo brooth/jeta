@@ -174,7 +174,7 @@ class TestProducer extends Producer {
 }
 ```
 
-You can use `@Inject` instead of `@Meta`. Add the option below to `jeta.properties` (see [Configuration][jeta#configuration]):
+You can use `@Inject` instead of `@Meta`. Add the option below to `jeta.properties` (see [Configuration][jeta-configuration]):
 ```properties
 meta.alias=javax.inject.Inject
 ```
@@ -358,4 +358,4 @@ License
 [di-pattern]: https://en.wikipedia.org/wiki/Dependency_injection
 [apt-plugins]: https://plugins.gradle.org/search?term=apt
 [androjeta]: https://github.com/brooth/androjeta
-[jeta#configuration]: :https://github.com/brooth/jeta#configuration
+[jeta-configuration]: :https://github.com/brooth/jeta#configuration
