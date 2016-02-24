@@ -21,7 +21,7 @@ import com.squareup.javapoet.*;
 import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.observer.EventObserver;
-import org.brooth.jeta.observer.Observer;
+import org.brooth.jeta.observer.Observe;
 import org.brooth.jeta.observer.ObserverHandler;
 import org.brooth.jeta.observer.ObserverMetacode;
 
@@ -36,7 +36,7 @@ import java.util.List;
  */public class ObserverProcessor extends AbstractProcessor {
 
     public ObserverProcessor() {
-        super(Observer.class);
+        super(Observe.class);
     }
 
     @Override
@@ -56,7 +56,7 @@ import java.util.List;
                 .addStatement("$T handler = new $T()", handlerClassName, handlerClassName);
 
         for (Element element : context.elements()) {
-            final Observer annotation = element.getAnnotation(Observer.class);
+            final Observe annotation = element.getAnnotation(Observe.class);
             String observableClass = MetacodeUtils.extractClassName(new Runnable() {
                 @Override
                 public void run() {

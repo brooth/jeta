@@ -20,7 +20,7 @@ import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
 import org.brooth.jeta.TestMetaHelper;
 import org.brooth.jeta.log.Log;
-import org.brooth.jeta.observer.Observer;
+import org.brooth.jeta.observer.Observe;
 import org.brooth.jeta.observer.ObserverHandler;
 import org.brooth.jeta.observer.Observers;
 import org.brooth.jeta.observer.Subject;
@@ -66,21 +66,21 @@ public class ObserverTest extends BaseTest {
             TestMetaHelper.createLogger(this);
         }
 
-        @Observer(ObservableHolder.class)
+        @Observe(ObservableHolder.class)
         void onEventOne(EventOne event) {
             logger.debug("onEventOne(value: %s)", event.value);
             onEventOneInvokes++;
             lastEventOne = event;
         }
 
-        @Observer(ObservableHolder.class)
+        @Observe(ObservableHolder.class)
         void onEventTwo(EventTwo event) {
             logger.debug("onEventTwo(value: %s)", event.value);
             onEventTwoInvokes++;
             lastEventTwo = event;
         }
 
-        @Observer(OtherObservableHolder.class)
+        @Observe(OtherObservableHolder.class)
         void onOtherEventOne(EventOne event) {
             logger.debug("onOtherEventOne(value: %s)", event.value);
             onOtherEventOneInvokes++;
@@ -99,7 +99,7 @@ public class ObserverTest extends BaseTest {
             TestMetaHelper.createLogger(this);
         }
 
-        @Observer(OtherObservableHolder.class)
+        @Observe(OtherObservableHolder.class)
         void onOtherEventOne(EventOne event) {
             logger.debug("onOtherEventOne(value: %s)", event.value);
             onOtherEventOneInvokes++;
@@ -259,7 +259,7 @@ public class ObserverTest extends BaseTest {
             handler = TestMetaHelper.registerObserver(this, observable);
         }
 
-        @Observer(OtherObservableHolder.class)
+        @Observe(OtherObservableHolder.class)
         void onOtherEventOne(EventOne event) {
             logger.debug("onOtherEventOne()");
             // unregister during the event is being notified

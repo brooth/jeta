@@ -23,6 +23,6 @@ import java.lang.annotation.Target;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 @Target(ElementType.METHOD)
-public @interface Observer {
+public @interface Observe {
     Class<?>[] value();
 }
