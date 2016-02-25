@@ -1,6 +1,6 @@
 Jeta
 ====
-`Jeta` - is a Open Source library built upon `javax.annotation.processing` tool that makes available meta programming in Java. Jeta aims to reduce boilerplate and increase error detection at compile-time.
+`Jeta` - is a Open Source library built upon `javax.annotation.processing` tool that makes available meta programming in Java. `Jeta` aims to reduce boilerplate and increase error detection at compile-time.
 
 Meta programming is achieved by code generation which makes programs fast and stable at runtime. The main goal is to ensure that the compiled code is the working code. Also the code generators are being optimized to provide fast code.
 
@@ -10,10 +10,10 @@ For android developers [Androjeta][androjeta] is recommended.
 
 Usage:
 --------
-Jeta provides ready to use annotations that handle most frequently used cases. Custom annotations also available. See [jeta-samples project][jeta-samples] to find more information.
+`Jeta` provides ready to use annotations that handle most frequently use cases. Custom annotations also available. See [jeta-samples project][jeta-samples] to find more information.
 
 ### @Log
-Whatever logging tool is used in your project it can be provided via `@Log` annotation:
+Any logging tool can be provided via `@Log` annotation:
 ```java
 class LogSample {
     @Log
@@ -126,7 +126,7 @@ class Subscriber {
 See [jeta-samples project][jeta-samples] for additional event bus features.
 
 ### @Meta, @MetaEntity
-Jeta provides [dependency injection][di-pattern] with some advantages. The dependencies can be extended in sub-modules (e.g. test module). It is possible to inject dependencies with parameters.
+`Jeta` provides [dependency injection][di-pattern] with some advantages. The dependencies can be extended in sub-modules (e.g. test module). It is possible to inject dependencies with parameters.
 ```java
 @MetaEntity
 class Producer {
@@ -186,7 +186,7 @@ meta.alias=javax.inject.Inject
 Static injection, providers, class injection and more in [jeta-samples][jeta-samples]
 
 ### @TypeCollector, @ObjectCollector
-Jeta collectors assemble scattered classes:
+`Jeta` collectors assemble scattered classes:
 ```java
 package com.example.collector.abc;
 
@@ -230,7 +230,7 @@ class CollectorSample {
 ```
 In the second approach you have to remember to amend the xml file each time you create new handler. No validation also, so incorrect entered class name induces `ClassNotFoundException` at runtime.
 
-@ObjectCollector also can be used to provide the instances of the collected objects. See [jeta-samples][jeta-samples] to find details.
+`@ObjectCollector` also can be used to provide the instances of the collected objects. See [jeta-samples][jeta-samples] to find details.
 
 ### @Implementation
 In a library or module, there might be a case when an implementation is unknown at compile-time and being defined in the end-product only:
@@ -287,7 +287,7 @@ Complete installation script and samples are available in [jeta-samples project]
 
 Configuration:
 --------------
-Jeta is configured via `jeta.properties` file (not required but recommended).
+`Jeta` is configured via `jeta.properties` file (not required but recommended).
 You should put this file in the root of the source directory. In this case you need to declare in your `build.gradle`:
 ```groovy
 compileJava {
@@ -305,7 +305,7 @@ apt {
 ```
 
 #### jeta.properties:
-It's highly recommended to define `metasitory package` (project's package). This package is used by Jeta to generate `metasitory` class.
+It's highly recommended to define `metasitory package` (project's package). This package is used by `Jeta` to generate `metasitory` class.
 ```properties
 metasitory.package=com.company.project
 ```
@@ -315,7 +315,7 @@ If you need to keep some annotations without processing you can turn their proce
 processors.disable=Meta.*,Log
 ```
 
-To speed up annotation processing, it's recommended to turn `utd` feature on. This option says to Jeta to use already generated code in case the source code hasn't been changed:
+To speed up annotation processing, it's recommended to turn `utd` feature on. This option says to `Jeta` to use already generated code in case the source code hasn't been changed:
 ```properties
 utd.enable=true
 
@@ -362,4 +362,4 @@ License
 [di-pattern]: https://en.wikipedia.org/wiki/Dependency_injection
 [apt-plugins]: https://plugins.gradle.org/search?term=apt
 [androjeta]: https://github.com/brooth/androjeta
-[jeta-configuration]: :https://github.com/brooth/jeta#configuration
+[jeta-configuration]: https://github.com/brooth/jeta#configuration
