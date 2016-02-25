@@ -310,7 +310,7 @@ It's highly recommended to define `metasitory package` (project's package). This
 metasitory.package=com.company.project
 ```
 
-If you need to keep some annotations without processing you can turn their processors off (reg-exp is allowed in the annotation names):
+If you need to keep some annotations without processing you can turn their processors off (`reg-exp` is allowed in the annotation names):
 ```properties
 processors.disable=Meta.*,Log
 ```
@@ -322,10 +322,10 @@ utd.enable=true
 # delete generated file if its source file has been removed
 utd.cleanup=true
 
-# absolute or relative to this file path where utd data is stored
+# absolute or relative `jeta.properties' file path where utd data is stored
 utd.dir=../../../build/jeta-utd-files
 
-# output info about utd states
+# output info about utd file state
 # + added or replaced
 # - removed
 # * up-to-date
