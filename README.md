@@ -1,6 +1,6 @@
 Jeta
 ====
-`Jeta` - is an Open Source library built on `javax.annotation.processing` that brings meta programming in a Java project. `Jeta` aims to reduce boilerplate and increase error detection at compile-time.
+`Jeta` - is an Open Source library built on `javax.annotation.processing` that brings meta programming in your Java project. `Jeta` aims to reduce boilerplate and increase error detection at compile-time.
 
 Meta programming is achieved by code generation which makes programs fast and stable at runtime. The main goal is to ensure that the compiled code is the working code. Also the code generators are being optimized to provide fast code.
 
