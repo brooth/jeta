@@ -4,7 +4,7 @@ Jeta
 
 Meta programming is achieved by code generation which makes programs fast and stable at runtime. The main goal is to ensure that the compiled metacode is the working code. In the other hand, `Jeta` was designed to provide rapid code.
 
-So if you are dissatisfied with `Java Reflection`, then you should give it a try :)
+So if you are dissatisfied with `Java Reflection`, welcome to aboard :)
 
 For android developers [Androjeta][androjeta] is recommended.
 
