@@ -27,7 +27,9 @@ import org.brooth.jeta.apt.metasitory.MetasitoryWriter;
 import org.brooth.jeta.apt.processors.*;
 
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.*;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
@@ -300,6 +302,11 @@ public class JetaProcessor extends AbstractProcessor {
 
                 // go through annotated elements
                 for (Element element : elements) {
+                    // yeah, happens...
+                    if (element.getAnnotation(annotation) == null)
+                        throw new ProcessingException("Unknown error in element \"" + element.toString() + "\". " +
+                                "Please, check it for potential compilation issues.");
+
                     logger.debug("found element: " + element.toString());
 
                     // go through element's masters

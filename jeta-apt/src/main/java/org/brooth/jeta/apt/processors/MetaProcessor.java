@@ -18,12 +18,13 @@ package org.brooth.jeta.apt.processors;
 
 import com.google.common.base.Joiner;
 import com.squareup.javapoet.*;
+import org.brooth.jeta.Factory;
 import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.ProcessingException;
 import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.meta.InjectMetacode;
 import org.brooth.jeta.meta.Meta;
 import org.brooth.jeta.meta.MetaEntityFactory;
-import org.brooth.jeta.Factory;
 
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -223,6 +224,9 @@ public class MetaProcessor extends AbstractProcessor {
             elementTypeStr = getGenericType(elementTypeStr);
 
         TypeElement typeElement = env.getElementUtils().getTypeElement(elementTypeStr);
+        if (typeElement == null)
+            throw new ProcessingException("Element \"" + elementTypeStr + "\" not suitable for meta processing.");
+
         Factory factory = typeElement.getAnnotation(Factory.class);
         if (factory != null) {
             if (classOf)

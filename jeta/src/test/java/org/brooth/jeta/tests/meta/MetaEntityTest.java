@@ -16,19 +16,12 @@
 
 package org.brooth.jeta.tests.meta;
 
-import org.brooth.jeta.BaseTest;
-import org.brooth.jeta.IMetacode;
-import org.brooth.jeta.Logger;
-import org.brooth.jeta.TestMetaHelper;
+import org.brooth.jeta.*;
+import org.brooth.jeta.log.Log;
 import org.brooth.jeta.meta.Meta;
 import org.brooth.jeta.meta.MetaEntity;
-import org.brooth.jeta.log.Log;
 import org.brooth.jeta.metasitory.ClassForNameMetasitory;
 import org.brooth.jeta.metasitory.Criteria;
-import org.brooth.jeta.Constructor;
-import org.brooth.jeta.Factory;
-import org.brooth.jeta.Lazy;
-import org.brooth.jeta.Provider;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -98,6 +91,8 @@ public class MetaEntityTest extends BaseTest {
         Lazy<MetaEntityOne> lazy;
         @Inject
         Provider<MetaEntityOne> provider;
+        @Inject
+        javax.inject.Provider<MetaEntityOne> javaxProvider;
     }
 
     @Test
@@ -124,6 +119,9 @@ public class MetaEntityTest extends BaseTest {
         assertFalse(holder.entity == holder.lazy.get());
         assertFalse(holder.entity == holder.provider.get());
         assertFalse(holder.lazy.get() == holder.provider.get());
+
+        assertThat(holder.javaxProvider, notNullValue());
+        assertThat(holder.javaxProvider.get().value, is("one"));
     }
 
     public static class MetaEntityTwo {
