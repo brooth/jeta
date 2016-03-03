@@ -17,7 +17,7 @@
 package org.brooth.jeta.metasitory;
 
 import org.brooth.jeta.IMetacode;
-import org.brooth.jeta.util.Provider;
+import org.brooth.jeta.Provider;
 
 import java.util.Map;
 

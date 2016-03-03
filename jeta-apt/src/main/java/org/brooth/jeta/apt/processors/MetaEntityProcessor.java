@@ -26,7 +26,7 @@ import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.meta.IMetaEntity;
 import org.brooth.jeta.meta.MetaEntity;
 import org.brooth.jeta.meta.MetaEntityMetacode;
-import org.brooth.jeta.util.Constructor;
+import org.brooth.jeta.Constructor;
 
 import javax.annotation.Nullable;
 import javax.lang.model.element.*;

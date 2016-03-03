@@ -19,7 +19,7 @@ package org.brooth.jeta.collector;
 import com.google.common.base.Preconditions;
 import org.brooth.jeta.MasterClassController;
 import org.brooth.jeta.metasitory.Metasitory;
-import org.brooth.jeta.util.Provider;
+import org.brooth.jeta.Provider;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;

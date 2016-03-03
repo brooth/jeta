@@ -116,7 +116,7 @@ public class TestMetaHelper {
     }
 
     public static void createLogger(Object master) {
-        new LogController(getInstance().metasitory, master).createLogger(getInstance().loggerProvider);
+        new LogController(getInstance().metasitory, master).createLoggers(getInstance().loggerProvider);
     }
 
     public static <M> SingletonMetacode<M> getSingleton(Class<M> masterClass) {

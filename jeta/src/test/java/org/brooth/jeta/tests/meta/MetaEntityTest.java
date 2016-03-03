@@ -25,10 +25,10 @@ import org.brooth.jeta.meta.MetaEntity;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.metasitory.ClassForNameMetasitory;
 import org.brooth.jeta.metasitory.Criteria;
-import org.brooth.jeta.util.Constructor;
-import org.brooth.jeta.util.Factory;
-import org.brooth.jeta.util.Lazy;
-import org.brooth.jeta.util.Provider;
+import org.brooth.jeta.Constructor;
+import org.brooth.jeta.Factory;
+import org.brooth.jeta.Lazy;
+import org.brooth.jeta.Provider;
 import org.junit.Test;
 
 import javax.inject.Inject;

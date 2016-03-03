@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4'
-    }
-}
+package org.brooth.jeta;
 
-apply plugin: 'java'
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
 
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
-
-dependencies {
-    compile project(':jeta-api')
-    compile 'com.squareup:javapoet:1.3.0'
+/**
+ * @author Oleg Khalidov (brooth@gmail.com)
+ */
+@Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
+public @interface Constructor {
 }

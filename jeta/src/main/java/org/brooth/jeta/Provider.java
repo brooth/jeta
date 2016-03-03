@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package org.brooth.jeta.util;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
+package org.brooth.jeta;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-@Target(ElementType.METHOD)
-public @interface Constructor {
+public interface Provider<T> {
+    T get();
 }

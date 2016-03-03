@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package org.brooth.jeta.util;
+package org.brooth.jeta;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface Lazy<T> {
-    public T get(); 
+@Target(ElementType.TYPE)
+public @interface Factory {
 }

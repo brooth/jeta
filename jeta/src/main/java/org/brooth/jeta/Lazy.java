@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.brooth.jeta.util;
+package org.brooth.jeta;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface Provider<T> {
-    public T get(); 
+public interface Lazy<T> {
+    T get();
 }

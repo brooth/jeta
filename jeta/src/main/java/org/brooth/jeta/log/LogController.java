@@ -29,7 +29,7 @@ public class LogController extends MasterController<Object, LogMetacode<Object>>
         super(metasitory, master, Log.class);
     }
 
-    public void createLogger(NamedLoggerProvider<?> loggerProvider) {
+    public void createLoggers(NamedLoggerProvider<?> loggerProvider) {
         Preconditions.checkNotNull(loggerProvider, "loggerProvider");
 
         for (LogMetacode<Object> metacode : metacodes)

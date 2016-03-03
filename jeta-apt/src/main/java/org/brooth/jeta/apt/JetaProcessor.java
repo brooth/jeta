@@ -49,7 +49,6 @@ import java.util.*;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 @SupportedAnnotationTypes("*")
-@SupportedSourceVersion(SourceVersion.RELEASE_5)
 public class JetaProcessor extends AbstractProcessor {
 
     public static final String METACODE_CLASS_POSTFIX = "_Metacode";
@@ -71,6 +70,11 @@ public class JetaProcessor extends AbstractProcessor {
 
     private String relateToPath = null;
     private String sourcePath = null;
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {

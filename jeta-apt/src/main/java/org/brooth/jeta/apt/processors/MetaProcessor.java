@@ -23,8 +23,9 @@ import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.meta.InjectMetacode;
 import org.brooth.jeta.meta.Meta;
 import org.brooth.jeta.meta.MetaEntityFactory;
-import org.brooth.jeta.util.Factory;
+import org.brooth.jeta.Factory;
 
+import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
@@ -40,18 +41,22 @@ public class MetaProcessor extends AbstractProcessor {
 
     private TypeName metaEntityFactoryTypeName = TypeName.get(MetaEntityFactory.class);
 
+    @Nullable
+    private String providerAlias;
+
     public MetaProcessor() {
         super(Meta.class);
     }
 
     @Override
     public Set<Class<? extends Annotation>> collectElementsAnnotatedWith() {
-        String alias = processingContext.processingProperties().getProperty("meta.alias", "");
-        if (!alias.isEmpty()) {
+        providerAlias = processingContext.processingProperties().getProperty("meta.provider.alias", null);
+        String metaAlias = processingContext.processingProperties().getProperty("meta.alias", "");
+        if (!metaAlias.isEmpty()) {
             try {
-                Class<?> aliasClass = Class.forName(alias);
+                Class<?> aliasClass = Class.forName(metaAlias);
                 if (aliasClass.isAssignableFrom(Annotation.class))
-                    throw new IllegalArgumentException(alias + " is not a annotation type.");
+                    throw new IllegalArgumentException(metaAlias + " is not a annotation type.");
 
                 HashSet<Class<? extends Annotation>> set = new HashSet<>();
                 set.add(annotation);
@@ -61,7 +66,7 @@ public class MetaProcessor extends AbstractProcessor {
                 return set;
 
             } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Failed to load meta alias annotation " + alias, e);
+                throw new RuntimeException("Failed to load meta alias annotation " + metaAlias, e);
             }
         }
 
@@ -162,8 +167,12 @@ public class MetaProcessor extends AbstractProcessor {
         String returnTypeStr = env.getTypeUtils().erasure(returnTypeMirror).toString();
         String getInstanceStr = String.format("getInstance(%s)", Joiner.on(", ").join(params.values()));
 
+        if (providerAlias != null && returnTypeStr.equals(providerAlias)) {
+            returnTypeStr = "org.brooth.jeta.Provider";
+        }
+
         switch (returnTypeStr) {
-            case "org.brooth.jeta.util.Provider": {
+            case "org.brooth.jeta.Provider": {
                 returnTypeStr = getGenericType(returnTypeMirror.toString());
 
                 TypeSpec providerTypeSpec = TypeSpec.anonymousClassBuilder("")
@@ -179,7 +188,7 @@ public class MetaProcessor extends AbstractProcessor {
                 methodBuilder.addStatement(statementPrefix + " $L", providerTypeSpec);
                 break;
             }
-            case "org.brooth.jeta.util.Lazy": {
+            case "org.brooth.jeta.Lazy": {
                 returnTypeStr = getGenericType(returnTypeMirror.toString());
                 ClassName returnClassName = ClassName.bestGuess(returnTypeStr);
 

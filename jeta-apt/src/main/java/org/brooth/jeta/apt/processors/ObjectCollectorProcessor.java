@@ -24,7 +24,7 @@ import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.collector.ObjectCollector;
 import org.brooth.jeta.collector.ObjectCollectorMetacode;
-import org.brooth.jeta.util.Provider;
+import org.brooth.jeta.Provider;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;

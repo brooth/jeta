@@ -22,7 +22,7 @@ import org.brooth.jeta.TestMetaHelper;
 import org.brooth.jeta.collector.ObjectCollector;
 import org.brooth.jeta.collector.TypeCollector;
 import org.brooth.jeta.log.Log;
-import org.brooth.jeta.util.Provider;
+import org.brooth.jeta.Provider;
 import org.junit.Test;
 
 import java.util.List;

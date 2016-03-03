@@ -16,7 +16,7 @@
 
 package org.brooth.jeta.collector;
 
-import org.brooth.jeta.util.Provider;
+import org.brooth.jeta.Provider;
 
 import java.lang.annotation.Annotation;
 import java.util.List;

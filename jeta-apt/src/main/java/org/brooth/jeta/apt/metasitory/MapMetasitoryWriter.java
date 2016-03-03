@@ -82,7 +82,7 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
         methodBuilder.addCode("result.put($L.class,\n" +
                         "\tnew $T(\n" +
                         "\t\t$L.class,\n" +
-                        "\t\tnew org.brooth.jeta.util.Provider<$L>() {\n" +
+                        "\t\tnew org.brooth.jeta.Provider<$L>() {\n" +
                         "\t\t\tpublic $L get() {\n" +
                         "\t\t\t\treturn new $L();\n" +
                         "\t\t}},\n" +
