@@ -275,8 +275,8 @@ repositories {
 }
 
 dependencies {
-    apt 'org.brooth.jeta:jeta-apt:0.2-beta'
-    compile 'org.brooth.jeta:jeta:0.2-beta'
+    apt 'org.brooth.jeta:jeta-apt:0.3-beta'
+    compile 'org.brooth.jeta:jeta:0.3-beta'
 }
 ```
 

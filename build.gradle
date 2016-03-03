@@ -50,11 +50,12 @@ subprojects {
 
     publishing {
         publications {
-            MyPublication(MavenPublication) {
+            pubs(MavenPublication) {
                 from components.java
-                groupId GROUP_ID
-                artifactId ARTIFACT_ID
-                version VERSION
+                if (tasks.findByName('sourcesJar'))
+                    artifact sourcesJar
+                if (tasks.findByName('noAptJar'))
+                    artifact noAptJar
             }
         }
     }
@@ -62,7 +63,7 @@ subprojects {
     bintray {
         user = 'brooth'
         key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('bintrayApiKey')
-        publications = ['MyPublication']
+        publications = ['pubs']
 
         pkg {
             repo = 'maven'
