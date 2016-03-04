@@ -33,7 +33,7 @@ public class MetaEntityFactory {
 
     public MetaEntityFactory(Metasitory metasitory) {
         Collection<IMetacode<?>> entities = metasitory.search(new Criteria.Builder().usesAny(MetaEntity.class).build());
-        this.graph = new HashMap<>(entities.size());
+        this.graph = new HashMap<Class<?>, MetaEntityMetacode<?, ?>>(entities.size());
 
         // fill all meta items
         for (IMetacode<?> entity : entities) {

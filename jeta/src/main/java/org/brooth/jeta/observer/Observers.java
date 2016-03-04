@@ -25,7 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class Observers<E> {
 
-    private final List<EventObserver<E>> observers = new CopyOnWriteArrayList<>();
+    private final List<EventObserver<E>> observers = new CopyOnWriteArrayList<EventObserver<E>>();
 
     public int notify(E event) {
         int result = observers.size();
@@ -54,7 +54,7 @@ public class Observers<E> {
 
     public Handler<E> register(EventObserver<E> observer) {
         observers.add(observer);
-        return new Handler<>(observers, observer);
+        return new Handler<E>(observers, observer);
     }
 
     /**

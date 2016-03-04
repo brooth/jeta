@@ -27,9 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class BaseEventBus implements EventBus {
 
-    protected ConcurrentHashMap<Class<?>, Subscribers<?>> subscribersMap = new ConcurrentHashMap<>();
+    protected ConcurrentHashMap<Class<?>, Subscribers<?>> subscribersMap = new ConcurrentHashMap<Class<?>, Subscribers<?>>();
 
-    @Override
     public <E extends Message> Observers.Handler<E> register(Class<E> eventClass, EventObserver<E> observer, int priority) {
         Preconditions.checkNotNull(eventClass, "eventClass");
         Preconditions.checkNotNull(eventClass, "observer");
@@ -37,7 +36,7 @@ public class BaseEventBus implements EventBus {
         @SuppressWarnings("unchecked")
         Subscribers<E> subscribers = (Subscribers<E>) subscribersMap.get(eventClass);
         if (subscribers == null) {
-            subscribers = new Subscribers<>();
+            subscribers = new Subscribers<E>();
             @SuppressWarnings("unchecked")
             Subscribers<E> quicker = (Subscribers<E>) subscribersMap.putIfAbsent(eventClass, subscribers);
             if (quicker != null)
@@ -47,7 +46,6 @@ public class BaseEventBus implements EventBus {
         return subscribers.register(observer, priority);
     }
 
-    @Override
     public <E extends Message> void publish(E event) {
         Preconditions.checkNotNull(event, "event");
 

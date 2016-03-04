@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class Subscribers<E extends Message> {
 
-    private Observers<E> observers = new ObserversDecorator<>();
+    private Observers<E> observers = new ObserversDecorator<E>();
 
     public int notify(E event) {
         return observers.notify(event);
@@ -48,7 +48,7 @@ public class Subscribers<E extends Message> {
     }
 
     public synchronized Observers.Handler<E> register(EventObserver<E> observer, int priority) {
-        Observers.Handler<E> handler = observers.register(new PriorityEventObserver<>(observer, priority));
+        Observers.Handler<E> handler = observers.register(new PriorityEventObserver<E>(observer, priority));
         ((ObserversDecorator<E>) observers).order();
         return handler;
     }
@@ -62,7 +62,6 @@ public class Subscribers<E extends Message> {
             this.priority = priority;
         }
 
-        @Override
         public void onEvent(E event) {
             observer.onEvent(event);
         }
@@ -70,7 +69,7 @@ public class Subscribers<E extends Message> {
 
     private static class ObserversDecorator<E> extends Observers<E> {
         private void order() {
-            List<EventObserver<E>> copy = new ArrayList<>(getAll());
+            List<EventObserver<E>> copy = new ArrayList<EventObserver<E>>(getAll());
             Collections.sort(copy, new PriorityComparator());
             clear();
             addAll(copy);
@@ -78,7 +77,6 @@ public class Subscribers<E extends Message> {
     }
 
     private static class PriorityComparator implements Comparator<EventObserver<?>> {
-        @Override
         public int compare(EventObserver<?> o1, EventObserver<?> o2) {
             return ((PriorityEventObserver<?>) o1).priority ==
                     ((PriorityEventObserver<?>) o2).priority ? 0 :

@@ -20,7 +20,8 @@ package org.brooth.jeta.meta;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface InjectMetacode<M> {
-    public void applyMeta(M master, MetaEntityFactory factory);
 
-    public void applyStaticMeta(MetaEntityFactory factory);
+    boolean applyMeta(Scope scope, M master, MetaEntityFactory factory);
+
+    boolean applyStaticMeta(Scope scope, MetaEntityFactory factory);
 }

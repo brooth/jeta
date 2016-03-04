@@ -17,6 +17,7 @@
 package org.brooth.jeta.apt.processors;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.Factory;
 import org.brooth.jeta.apt.MetacodeUtils;
@@ -38,7 +39,7 @@ import java.util.*;
  */
 public class MetaProcessor extends AbstractProcessor {
 
-    private final Map<TypeElement, String> factoryElements = new HashMap<>();
+    private final Map<TypeElement, String> factoryElements = new HashMap<TypeElement, String>();
 
     private TypeName metaEntityFactoryTypeName = TypeName.get(MetaEntityFactory.class);
 
@@ -59,7 +60,7 @@ public class MetaProcessor extends AbstractProcessor {
                 if (aliasClass.isAssignableFrom(Annotation.class))
                     throw new IllegalArgumentException(metaAlias + " is not a annotation type.");
 
-                HashSet<Class<? extends Annotation>> set = new HashSet<>();
+                HashSet<Class<? extends Annotation>> set = new HashSet<Class<? extends Annotation>>();
                 set.add(annotation);
                 @SuppressWarnings("unchecked")
                 Class<? extends Annotation> aliasAnnotation = (Class<? extends Annotation>) aliasClass;
@@ -74,7 +75,6 @@ public class MetaProcessor extends AbstractProcessor {
         return super.collectElementsAnnotatedWith();
     }
 
-    @Override
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
@@ -140,7 +140,7 @@ public class MetaProcessor extends AbstractProcessor {
         for (Element subElement : element.getEnclosedElements())
             if (subElement.getKind() == ElementKind.METHOD) {
                 ExecutableElement method = (ExecutableElement) subElement;
-                Map<TypeMirror, String> params = new HashMap<>();
+                Map<TypeMirror, String> params = new HashMap<TypeMirror, String>();
                 for (VariableElement param : method.getParameters())
                     params.put(param.asType(), param.getSimpleName().toString());
 
@@ -172,49 +172,43 @@ public class MetaProcessor extends AbstractProcessor {
             returnTypeStr = "org.brooth.jeta.Provider";
         }
 
-        switch (returnTypeStr) {
-            case "org.brooth.jeta.Provider": {
-                returnTypeStr = getGenericType(returnTypeMirror.toString());
+        if (returnTypeStr.equals("org.brooth.jeta.Provider")) {
+            returnTypeStr = getGenericType(returnTypeMirror.toString());
+            TypeSpec providerTypeSpec = TypeSpec.anonymousClassBuilder("")
+                    .addSuperinterface(TypeName.get(returnTypeMirror))
+                    .addMethod(MethodSpec.methodBuilder("get")
+                            .addAnnotation(Override.class)
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(ClassName.bestGuess(returnTypeStr))
+                            .addStatement("return " + getResultStatement(env, returnTypeStr, getInstanceStr))
+                            .build())
+                    .build();
+            methodBuilder.addStatement(statementPrefix + " $L", providerTypeSpec);
 
-                TypeSpec providerTypeSpec = TypeSpec.anonymousClassBuilder("")
-                        .addSuperinterface(TypeName.get(returnTypeMirror))
-                        .addMethod(MethodSpec.methodBuilder("get")
-                                .addAnnotation(Override.class)
-                                .addModifiers(Modifier.PUBLIC)
-                                .returns(ClassName.bestGuess(returnTypeStr))
-                                .addStatement("return " + getResultStatement(env, returnTypeStr, getInstanceStr))
-                                .build())
-                        .build();
+        } else if (returnTypeStr.equals("org.brooth.jeta.Lazy")) {
+            returnTypeStr = getGenericType(returnTypeMirror.toString());
+            ClassName returnClassName = ClassName.bestGuess(returnTypeStr);
+            TypeSpec lazyTypeSpec = TypeSpec.anonymousClassBuilder("")
+                    .addSuperinterface(TypeName.get(returnTypeMirror))
+                    .addField(returnClassName, "instance", Modifier.PRIVATE)
+                    .addMethod(MethodSpec.methodBuilder("get")
+                            .addAnnotation(Override.class)
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(returnClassName)
+                            .beginControlFlow("if(instance == null)")
+                            .beginControlFlow("synchronized (this)")
+                            .beginControlFlow("if(instance == null)")
+                            .addStatement("instance = " + getResultStatement(env, returnTypeStr, getInstanceStr))
+                            .endControlFlow()
+                            .endControlFlow()
+                            .endControlFlow()
+                            .addStatement("return instance")
+                            .build())
+                    .build();
+            methodBuilder.addStatement(statementPrefix + " $L", lazyTypeSpec);
 
-                methodBuilder.addStatement(statementPrefix + " $L", providerTypeSpec);
-                break;
-            }
-            case "org.brooth.jeta.Lazy": {
-                returnTypeStr = getGenericType(returnTypeMirror.toString());
-                ClassName returnClassName = ClassName.bestGuess(returnTypeStr);
-
-                TypeSpec lazyTypeSpec = TypeSpec.anonymousClassBuilder("")
-                        .addSuperinterface(TypeName.get(returnTypeMirror))
-                        .addField(returnClassName, "instance", Modifier.PRIVATE)
-                        .addMethod(MethodSpec.methodBuilder("get")
-                                .addAnnotation(Override.class)
-                                .addModifiers(Modifier.PUBLIC)
-                                .returns(returnClassName)
-                                .beginControlFlow("if(instance == null)")
-                                .beginControlFlow("synchronized (this)")
-                                .beginControlFlow("if(instance == null)")
-                                .addStatement("instance = " + getResultStatement(env, returnTypeStr, getInstanceStr))
-                                .endControlFlow()
-                                .endControlFlow()
-                                .endControlFlow()
-                                .addStatement("return instance")
-                                .build())
-                        .build();
-                methodBuilder.addStatement(statementPrefix + " $L", lazyTypeSpec);
-                break;
-            }
-            default:
-                methodBuilder.addStatement(statementPrefix + getResultStatement(env, returnTypeMirror.toString(), getInstanceStr));
+        } else {
+            methodBuilder.addStatement(statementPrefix + getResultStatement(env, returnTypeMirror.toString(), getInstanceStr));
         }
     }
 

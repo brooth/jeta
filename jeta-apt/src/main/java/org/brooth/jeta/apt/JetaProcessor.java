@@ -20,6 +20,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
+import com.google.common.hash.Hashing;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.IMetacode;
 import org.brooth.jeta.apt.metasitory.MapMetasitoryWriter;
@@ -41,6 +42,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 import java.io.*;
 import java.lang.annotation.Annotation;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,6 +50,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /**
+ * todo: compile on java 1.5
+ *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 @SupportedAnnotationTypes("*")
@@ -58,8 +62,8 @@ public class JetaProcessor extends AbstractProcessor {
     private Messager logger;
     private Elements elementUtils;
 
-    private List<Processor> processors = new ArrayList<>();
-    private List<MetacodeContextImpl> metacodeContextList = new ArrayList<>(500);
+    private List<Processor> processors = new ArrayList<Processor>();
+    private List<MetacodeContextImpl> metacodeContextList = new ArrayList<MetacodeContextImpl>(500);
 
     private MetasitoryWriter metasitoryWriter;
 
@@ -126,7 +130,7 @@ public class JetaProcessor extends AbstractProcessor {
                 is.close();
 
             } catch (IOException e) {
-                throw new RuntimeException("failed to load properties from file " + propertiesPath, e);
+                throw new ProcessingException("failed to load properties from file " + propertiesPath, e);
             }
         }
 
@@ -195,7 +199,7 @@ public class JetaProcessor extends AbstractProcessor {
                     addProcessor((Processor) processorClass.newInstance());
 
                 } catch (Exception e) {
-                    throw new RuntimeException("Failed to load processor " + addProcessor, e);
+                    throw new ProcessingException("Failed to load processor " + addProcessor, e);
                 }
             }
         }
@@ -383,7 +387,7 @@ public class JetaProcessor extends AbstractProcessor {
                                     break;
                                 }
                             } catch (IOException e) {
-                                throw new RuntimeException("failed to read last modify date of " + path.toString(), e);
+                                throw new ProcessingException("failed to read last modify date of " + path.toString(), e);
                             }
 
                         } else {
@@ -412,7 +416,7 @@ public class JetaProcessor extends AbstractProcessor {
                             continue;
 
                         } catch (IOException e) {
-                            throw new RuntimeException("failed to create link to .utd file", e);
+                            throw new ProcessingException("failed to create link to .utd file", e);
                         }
                     }
                 }
@@ -519,7 +523,7 @@ public class JetaProcessor extends AbstractProcessor {
                     }
 
                 } catch (IOException e) {
-                    throw new RuntimeException("failed to write metacode file", e);
+                    throw new ProcessingException("failed to write metacode file", e);
 
                 } finally {
                     if (out != null)
@@ -544,33 +548,45 @@ public class JetaProcessor extends AbstractProcessor {
         return getUtdDirPath() + "utd.properties";
     }
 
+    private String $utdDirPath;
+
     private String getUtdDirPath() {
-        String result = properties.getProperty("utd.dir");
-        if (result != null) {
-            Path path = Paths.get(result);
+        if ($utdDirPath != null)
+            return $utdDirPath;
+
+        $utdDirPath = properties.getProperty("utd.dir");
+        if ($utdDirPath != null) {
+            Path path = Paths.get($utdDirPath);
             if (!path.isAbsolute())
-                path = Paths.get(relateToPath + result).toAbsolutePath();
+                path = Paths.get(relateToPath + $utdDirPath).toAbsolutePath();
 
-            if (Files.notExists(path) && !path.toFile().mkdirs())
-                throw new RuntimeException("not valid utd.dir property", new IOException("failed to create utd.dir structure"));
-
-            result = path.normalize().toString();
+            $utdDirPath = path.normalize().toString();
 
         } else {
-            result = System.getProperty("java.io.tmpdir");
-            if (!result.endsWith(File.separator))
-                result += File.separator;
+            $utdDirPath = System.getProperty("java.io.tmpdir");
+            if (!$utdDirPath.endsWith(File.separator))
+                $utdDirPath += File.separator;
 
-            result = result + sourcePath.replaceAll("[^a-zA-Z_]", "_");
-            Path path = Paths.get(result);
-            if (Files.notExists(path) && !path.toFile().mkdirs())
-                throw new RuntimeException("not valid utd.dir property", new IOException("failed to create utd.dir structure"));
+            $utdDirPath += "jeta-utd-files";
         }
 
-        if (!result.endsWith(File.separator))
-            result += File.separator;
+        if (!$utdDirPath.endsWith(File.separator))
+            $utdDirPath += File.separator;
 
-        return result;
+        try {
+            $utdDirPath += Hashing.adler32().newHasher().putString(processingEnv.getFiler().
+                            getResource(StandardLocation.SOURCE_OUTPUT, "a", "b").toUri().getPath(),
+                    Charset.defaultCharset()).hash().toString() + File.separator;
+
+        } catch (IOException e) {
+            throw new ProcessingException("failed to get upt dir hash", e);
+        }
+
+        Path structurePath = Paths.get($utdDirPath);
+        if (Files.notExists(structurePath) && !structurePath.toFile().mkdirs())
+            throw new ProcessingException("not valid utd.dir property", new IOException("failed to create utd.dir structure"));
+
+        return $utdDirPath;
     }
 
     private void saveUtdProperties() {
@@ -596,22 +612,18 @@ public class JetaProcessor extends AbstractProcessor {
         private RoundEnvironment roundEnv;
         private int round;
 
-        @Override
         public Collection<Element> elements() {
             return elements;
         }
 
-        @Override
         public MetacodeContext metacodeContext() {
             return metacodeContext;
         }
 
-        @Override
         public RoundEnvironment roundEnv() {
             return roundEnv;
         }
 
-        @Override
         public int round() {
             return round;
         }
@@ -622,17 +634,14 @@ public class JetaProcessor extends AbstractProcessor {
         private Properties processorProperties;
         private Messager logger;
 
-        @Override
         public ProcessingEnvironment processingEnv() {
             return processingEnv;
         }
 
-        @Override
         public Logger logger() {
             return logger;
         }
 
-        @Override
         public Properties processingProperties() {
             return processorProperties;
         }
@@ -653,24 +662,21 @@ public class JetaProcessor extends AbstractProcessor {
         public MetacodeContextImpl(Elements elementUtils, TypeElement masterElement) {
             this.processors = HashMultimap.create();
             this.masterElement = masterElement;
-            this.metacodeAnnotations = new HashSet<>();
+            this.metacodeAnnotations = new HashSet<Class<? extends Annotation>>();
 
             metacodeCanonicalName = MetacodeUtils.getMetacodeOf(elementUtils, masterElement.toString());
             int i = metacodeCanonicalName.lastIndexOf('.');
             metacodeSimpleName = i >= 0 ? metacodeCanonicalName.substring(i + 1) : metacodeCanonicalName;
         }
 
-        @Override
         public TypeElement masterElement() {
             return masterElement;
         }
 
-        @Override
         public Set<Class<? extends Annotation>> metacodeAnnotations() {
             return metacodeAnnotations;
         }
 
-        @Override
         public boolean isUpToDate() {
             return utd;
         }
@@ -680,24 +686,20 @@ public class JetaProcessor extends AbstractProcessor {
         private javax.annotation.processing.Messager messager;
         private boolean debug = true;
 
-        @Override
         public void debug(String msg) {
             if (debug) {
                 messager.printMessage(Diagnostic.Kind.NOTE, msg);
             }
         }
 
-        @Override
         public void note(String msg) {
             messager.printMessage(Diagnostic.Kind.NOTE, msg);
         }
 
-        @Override
         public void warn(String msg) {
             messager.printMessage(Diagnostic.Kind.WARNING, msg);
         }
 
-        @Override
         public void error(String msg) {
             messager.printMessage(Diagnostic.Kind.ERROR, msg);
         }
@@ -710,7 +712,6 @@ public class JetaProcessor extends AbstractProcessor {
             this.masterTypeElement = masterTypeElement;
         }
 
-        @Override
         public boolean apply(MetacodeContext input) {
             return input.masterElement().equals(masterTypeElement);
         }

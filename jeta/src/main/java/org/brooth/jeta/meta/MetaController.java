@@ -30,9 +30,24 @@ public class MetaController extends MasterController<Object, InjectMetacode<Obje
     }
 
     public void injectMeta(MetaEntityFactory factory) {
+        injectMeta(Scope.Default.getInstance(), factory);
+    }
+
+    public void injectMeta(Scope scope, MetaEntityFactory factory) {
         Preconditions.checkNotNull(factory, "factory");
 
         for (InjectMetacode<Object> metacode : metacodes)
-            metacode.applyMeta(master, factory);
+            metacode.applyMeta(scope, master, factory);
+    }
+
+    public void injectStaticMeta(MetaEntityFactory factory) {
+        injectStaticMeta(Scope.Default.getInstance(), factory);
+    }
+
+    public void injectStaticMeta(Scope scope, MetaEntityFactory factory) {
+        Preconditions.checkNotNull(factory, "factory");
+
+        for (InjectMetacode<Object> metacode : metacodes)
+            metacode.applyStaticMeta(scope, factory);
     }
 }

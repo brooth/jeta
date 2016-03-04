@@ -35,7 +35,7 @@ public class ClassForNameMetasitory implements Metasitory {
 
         Class<?> masterClass = c.getMasterEq() != null ? c.getMasterEq() : c.getMasterEqDeep();
         Class<?> metacodeClass;
-        List<IMetacode<?>> result = new ArrayList<>();
+        List<IMetacode<?>> result = new ArrayList<IMetacode<?>>();
         while (masterClass != null) {
             try {
                 metacodeClass = Class.forName(masterClass.getName().replaceAll("\\$", "_") + "_Metacode");

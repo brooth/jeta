@@ -43,7 +43,6 @@ public class MetaEntityProcessor extends AbstractProcessor {
         super(MetaEntity.class);
     }
 
-    @Override
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         TypeElement element = (TypeElement) context.elements().iterator().next();
         ClassName elementClassName = ClassName.get(element);
@@ -63,7 +62,7 @@ public class MetaEntityProcessor extends AbstractProcessor {
         boolean ofTypeEqElementType = masterTypeStr.equals(ofTypeStr);
         boolean isProvider = masterTypeStr.equals(elementTypeStr);
 
-        List<ExecutableElement> constructors = new ArrayList<>();
+        List<ExecutableElement> constructors = new ArrayList<ExecutableElement>();
         for (Element subElement : ((TypeElement) element).getEnclosedElements()) {
             boolean validInitConstructor = subElement.getSimpleName().contentEquals("<init>") && isProvider
                     && ofTypeEqElementType && !subElement.getModifiers().contains(Modifier.PRIVATE)
@@ -91,7 +90,6 @@ public class MetaEntityProcessor extends AbstractProcessor {
             for (ExecutableElement constructor : constructors) {
                 Iterable<ParameterSpec> params = Iterables.transform(constructor.getParameters(),
                         new Function<VariableElement, ParameterSpec>() {
-                            @Override
                             public ParameterSpec apply(VariableElement input) {
                                 return ParameterSpec
                                         .builder(TypeName.get(input.asType()), input.getSimpleName().toString())
@@ -123,7 +121,7 @@ public class MetaEntityProcessor extends AbstractProcessor {
                             .build());
 
             for (ExecutableElement constructor : constructors) {
-                List<ParameterSpec> params2 = new ArrayList<>(constructor.getParameters().size());
+                List<ParameterSpec> params2 = new ArrayList<ParameterSpec>(constructor.getParameters().size());
 
                 String[] params = new String[constructor.getParameters().size() * 2];
                 String[] paramValues = new String[params.length / 2];
@@ -190,7 +188,6 @@ public class MetaEntityProcessor extends AbstractProcessor {
 
     private String getOfClass(final MetaEntity annotation) {
         return MetacodeUtils.extractClassName(new Runnable() {
-            @Override
             public void run() {
                 annotation.of();
             }
@@ -199,7 +196,6 @@ public class MetaEntityProcessor extends AbstractProcessor {
 
     private String getExtClass(final MetaEntity annotation) {
         return MetacodeUtils.extractClassName(new Runnable() {
-            @Override
             public void run() {
                 annotation.ext();
             }

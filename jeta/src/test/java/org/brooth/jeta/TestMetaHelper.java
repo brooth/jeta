@@ -64,7 +64,6 @@ public class TestMetaHelper {
         bus = new BaseEventBus();
 
         loggerProvider = new NamedLoggerProvider<Logger>() {
-            @Override
             public Logger get(String name) {
                 return new Logger(name);
             }
@@ -76,7 +75,7 @@ public class TestMetaHelper {
     }
 
     public static <I> ImplementationController<I> implementationController(Class<I> of) {
-        return new ImplementationController<>(getInstance().metasitory, of);
+        return new ImplementationController<I>(getInstance().metasitory, of);
     }
 
     public static EventBus getEventBus() {
@@ -84,15 +83,15 @@ public class TestMetaHelper {
     }
 
     public static SubscriptionHandler registerSubscriber(Object master) {
-        return new SubscriberController<>(getInstance().metasitory, master).registerSubscriber(getEventBus());
+        return new SubscriberController<Object>(getInstance().metasitory, master).registerSubscriber(getEventBus());
     }
 
     public static void createObservable(Object master) {
-        new ObservableController<>(getInstance().metasitory, master).createObservable();
+        new ObservableController<Object>(getInstance().metasitory, master).createObservable();
     }
 
     public static ObserverHandler registerObserver(Object observer, Object observable) {
-        return new ObserverController<>(getInstance().metasitory, observer).registerObserver(observable);
+        return new ObserverController<Object>(getInstance().metasitory, observer).registerObserver(observable);
     }
 
     public static ValidationController validationController(Object master) throws ValidationException {
@@ -120,10 +119,10 @@ public class TestMetaHelper {
     }
 
     public static <M> SingletonMetacode<M> getSingleton(Class<M> masterClass) {
-        return new SingletonController<>(getInstance().metasitory, masterClass).getMetacode();
+        return new SingletonController<M>(getInstance().metasitory, masterClass).getMetacode();
     }
 
     public static <M> MultitonMetacode<M> getMultiton(Class<M> masterClass) {
-        return new MultitonController<>(getInstance().metasitory, masterClass).getMetacode();
+        return new MultitonController<M>(getInstance().metasitory, masterClass).getMetacode();
     }
 }

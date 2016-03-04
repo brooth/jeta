@@ -39,7 +39,6 @@ public class ProxyProcessor extends AbstractProcessor {
         super(Proxy.class);
     }
 
-    @Override
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
@@ -57,7 +56,6 @@ public class ProxyProcessor extends AbstractProcessor {
             ClassName realClassName = ClassName.bestGuess(element.asType().toString());
             final Proxy annotation = element.getAnnotation(Proxy.class);
             String proxyClassNameStr = MetacodeUtils.extractClassName(new Runnable() {
-                @Override
                 public void run() {
                     annotation.value();
                 }
@@ -75,7 +73,7 @@ public class ProxyProcessor extends AbstractProcessor {
                             .build());
 
             TypeElement realTypeElement = (TypeElement) processingContext.processingEnv().getTypeUtils().asElement(element.asType());
-            Set<ExecutableElement> toImplementMethods = new HashSet<>();
+            Set<ExecutableElement> toImplementMethods = new HashSet<ExecutableElement>();
             for (Element subElement : ((TypeElement) realTypeElement).getEnclosedElements()) {
                 if (subElement.getKind() == ElementKind.METHOD)
                     toImplementMethods.add((ExecutableElement) subElement);
@@ -85,7 +83,6 @@ public class ProxyProcessor extends AbstractProcessor {
                 if (subElement.getKind() == ElementKind.METHOD) {
                     // todo: iterator.remove();
                     toImplementMethods = Sets.filter(toImplementMethods, new Predicate<ExecutableElement>() {
-                        @Override
                         public boolean apply(ExecutableElement input) {
                             return !input.toString().equals(subElement.toString());
                         }

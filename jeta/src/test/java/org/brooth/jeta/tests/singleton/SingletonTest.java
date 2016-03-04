@@ -63,7 +63,7 @@ public class SingletonTest extends BaseTest {
         static MultitonMetacode<MultitonHolder> multiton = 
             TestMetaHelper.getMultiton(MultitonHolder.class);
 
-        private static List<String> instances = new ArrayList<>();
+        private static List<String> instances = new ArrayList<String>();
         private String key;
 
         public static MultitonHolder getInstance(String key) {
@@ -90,7 +90,6 @@ public class SingletonTest extends BaseTest {
         for (int i = 0; i < threads.length; i++) {
             final int finalI = i;
             threads[i] = new Thread(new Runnable() {
-                @Override
                 public void run() {
                     SingletonHolder instance = SingletonHolder.getInstance();
                     assert instance != null;
@@ -122,7 +121,6 @@ public class SingletonTest extends BaseTest {
         for (int i = 0; i < oneThreads.length; i++) {
             final int finalI = i;
             oneThreads[i] = new Thread(new Runnable() {
-                @Override
                 public void run() {
                     MultitonHolder instance = MultitonHolder.getInstance("one");
                     assert instance != null;
@@ -131,7 +129,6 @@ public class SingletonTest extends BaseTest {
                 }
             });
             twoThreads[i] = new Thread(new Runnable() {
-                @Override
                 public void run() {
                     MultitonHolder instance = MultitonHolder.getInstance("two");
                     assert instance != null;

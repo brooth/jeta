@@ -20,5 +20,5 @@ package org.brooth.jeta.log;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface LogMetacode<M> {
-    public void applyLogger(M master, NamedLoggerProvider<?> loggerProvider);
+    void applyLogger(M master, NamedLoggerProvider<?> loggerProvider);
 }

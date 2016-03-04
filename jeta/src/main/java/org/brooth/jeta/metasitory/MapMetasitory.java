@@ -80,7 +80,6 @@ public class MapMetasitory implements Metasitory {
         }
     }
 
-    @Override
     public void add(Metasitory other) {
         if (!(other instanceof MapMetasitory))
             throw new UnsupportedOperationException("Only other MapMetasitory is supported");
@@ -93,7 +92,6 @@ public class MapMetasitory implements Metasitory {
         }
     }
 
-    @Override
     public Collection<IMetacode<?>> search(Criteria criteria) {
         if (Criteria.VERSION > SUPPORTED_CRITERIA_VERSION)
             throw new IllegalArgumentException("Criteria version " + Criteria.VERSION + " not supported");
@@ -114,7 +112,6 @@ public class MapMetasitory implements Metasitory {
             return Collections.emptyList();
 
         return Collections2.transform(selection.values(), new Function<MapMetasitoryContainer.Context, IMetacode<?>>() {
-            @Override
             public IMetacode<?> apply(MapMetasitoryContainer.Context input) {
                 return input.metacodeProvider.get();
             }
@@ -126,7 +123,6 @@ public class MapMetasitory implements Metasitory {
             return selection;
 
         return Maps.filterValues(selection, new Predicate<MapMetasitoryContainer.Context>() {
-            @Override
             public boolean apply(MapMetasitoryContainer.Context input) {
                 for (Class<?> annotation : input.annotations) {
                     for (Class<?> uses : criteria.getUsesAny()) {
@@ -147,7 +143,6 @@ public class MapMetasitory implements Metasitory {
             throw new IllegalArgumentException("criteria.useAll is empty");
 
         return Maps.filterValues(selection, new Predicate<MapMetasitoryContainer.Context>() {
-            @Override
             public boolean apply(MapMetasitoryContainer.Context input) {
                 for (Class<?> need : criteria.getUsesAll()) {
                     boolean used = false;
@@ -169,7 +164,7 @@ public class MapMetasitory implements Metasitory {
         if (criteria.getMasterEqDeep() == null)
             return selection;
 
-        Map<Class<?>, MapMetasitoryContainer.Context> result = new HashMap<>();
+        Map<Class<?>, MapMetasitoryContainer.Context> result = new HashMap<Class<?>, MapMetasitoryContainer.Context>();
         Class<?> clazz = criteria.getMasterEqDeep();
         while (clazz != Object.class) {
             MapMetasitoryContainer.Context context = selection.get(clazz);

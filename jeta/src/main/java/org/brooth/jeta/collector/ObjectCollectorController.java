@@ -37,7 +37,7 @@ public class ObjectCollectorController extends MasterClassController<Object, Obj
     public List<Provider<?>> getObjects(Class<? extends Annotation> annotation) {
         Preconditions.checkNotNull(annotation, "annotation");
 
-        List<Provider<?>> result = new ArrayList<>();
+        List<Provider<?>> result = new ArrayList<Provider<?>>();
         for (ObjectCollectorMetacode collector : metacodes) {
             List<Provider<?>> collection = collector.getObjectCollection(annotation);
             if (collection != null)

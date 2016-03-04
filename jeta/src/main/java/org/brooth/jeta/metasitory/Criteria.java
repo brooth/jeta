@@ -71,7 +71,7 @@ public final class Criteria {
 
         public Builder usesAny(Class<? extends Annotation> value) {
             if (criteria.usesAny == null)
-                criteria.usesAny = new HashSet<>();
+                criteria.usesAny = new HashSet<Class<? extends Annotation>>();
             criteria.usesAny.add(value);
             return this;
         }

@@ -39,7 +39,7 @@ public class ObserverHandler {
         }
     }
 
-    protected final List<Record> handlers = new ArrayList<>();
+    protected final List<Record> handlers = new ArrayList<Record>();
 
     /**
      * used by metacode

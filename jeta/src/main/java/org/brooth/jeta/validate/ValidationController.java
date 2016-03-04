@@ -38,7 +38,7 @@ public class ValidationController extends MasterController<Object, ValidatorMeta
     }
 
     public List<String> validateSafe() {
-        List<String> errors = new ArrayList<>();
+        List<String> errors = new ArrayList<String>();
         for (ValidatorMetacode<Object> metacode : metacodes)
             errors.addAll(metacode.applyValidation(master));
 

@@ -36,7 +36,7 @@ public class TypeCollectorController extends MasterClassController<Object, TypeC
     public List<Class<?>>  getTypes(Class<? extends Annotation> annotation) {
         Preconditions.checkNotNull(annotation, "annotation");
 
-        List<Class<?>>  result = new ArrayList<>();
+        List<Class<?>>  result = new ArrayList<Class<?>>();
         for (TypeCollectorMetacode collector : metacodes) {
             List<Class<?>>  collection = collector.getTypeCollection(annotation);
             if (collection != null)
