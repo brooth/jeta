@@ -39,7 +39,6 @@ import java.util.List;
         super(Observe.class);
     }
 
-    @Override
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
@@ -58,7 +57,6 @@ import java.util.List;
         for (Element element : context.elements()) {
             final Observe annotation = element.getAnnotation(Observe.class);
             String observableClass = MetacodeUtils.extractClassName(new Runnable() {
-                @Override
                 public void run() {
                     annotation.value();
                 }

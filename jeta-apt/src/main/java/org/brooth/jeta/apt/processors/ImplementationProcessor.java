@@ -37,12 +37,10 @@ public class ImplementationProcessor extends AbstractProcessor {
         super(Implementation.class);
     }
 
-    @Override
 	public boolean process(TypeSpec.Builder builder, RoundContext context) {
         Element element = context.elements().iterator().next();
         final Implementation annotation = element.getAnnotation(Implementation.class);
         String implOfClassStr = MetacodeUtils.extractClassName(new Runnable() {
-            @Override
             public void run() {
                 annotation.value();
             }

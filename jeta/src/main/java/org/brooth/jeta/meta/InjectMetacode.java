@@ -21,7 +21,7 @@ package org.brooth.jeta.meta;
  */
 public interface InjectMetacode<M> {
 
-    boolean applyMeta(Scope scope, M master, MetaEntityFactory factory);
+    void applyMeta(Scope scope, M master, MetaEntityFactory factory);
 
-    boolean applyStaticMeta(Scope scope, MetaEntityFactory factory);
+    void applyStaticMeta(Scope scope, MetaEntityFactory factory);
 }

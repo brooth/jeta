@@ -28,10 +28,10 @@ public interface MetacodeContext {
     /**
      * TypeElement of the masters source
      */
-    public TypeElement masterElement();
+    TypeElement masterElement();
 
     /**
      * All the metacode annotations used by masters type
      */
-    public Set<Class<? extends Annotation>> metacodeAnnotations();
+    Set<Class<? extends Annotation>> metacodeAnnotations();
 }   

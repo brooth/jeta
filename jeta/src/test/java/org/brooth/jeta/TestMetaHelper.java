@@ -26,6 +26,7 @@ import org.brooth.jeta.log.LogController;
 import org.brooth.jeta.log.NamedLoggerProvider;
 import org.brooth.jeta.meta.MetaController;
 import org.brooth.jeta.meta.MetaEntityFactory;
+import org.brooth.jeta.meta.Scope;
 import org.brooth.jeta.metasitory.MapMetasitory;
 import org.brooth.jeta.metasitory.Metasitory;
 import org.brooth.jeta.observer.ObservableController;
@@ -72,6 +73,10 @@ public class TestMetaHelper {
 
     public static void injectMeta(Object master) {
         new MetaController(getInstance().metasitory, master).injectMeta(getInstance().metaEntityFactory);
+    }
+
+    public static void injectMeta(Scope scope, Object master) {
+        new MetaController(getInstance().metasitory, master).injectMeta(scope, getInstance().metaEntityFactory);
     }
 
     public static <I> ImplementationController<I> implementationController(Class<I> of) {

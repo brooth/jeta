@@ -20,6 +20,7 @@ import org.brooth.jeta.*;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.meta.Meta;
 import org.brooth.jeta.meta.MetaEntity;
+import org.brooth.jeta.meta.Scope;
 import org.brooth.jeta.metasitory.ClassForNameMetasitory;
 import org.brooth.jeta.metasitory.Criteria;
 import org.junit.Test;
@@ -30,6 +31,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
 
 /**
@@ -80,6 +82,80 @@ public class MetaEntityTest extends BaseTest {
         assertFalse(holder.entity == holder.lazy.get());
         assertFalse(holder.entity == holder.provider.get());
         assertFalse(holder.lazy.get() == holder.provider.get());
+    }
+
+    public static class TestScope implements Scope {
+        public String data = "scope data";
+    }
+
+    public static class TestScope2 implements Scope {
+    }
+
+    @MetaEntity(scope = TestScope.class)
+    public static class MetaScopeEntity {
+        String value = "scope";
+        String scopeData = null;
+
+        public MetaScopeEntity(TestScope scope) {
+            scopeData = scope.data;
+        }
+
+        public MetaScopeEntity(TestScope2 scope) {
+            assertTrue(false);
+        }
+
+        public MetaScopeEntity(String value, TestScope scope, boolean fake) {
+            this.value = value;
+            this.scopeData = scope.data;
+        }
+    }
+
+    @MetaEntity(scope = Scope.Default.class)
+    public static class MetaDefaultScopeEntity {
+        String value = "default";
+    }
+
+    public static class MetaScopeEntityHolder {
+        @Meta
+        MetaDefaultScopeEntity defaultScopeEntity;
+        @Meta
+        MetaScopeEntity scopeEntity;
+        @Meta
+        MetaFactory factory;
+
+        @Factory
+        interface MetaFactory {
+            MetaDefaultScopeEntity getMetaDefaultScopeEntity();
+
+            MetaScopeEntity getMetaScopeEntity(String value, boolean fake);
+        }
+    }
+
+    @Test
+    public void testScope() {
+        logger.debug("testScope()");
+
+        MetaScopeEntityHolder holder = new MetaScopeEntityHolder();
+        TestMetaHelper.injectMeta(holder);
+
+        assertThat(holder.defaultScopeEntity, notNullValue());
+        assertThat(holder.defaultScopeEntity.value, is("default"));
+
+        assertThat(holder.scopeEntity, nullValue());
+
+        TestScope scope = new TestScope();
+        TestMetaHelper.injectMeta(scope, holder);
+
+        assertThat(holder.defaultScopeEntity, notNullValue());
+        assertThat(holder.defaultScopeEntity.value, is("default"));
+
+        assertThat(holder.scopeEntity, notNullValue());
+        assertThat(holder.scopeEntity.value, is("scope"));
+        assertThat(holder.scopeEntity.scopeData, is("scope data"));
+        assertThat(holder.factory.getMetaDefaultScopeEntity(), notNullValue());
+
+        // meta factory with custom scope not allowed due a factory might provide entities with different scopes
+        assertThat(holder.factory.getMetaScopeEntity("boo", true), nullValue());
     }
 
     public static class MetaAliasEntityHolder {

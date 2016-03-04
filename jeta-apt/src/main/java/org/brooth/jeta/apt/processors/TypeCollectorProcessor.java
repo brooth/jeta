@@ -40,7 +40,6 @@ public class TypeCollectorProcessor extends AbstractProcessor {
         super(TypeCollector.class);
     }
 
-    @Override
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         final Element element = context.elements().iterator().next();
         builder.addSuperinterface(ClassName.get(TypeCollectorMetacode.class));
@@ -57,7 +56,6 @@ public class TypeCollectorProcessor extends AbstractProcessor {
                 .addParameter(annotationClassTypeName, "annotation");
 
         List<String> annotationsStr = MetacodeUtils.extractClassesNames(new Runnable() {
-            @Override
             public void run() {
                 element.getAnnotation(TypeCollector.class).value();
             }
@@ -68,7 +66,6 @@ public class TypeCollectorProcessor extends AbstractProcessor {
 
             annotatedElements = FluentIterable.from(annotatedElements)
                     .transform(new Function<Element, Element>() {
-                        @Override
                         public Element apply(Element input) {
                             return MetacodeUtils.typeElementOf(input);
                         }

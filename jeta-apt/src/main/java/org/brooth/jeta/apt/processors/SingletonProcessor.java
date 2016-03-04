@@ -33,7 +33,6 @@ public class SingletonProcessor extends AbstractProcessor {
         super(Singleton.class);
     }
 
-    @Override
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(

@@ -36,7 +36,6 @@ public class ObservableProcessor extends AbstractProcessor {
         super(Subject.class);
     }
 
-    @Override
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(

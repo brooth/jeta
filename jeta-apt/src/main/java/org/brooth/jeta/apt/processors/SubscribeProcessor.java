@@ -36,7 +36,6 @@ public class SubscribeProcessor extends AbstractProcessor {
         super(Subscribe.class);
     }
 
-    @Override
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
@@ -91,7 +90,6 @@ public class SubscribeProcessor extends AbstractProcessor {
             // Filters
             String onEventMethodNameStr = element.getSimpleName().toString();
             List<String> filters = MetacodeUtils.extractClassesNames(new Runnable() {
-                @Override
                 public void run() {
                     annotation.filters();
                 }

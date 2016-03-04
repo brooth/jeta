@@ -68,7 +68,6 @@ public class MetacodeUtils {
 
         } catch (MirroredTypesException e) {
             return Lists.transform(e.getTypeMirrors(), new Function<TypeMirror, String>() {
-                @Override
                 public String apply(TypeMirror input) {
                     return input.toString();
                 }

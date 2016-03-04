@@ -17,7 +17,6 @@
 package org.brooth.jeta.apt.processors;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.Factory;
 import org.brooth.jeta.apt.MetacodeUtils;
@@ -26,6 +25,7 @@ import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.meta.InjectMetacode;
 import org.brooth.jeta.meta.Meta;
 import org.brooth.jeta.meta.MetaEntityFactory;
+import org.brooth.jeta.meta.Scope;
 
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -41,7 +41,8 @@ public class MetaProcessor extends AbstractProcessor {
 
     private final Map<TypeElement, String> factoryElements = new HashMap<TypeElement, String>();
 
-    private TypeName metaEntityFactoryTypeName = TypeName.get(MetaEntityFactory.class);
+    private final TypeName metaEntityFactoryTypeName = TypeName.get(MetaEntityFactory.class);
+    private final ClassName scopeClassName = ClassName.get(Scope.class);
 
     @Nullable
     private String providerAlias;
@@ -86,10 +87,12 @@ public class MetaProcessor extends AbstractProcessor {
             MethodSpec.Builder methodBuilder;
             if (staticMeta) {
                 methodBuilder = MethodSpec.methodBuilder("applyStaticMeta")
+                        .addParameter(scopeClassName, "scope", Modifier.FINAL)
                         .addParameter(metaFactoryClassName, "factory", Modifier.FINAL);
 
             } else {
                 methodBuilder = MethodSpec.methodBuilder("applyMeta")
+                        .addParameter(scopeClassName, "scope", Modifier.FINAL)
                         .addParameter(masterClassName, "master", Modifier.FINAL)
                         .addParameter(metaFactoryClassName, "factory", Modifier.FINAL);
             }
@@ -115,7 +118,7 @@ public class MetaProcessor extends AbstractProcessor {
                     continue;
 
                 addReturnStatement(methodBuilder, processingContext.processingEnv(), element.asType(),
-                        Collections.<TypeMirror, String>emptyMap(), fieldStatement);
+                        Collections.<TypeMirror, String>emptyMap(), fieldStatement, null);
             }
 
             builder.addMethod(methodBuilder.build());
@@ -131,16 +134,19 @@ public class MetaProcessor extends AbstractProcessor {
         TypeSpec.Builder factoryBuilder = TypeSpec.classBuilder(name)
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC)
                 .addSuperinterface(ClassName.bestGuess(element.getQualifiedName().toString()))
+                .addField(scopeClassName, "scope", Modifier.PRIVATE, Modifier.FINAL)
                 .addField(metaEntityFactoryTypeName, "factory", Modifier.PRIVATE, Modifier.FINAL)
                 .addMethod(MethodSpec.constructorBuilder()
+                        .addParameter(scopeClassName, "scope")
                         .addParameter(metaEntityFactoryTypeName, "factory")
+                        .addStatement("this.scope = scope")
                         .addStatement("this.factory = factory")
                         .build());
 
         for (Element subElement : element.getEnclosedElements())
             if (subElement.getKind() == ElementKind.METHOD) {
                 ExecutableElement method = (ExecutableElement) subElement;
-                Map<TypeMirror, String> params = new HashMap<TypeMirror, String>();
+                Map<TypeMirror, String> params = new LinkedHashMap<TypeMirror, String>();
                 for (VariableElement param : method.getParameters())
                     params.put(param.asType(), param.getSimpleName().toString());
 
@@ -153,7 +159,7 @@ public class MetaProcessor extends AbstractProcessor {
                     methodSpec.addParameter(TypeName.get(type), params.get(type), Modifier.FINAL);
                 }
 
-                addReturnStatement(methodSpec, env, method.getReturnType(), params, "return");
+                addReturnStatement(methodSpec, env, method.getReturnType(), params, "return ", "return null");
                 factoryBuilder.addMethod(methodSpec.build());
 
             }
@@ -163,10 +169,12 @@ public class MetaProcessor extends AbstractProcessor {
 
     private void addReturnStatement(MethodSpec.Builder methodBuilder, ProcessingEnvironment env,
                                     TypeMirror returnTypeMirror, Map<TypeMirror, String> params,
-                                    String statementPrefix) {
-
+                                    String statementPrefix, @Nullable String scopeElseStatement) {
         String returnTypeStr = env.getTypeUtils().erasure(returnTypeMirror).toString();
-        String getInstanceStr = String.format("getInstance(%s)", Joiner.on(", ").join(params.values()));
+        Collection<String> paramValues = new ArrayList<String>(params.size() + 1);
+        paramValues.add("scope");
+        paramValues.addAll(params.values());
+        String getInstanceStr = String.format("getInstance(%s)", Joiner.on(", ").join(paramValues));
 
         if (providerAlias != null && returnTypeStr.equals(providerAlias)) {
             returnTypeStr = "org.brooth.jeta.Provider";
@@ -183,7 +191,7 @@ public class MetaProcessor extends AbstractProcessor {
                             .addStatement("return " + getResultStatement(env, returnTypeStr, getInstanceStr))
                             .build())
                     .build();
-            methodBuilder.addStatement(statementPrefix + " $L", providerTypeSpec);
+            addReturnStatement(methodBuilder, returnTypeStr, scopeElseStatement, statementPrefix + " $L", providerTypeSpec);
 
         } else if (returnTypeStr.equals("org.brooth.jeta.Lazy")) {
             returnTypeStr = getGenericType(returnTypeMirror.toString());
@@ -205,39 +213,61 @@ public class MetaProcessor extends AbstractProcessor {
                             .addStatement("return instance")
                             .build())
                     .build();
-            methodBuilder.addStatement(statementPrefix + " $L", lazyTypeSpec);
+            addReturnStatement(methodBuilder, returnTypeStr, scopeElseStatement, statementPrefix + " $L", lazyTypeSpec);
+
+        } else if (returnTypeStr.equals("java.lang.Class")) {
+            returnTypeStr = getGenericType(returnTypeMirror.toString());
+            addReturnStatement(methodBuilder, returnTypeStr, scopeElseStatement,
+                    statementPrefix + getResultStatement(env, returnTypeStr, "getEntityClass()"));
 
         } else {
-            methodBuilder.addStatement(statementPrefix + getResultStatement(env, returnTypeMirror.toString(), getInstanceStr));
+            addReturnStatement(methodBuilder, returnTypeStr, scopeElseStatement,
+                    statementPrefix + getResultStatement(env, returnTypeMirror.toString(), getInstanceStr));
+        }
+    }
+
+    private void addReturnStatement(MethodSpec.Builder methodBuilder, String elementTypeStr, @Nullable String scopeElseStatement,
+                                    String format, Object... args) {
+        TypeElement typeElement = processingContext.processingEnv().getElementUtils().getTypeElement(elementTypeStr);
+        Factory factory = typeElement.getAnnotation(Factory.class);
+        if (factory != null) {
+            methodBuilder.beginControlFlow("if(scope.getClass() == $T.class)",
+                    ClassName.get(Scope.Default.class));
+
+        } else {
+            methodBuilder.beginControlFlow(String.format("if(scope.getClass() == %s.MetaEntity.SCOPE)",
+                    MetacodeUtils.getMetacodeOf(processingContext.processingEnv().getElementUtils(), elementTypeStr)));
+        }
+
+        methodBuilder.addStatement(format, args);
+        methodBuilder.endControlFlow();
+
+        if (scopeElseStatement != null) {
+            methodBuilder.beginControlFlow("else")
+                    .addStatement(scopeElseStatement)
+                    .endControlFlow();
         }
     }
 
     private String getResultStatement(ProcessingEnvironment env, String elementTypeStr, String getInstanceStr) {
-        boolean classOf = elementTypeStr.startsWith("java.lang.Class");
-        if (classOf)
-            elementTypeStr = getGenericType(elementTypeStr);
-
         TypeElement typeElement = env.getElementUtils().getTypeElement(elementTypeStr);
         if (typeElement == null)
             throw new ProcessingException("Element \"" + elementTypeStr + "\" not suitable for meta processing.");
 
         Factory factory = typeElement.getAnnotation(Factory.class);
         if (factory != null) {
-            if (classOf)
-                throw new IllegalStateException("Class of " + elementTypeStr + " not valid meta structure.");
             if (typeElement.getKind() != ElementKind.INTERFACE)
                 throw new IllegalStateException(elementTypeStr + " only interfaces allowed to be used as a meta factory.");
 
             if (!factoryElements.containsKey(typeElement))
                 factoryElements.put(typeElement, typeElement.getSimpleName().toString() + "Impl" + factoryElements.size());
 
-            return String.format("new %s(factory)", factoryElements.get(typeElement));
+            return String.format("new %s(scope, factory)", factoryElements.get(typeElement));
         }
 
         return String.format("((%1$s.MetaEntity)\n\tfactory.getMetaEntity(%2$s.class))\n\t\t\t.%3$s",
                 MetacodeUtils.getMetacodeOf(env.getElementUtils(), elementTypeStr),
-                elementTypeStr,
-                classOf ? "getEntityClass()" : getInstanceStr);
+                elementTypeStr, getInstanceStr);
     }
 
     private String getGenericType(String type) {

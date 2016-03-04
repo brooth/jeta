@@ -40,7 +40,6 @@ public class ValidateProcessor extends AbstractProcessor {
         super(Validate.class);
     }
 
-    @Override
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
@@ -63,7 +62,6 @@ public class ValidateProcessor extends AbstractProcessor {
 
             final Validate annotation = element.getAnnotation(Validate.class);
             List<String> validators = MetacodeUtils.extractClassesNames(new Runnable() {
-                @Override
                 public void run() {
                     annotation.value();
                 }

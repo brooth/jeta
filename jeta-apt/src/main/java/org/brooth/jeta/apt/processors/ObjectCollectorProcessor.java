@@ -43,7 +43,6 @@ public class ObjectCollectorProcessor extends AbstractProcessor {
         super(ObjectCollector.class);
     }
 
-    @Override
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         final Element element = context.elements().iterator().next();
         builder.addSuperinterface(ClassName.get(ObjectCollectorMetacode.class));
@@ -61,7 +60,6 @@ public class ObjectCollectorProcessor extends AbstractProcessor {
                 .addParameter(annotationClassTypeName, "annotation");
 
         List<String> annotationsStr = MetacodeUtils.extractClassesNames(new Runnable() {
-            @Override
             public void run() {
                 element.getAnnotation(ObjectCollector.class).value();
             }
@@ -73,13 +71,11 @@ public class ObjectCollectorProcessor extends AbstractProcessor {
             annotatedElements = FluentIterable
                     .from(annotatedElements)
                     .filter(new Predicate<Element>() {
-                        @Override
                         public boolean apply(Element input) {
                             return input.getKind() == ElementKind.CLASS && !input.getModifiers().contains(Modifier.ABSTRACT);
                         }
                     })
                     .transform(new Function<Element, Element>() {
-                        @Override
                         public Element apply(Element input) {
                             return MetacodeUtils.typeElementOf(input);
                         }

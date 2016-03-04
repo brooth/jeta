@@ -34,7 +34,6 @@ public class MultitonProcessor extends AbstractProcessor {
         super(Multiton.class);
     }
 
-    @Override
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(

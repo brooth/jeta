@@ -39,32 +39,26 @@ public abstract class AbstractProcessor implements UtdProcessor {
         this.annotation = annotation;
     }
     
-    @Override
     public void init(ProcessingContext processingContext) {
     	this.processingContext = processingContext;
     }
 
-    @Override
     public Set<Class<? extends Annotation>> collectElementsAnnotatedWith() {
         return Collections.<Class<? extends Annotation>>singleton(annotation);
     }
 
-    @Override
     public Set<TypeElement> applicableMastersOfElement(Element element) {
         return Collections.singleton(MetacodeUtils.typeElementOf(element));
     }
 
-    @Override
     public boolean isEnabled() {
         return true;
     }
 
-    @Override
     public boolean needReclaim() {
         return false;
     }
 
-    @Override
     public boolean ignoreUpToDate() {
         return false;
     }

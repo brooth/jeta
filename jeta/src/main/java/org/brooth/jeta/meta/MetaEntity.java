@@ -34,4 +34,6 @@ public @interface MetaEntity {
     boolean minor() default false;
 
     int priority() default 0;
+
+    Class<? extends Scope> scope() default Scope.Default.class;
 }
