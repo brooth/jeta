@@ -13,7 +13,7 @@ Usage:
 `Jeta` provides ready to use annotations that handle most frequently use cases. Custom annotations also available. See [jeta-samples project][jeta-samples] to find more information.
 
 ### @Log
-Any logging tool can be provided via `@Log` annotation:
+A logger can be provided via `@Log` annotation:
 ```java
 class LogSample {
     @Log
