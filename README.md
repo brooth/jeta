@@ -53,7 +53,7 @@ class Observer {
         MetaHelper.registerObserver(this, observable);
     }
 
-    @Observer(Observable.class)
+    @Observe(Observable.class)
     void onEvent(Event event) {
         //...
     }
