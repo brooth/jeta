@@ -28,7 +28,7 @@ class LogSample {
 ```
 The second  approach instigates copy-paste. The programmers often forget to replace the class name so many loggers have incorrect names.
 
-### @Observer, @Subject, @Subscribe
+### @Observe, @Subject, @Subscribe
 Easy to use [observer pattens][observer-pattern]:
 ```java
 class Observable {
