@@ -13,7 +13,7 @@ Usage:
 `Jeta` provides ready to use annotations that handle most frequently use cases. Custom annotations also available. See [jeta-samples project][jeta-samples] to find more information.
 
 ### @Log
-Any logging tool can be provided via `@Log` annotation:
+A logger can be provided via `@Log` annotation:
 ```java
 class LogSample {
     @Log
@@ -28,8 +28,8 @@ class LogSample {
 ```
 The second  approach instigates copy-paste. The programmers often forget to replace the class name so many loggers have incorrect names.
 
-### @Observer, @Subject, @Subscribe
-Easy to use [observer pattens][observer-pattern]:
+### @Observe, @Subject, @Subscribe
+Easy to use [observer patten][observer-pattern]:
 ```java
 class Observable {
     @Subject
