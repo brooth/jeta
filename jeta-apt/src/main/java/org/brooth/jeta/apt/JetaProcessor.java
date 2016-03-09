@@ -371,28 +371,37 @@ public class JetaProcessor extends AbstractProcessor {
             MetacodeContextImpl context = iter.next();
             if (utdPropertiesCopy != null) {
                 if (utdPropertiesCopy.containsKey(context.metacodeCanonicalName)) {
-                    context.utd = true;
-                    for (Processor processor : context.processors.keySet()) {
-                        if (processor instanceof UtdProcessor) {
-                            Path path = Paths.get(getSourceJavaFile(context.masterElement));
-                            if (!Files.exists(path))
-                                throw new IllegalStateException("can't find source file: " + path.toString() +
-                                        ", set 'sourcepath' property to the source dir path");
+                    long modifiedTs = Long.parseLong(utdPropertiesCopy.getProperty(context.metacodeCanonicalName));
+                    if (modifiedTs > 0) {
+                        // check metacode exists
+                        if (Files.exists(Paths.get(getMetacodeFileObject(context.metacodeCanonicalName).toUri()))) {
+                            context.utd = true;
+                            for (Processor processor : context.processors.keySet()) {
+                                if (processor instanceof UtdProcessor) {
+                                    Path path = Paths.get(getSourceJavaFile(context.masterElement));
+                                    if (Files.exists(path)) {
+                                        try {
+                                            if (((UtdProcessor) processor).ignoreUpToDate() ||
+                                                    Files.getLastModifiedTime(path).toMillis() != modifiedTs) {
+                                                context.utd = false;
+                                                break;
+                                            }
+                                        } catch (IOException e) {
+                                            throw new ProcessingException("failed to read last modify date of " + path.toString(), e);
+                                        }
+                                    } else {
+                                        logger.debug("Can't check utd state. No source file of " + path.toUri().getPath());
+                                        context.utd = false;
+                                    }
 
-                            try {
-                                if (((UtdProcessor) processor).ignoreUpToDate() ||
-                                        Files.getLastModifiedTime(path).toMillis() !=
-                                                Long.parseLong(utdPropertiesCopy.getProperty(context.metacodeCanonicalName))) {
+                                } else {
                                     context.utd = false;
                                     break;
                                 }
-                            } catch (IOException e) {
-                                throw new ProcessingException("failed to read last modify date of " + path.toString(), e);
                             }
 
                         } else {
-                            context.utd = false;
-                            break;
+                            logger.debug(context.metacodeCanonicalName + " source file not exists. utd checking skipped");
                         }
                     }
 
@@ -443,27 +452,29 @@ public class JetaProcessor extends AbstractProcessor {
                 properties.getProperty("utd.cleanup", "true").equals("true")) {
             for (Object key : utdPropertiesCopy.keySet()) {
                 String metacodeCanonicalName = (String) key;
-                int dot = metacodeCanonicalName.lastIndexOf('.');
+                FileObject file = getMetacodeFileObject(metacodeCanonicalName);
+                if (new File(file.toUri()).delete()) {
+                    if (debug)
+                        logger.note("    - " + metacodeCanonicalName + " removed");
+                    utdProperties.remove(metacodeCanonicalName);
 
-                try {
-                    FileObject file = processingEnv.getFiler().getResource(
-                            StandardLocation.SOURCE_OUTPUT,
-                            (dot > 0 ? metacodeCanonicalName.substring(0, dot) : ""),
-                            (dot > 0 ? metacodeCanonicalName.substring(dot + 1) : metacodeCanonicalName) + ".java");
-
-                    if (new File(file.toUri()).delete()) {
-                        if (debug)
-                            logger.note("    - " + metacodeCanonicalName + " removed");
-                        utdProperties.remove(metacodeCanonicalName);
-
-                    } else {
-                        logger.warn("failed to cleanup metacode file: " + metacodeCanonicalName);
-                    }
-
-                } catch (IOException e) {
-                    logger.warn("failed to cleanup metacode file: " + metacodeCanonicalName + " error: " + e.getMessage());
+                } else {
+                    logger.warn("failed to cleanup metacode file: " + metacodeCanonicalName);
                 }
             }
+        }
+    }
+
+    private FileObject getMetacodeFileObject(String canonicalName) {
+        int dot = canonicalName.lastIndexOf('.');
+        try {
+            return processingEnv.getFiler().getResource(
+                    StandardLocation.SOURCE_OUTPUT,
+                    (dot > 0 ? canonicalName.substring(0, dot) : ""),
+                    (dot > 0 ? canonicalName.substring(dot + 1) : canonicalName) + ".java");
+
+        } catch (IOException e) {
+            throw new ProcessingException(e);
         }
     }
 

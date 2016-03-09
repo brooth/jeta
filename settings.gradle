@@ -20,6 +20,6 @@ include ':jeta-apt'
 include ':jeta'
 
 gradle.ext.GROUP_ID = 'org.brooth.jeta'
-gradle.ext.VERSION = '0.3-beta'
+gradle.ext.VERSION = '0.4-beta'
 gradle.ext.VERSION_DESC = 'third beta version'
 gradle.ext.VERSION_VCS_TAG = gradle.VERSION

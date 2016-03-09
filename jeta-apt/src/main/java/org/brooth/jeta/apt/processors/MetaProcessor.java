@@ -118,7 +118,7 @@ public class MetaProcessor extends AbstractProcessor {
                     continue;
 
                 addReturnStatement(methodBuilder, processingContext.processingEnv(), element.asType(),
-                        Collections.<TypeMirror, String>emptyMap(), fieldStatement, null);
+                        Collections.<String, TypeMirror>emptyMap(), fieldStatement, null);
             }
 
             builder.addMethod(methodBuilder.build());
@@ -146,17 +146,18 @@ public class MetaProcessor extends AbstractProcessor {
         for (Element subElement : element.getEnclosedElements())
             if (subElement.getKind() == ElementKind.METHOD) {
                 ExecutableElement method = (ExecutableElement) subElement;
-                Map<TypeMirror, String> params = new LinkedHashMap<TypeMirror, String>();
+                // name -> type
+                Map<String, TypeMirror> params = new LinkedHashMap<String, TypeMirror>();
                 for (VariableElement param : method.getParameters())
-                    params.put(param.asType(), param.getSimpleName().toString());
+                    params.put(param.getSimpleName().toString(), param.asType());
 
                 MethodSpec.Builder methodSpec = MethodSpec.methodBuilder(method.getSimpleName().toString())
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
                         .returns(TypeName.get(method.getReturnType()));
 
-                for (TypeMirror type : params.keySet()) {
-                    methodSpec.addParameter(TypeName.get(type), params.get(type), Modifier.FINAL);
+                for (String paramName : params.keySet()) {
+                    methodSpec.addParameter(TypeName.get(params.get(paramName)), paramName, Modifier.FINAL);
                 }
 
                 addReturnStatement(methodSpec, env, method.getReturnType(), params, "return ", "return null");
@@ -168,12 +169,12 @@ public class MetaProcessor extends AbstractProcessor {
     }
 
     private void addReturnStatement(MethodSpec.Builder methodBuilder, ProcessingEnvironment env,
-                                    TypeMirror returnTypeMirror, Map<TypeMirror, String> params,
+                                    TypeMirror returnTypeMirror, Map<String, TypeMirror> params,
                                     String statementPrefix, @Nullable String scopeElseStatement) {
         String returnTypeStr = env.getTypeUtils().erasure(returnTypeMirror).toString();
         Collection<String> paramValues = new ArrayList<String>(params.size() + 1);
         paramValues.add("scope");
-        paramValues.addAll(params.values());
+        paramValues.addAll(params.keySet());
         String getInstanceStr = String.format("getInstance(%s)", Joiner.on(", ").join(paramValues));
 
         if (providerAlias != null && returnTypeStr.equals(providerAlias)) {

@@ -24,4 +24,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.FIELD)
 public @interface Meta {
+
+    // todo: rename package to 'inject', use javax.inject instead. @Singleton per scope support
+    // two libs can gen Context_Metacode in the same package and boom
 }

@@ -161,7 +161,7 @@ public class MetaEntityProcessor extends AbstractProcessor {
 
                 String paramNames = Joiner.on(", ").join(paramValues);
                 if (constructor.getSimpleName().contentEquals("<init>")) {
-                    methodBuilder.addStatement("return new $T($L)", ofClassName, paramNames);
+                    methodBuilder.addStatement("return new $T($L)", elementClassName, paramNames);
 
                 } else {
                     String initCode = constructor.getModifiers().contains(Modifier.STATIC) ? "$T"

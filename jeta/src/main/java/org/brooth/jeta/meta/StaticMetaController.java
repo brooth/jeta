@@ -17,26 +17,27 @@
 package org.brooth.jeta.meta;
 
 import com.google.common.base.Preconditions;
+import org.brooth.jeta.MasterClassController;
 import org.brooth.jeta.MasterController;
 import org.brooth.jeta.metasitory.Metasitory;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MetaController extends MasterController<Object, InjectMetacode<Object>> {
+public class StaticMetaController extends MasterClassController<Object, InjectMetacode<Object>> {
 
-    public MetaController(Metasitory metasitory, Object master) {
-        super(metasitory, master, Meta.class);
+    public StaticMetaController(Metasitory metasitory, Class masterClass) {
+        super(metasitory, masterClass, Meta.class);
     }
 
-    public void injectMeta(MetaEntityFactory factory) {
-        injectMeta(Scope.Default.getInstance(), factory);
+    public void injectStaticMeta(MetaEntityFactory factory) {
+        injectStaticMeta(Scope.Default.getInstance(), factory);
     }
 
-    public void injectMeta(Scope scope, MetaEntityFactory factory) {
+    public void injectStaticMeta(Scope scope, MetaEntityFactory factory) {
         Preconditions.checkNotNull(factory, "factory");
 
         for (InjectMetacode<Object> metacode : metacodes)
-            metacode.applyMeta(scope, master, factory);
+            metacode.applyStaticMeta(scope, factory);
     }
 }
