@@ -32,10 +32,21 @@ import java.util.List;
 public class MetacodeUtils {
 
     public static String getMetacodeOf(Elements elementsUtils, String canonicalName) {
+        return getMetaNameOf(elementsUtils, canonicalName, JetaProcessor.METACODE_CLASS_POSTFIX);
+    }
+
+    public static String getMetaNameOf(Elements elementsUtils, String canonicalName, String postfix) {
         TypeElement typeElement = elementsUtils.getTypeElement(canonicalName);
         Object packageName = elementsUtils.getPackageOf(typeElement).getQualifiedName().toString();
         return packageName + "." + canonicalName.replace(packageName + ".", "")
-                .replaceAll("\\.", "_") + JetaProcessor.METACODE_CLASS_POSTFIX;
+                .replaceAll("\\.", "_") + postfix;
+    }
+
+    public static String getSimpleMetaNodeOf(Elements elementUtils, String canonicalName, String postfix) {
+        String metacodeCanonicalName = getMetaNameOf(elementUtils, canonicalName, postfix);
+        int i = metacodeCanonicalName.lastIndexOf('.');
+        return i >= 0 ? metacodeCanonicalName.substring(i + 1) : metacodeCanonicalName;
+
     }
 
     public static TypeElement sourceElementOf(Element element) {

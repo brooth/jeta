@@ -188,8 +188,10 @@ public class JetaProcessor extends AbstractProcessor {
         addProcessor(new SingletonProcessor());
         addProcessor(new MultitonProcessor());
         addProcessor(new ImplementationProcessor());
-        addProcessor(new MetaProcessor());
-        addProcessor(new MetaEntityProcessor());
+//        addProcessor(new MetaProcessor());
+//        addProcessor(new MetaEntityProcessor());
+        addProcessor(new MetaScopeProcessor());
+        addProcessor(new MetaInjectProcessor());
 
         String addProcessors = properties.getProperty("processors.add");
         if (addProcessors != null) {
@@ -283,6 +285,7 @@ public class JetaProcessor extends AbstractProcessor {
         }
     }
 
+    // todo: what if
     private void assembleMetacodeContextList(RoundEnvironment roundEnv) {
         logger.debug("assemble metacode context list");
 
