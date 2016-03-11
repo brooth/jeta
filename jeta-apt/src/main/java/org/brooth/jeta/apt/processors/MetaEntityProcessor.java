@@ -17,22 +17,20 @@
 package org.brooth.jeta.apt.processors;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.Constructor;
+import org.brooth.jeta.apt.JetaProcessor;
 import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.RoundContext;
-import org.brooth.jeta.meta.IMetaEntity;
-import org.brooth.jeta.meta.MetaEntity;
-import org.brooth.jeta.meta.MetaEntityMetacode;
-import org.brooth.jeta.meta.Scope;
+import org.brooth.jeta.inject.MetaEntity;
+import org.brooth.jeta.inject.MetaEntityMetacode;
 
 import javax.annotation.Nullable;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -44,7 +42,15 @@ public class MetaEntityProcessor extends AbstractProcessor {
     }
 
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
+        if (MetaScopeProcessor.scopeEntities == null)
+            throw new IllegalStateException("MetaInjectProcessor must follow after MetaScopeProcessor");
+
         TypeElement element = (TypeElement) context.elements().iterator().next();
+
+        // is a scheme?
+        if (element.getKind() != ElementKind.CLASS)
+            return false;
+
         ClassName elementClassName = ClassName.get(element);
         final MetaEntity annotation = element.getAnnotation(MetaEntity.class);
         String masterTypeStr = context.metacodeContext().masterElement().toString();
@@ -57,152 +63,104 @@ public class MetaEntityProcessor extends AbstractProcessor {
             extTypeStr = null;
 
         ClassName ofClassName = ClassName.bestGuess(ofTypeStr);
-        String elementTypeStr = element.getQualifiedName().toString();
-
-        boolean ofTypeEqElementType = masterTypeStr.equals(ofTypeStr);
-        boolean isProvider = masterTypeStr.equals(elementTypeStr);
+        boolean isSelfProvider = masterTypeStr.equals(ofTypeStr);
 
         List<ExecutableElement> constructors = new ArrayList<ExecutableElement>();
         for (Element subElement : ((TypeElement) element).getEnclosedElements()) {
-            boolean validInitConstructor = subElement.getSimpleName().contentEquals("<init>") && isProvider
-                    && ofTypeEqElementType && !subElement.getModifiers().contains(Modifier.PRIVATE)
-                    // enums may have constructors
-                    && element.getKind() == ElementKind.CLASS;
+            boolean validInitConstructor = element.getKind() == ElementKind.CLASS
+                    && !subElement.getModifiers().contains(Modifier.PRIVATE)
+                    && ((isSelfProvider && subElement.getSimpleName().contentEquals("<init>")) ||
+                    subElement.getAnnotation(Constructor.class) != null);
 
-            if (validInitConstructor || subElement.getAnnotation(Constructor.class) != null)
+            if (validInitConstructor)
                 constructors.add((ExecutableElement) subElement);
         }
 
-        ClassName scopeClassName = ClassName.get(Scope.class);
-        String entityScopeStr = MetacodeUtils.extractClassName(new Runnable() {
-            public void run() {
-                annotation.scope();
-            }
-        });
-        TypeMirror entityScopeTypeMirror = processingContext.processingEnv().getElementUtils().getTypeElement(entityScopeStr).asType();
+        ProcessingEnvironment env = processingContext.processingEnv();
+        TypeElement scopeElement = MetaScopeProcessor.scopeEntities.get(ofTypeStr);
+        ClassName entityScopeClassName = ClassName.get(scopeElement);
+        ClassName implOfClassName = ClassName.get(entityScopeClassName.packageName(),
+                entityScopeClassName.simpleName() + JetaProcessor.METACODE_CLASS_POSTFIX + "." +
+                        MetacodeUtils.getMetaNameOf(env.getElementUtils(), ofTypeStr, "_MetaEntity"));
 
-        // emit MetaEntity interface
-        if (ofTypeEqElementType && !annotation.minor()) {
-            ClassName superClassName = extTypeStr == null ? ClassName.get(IMetaEntity.class)
-                    : ClassName.bestGuess(MetacodeUtils.getMetacodeOf(processingContext.processingEnv().getElementUtils(), extTypeStr)
-                    + ".MetaEntity");
-
-            TypeSpec.Builder interfaceBuilder = TypeSpec.interfaceBuilder("MetaEntity")
-                    .addJavadoc("emitted by @see " + elementTypeStr + '\n').addModifiers(Modifier.PUBLIC)
-                    .addSuperinterface(superClassName)
-                    .addField(FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Class.class),
-                            WildcardTypeName.subtypeOf(scopeClassName)),
-                            "SCOPE", Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-                            .initializer("$T.class", ClassName.bestGuess(entityScopeStr)).build())
-                    .addMethod(MethodSpec.methodBuilder("getEntityClass")
-                            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                            .returns(ParameterizedTypeName.get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(ofClassName)))
-                            .build());
-
-            for (ExecutableElement constructor : constructors) {
-                List<ParameterSpec> params = new ArrayList<ParameterSpec>();
-                params.add(ParameterSpec.builder(scopeClassName, "__scope__").build());
-                for (VariableElement input : constructor.getParameters()) {
-                    TypeMirror paramType = input.asType();
-                    if (!processingContext.processingEnv().getTypeUtils().isAssignable(paramType, entityScopeTypeMirror)) {
-                        params.add(ParameterSpec.builder(TypeName.get(paramType), input.getSimpleName().toString()).build());
-                    }
-                }
-
-                interfaceBuilder.addMethod(
-                        MethodSpec.methodBuilder("getInstance")
-                                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                                .returns(ofClassName).addParameters(params).build());
-            }
-
-            builder.addType(interfaceBuilder.build());
-        }
-
-        // emit MetaEntityImpl (for autocode, host annotated @MetaEntity with
-        // and not an interface/scheme)
-        if (isProvider && element.getKind() != ElementKind.INTERFACE) {
-            ClassName implOfClassName = ClassName
-                    .bestGuess(MetacodeUtils.getMetacodeOf(processingContext.processingEnv().getElementUtils(),
-                            ofTypeEqElementType ? masterTypeStr : ofTypeStr) + ".MetaEntity");
-
-            TypeSpec.Builder implBuilder = TypeSpec.classBuilder("MetaEntityImpl")
-                    .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                    .addSuperinterface(implOfClassName)
-                    .addMethod(MethodSpec.methodBuilder("getEntityClass")
-                            .addAnnotation(Override.class)
-                            .addModifiers(Modifier.PUBLIC)
-                            .addStatement("return $T.class", ofClassName).returns(ParameterizedTypeName
-                                    .get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(ofClassName)))
-                            .build());
-
-
-            for (ExecutableElement constructor : constructors) {
-                List<ParameterSpec> params = new ArrayList<ParameterSpec>(constructor.getParameters().size());
-                List<String> paramValues = new ArrayList<String>(params.size());
-                params.add(ParameterSpec.builder(scopeClassName, "__scope__").build());
-
-                for (VariableElement param : constructor.getParameters()) {
-                    TypeMirror paramType = param.asType();
-                    if (processingContext.processingEnv().getTypeUtils().isAssignable(paramType, entityScopeTypeMirror)) {
-                        paramValues.add(String.format("(%s) __scope__", entityScopeStr));
-
-                    } else {
-                        params.add(ParameterSpec.builder(TypeName.get(paramType), param.getSimpleName().toString()).build());
-                        paramValues.add(param.getSimpleName().toString());
-                    }
-                }
-
-                MethodSpec.Builder methodBuilder = MethodSpec
-                        .methodBuilder("getInstance")
+        TypeSpec.Builder implBuilder = TypeSpec.classBuilder("MetaEntityImpl")
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addSuperinterface(implOfClassName)
+                .addMethod(MethodSpec.methodBuilder("getEntityClass")
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
-                        .returns(ofClassName)
-                        .addParameters(params);
+                        .addStatement("return $T.class", ofClassName).returns(ParameterizedTypeName
+                                .get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(ofClassName)))
+                        .build());
 
-                String paramNames = Joiner.on(", ").join(paramValues);
-                if (constructor.getSimpleName().contentEquals("<init>")) {
-                    methodBuilder.addStatement("return new $T($L)", elementClassName, paramNames);
+        for (ExecutableElement constructor : constructors) {
+            List<ParameterSpec> params = new ArrayList<ParameterSpec>(constructor.getParameters().size());
+            List<String> paramValues = new ArrayList<String>(params.size());
+            params.add(ParameterSpec.builder(ClassName.OBJECT, "__scope__").build());
+
+            for (VariableElement param : constructor.getParameters()) {
+                TypeMirror paramType = param.asType();
+                String paramName = param.getSimpleName().toString();
+                if (paramName.equals("__scope__")) {
+                    paramValues.add(paramName);
 
                 } else {
-                    String initCode = constructor.getModifiers().contains(Modifier.STATIC) ? "$T"
-                            : annotation.staticConstructor().isEmpty() ? ("new $T()")
-                            : String.format("$T.%s()", annotation.staticConstructor());
-
-                    methodBuilder.addStatement("return " + initCode + ".$L($L)", elementClassName,
-                            constructor.getSimpleName().toString(), paramNames);
+                    params.add(ParameterSpec.builder(TypeName.get(paramType), paramName).build());
+                    paramValues.add(paramName);
                 }
-
-                implBuilder.addMethod(methodBuilder.build());
             }
 
-            MethodSpec.Builder extClassMethodBuilder = MethodSpec.methodBuilder("getMetaEntityExtClass")
+            MethodSpec.Builder methodBuilder = MethodSpec
+                    .methodBuilder("getInstance")
                     .addAnnotation(Override.class)
-                    .addAnnotation(Nullable.class)
                     .addModifiers(Modifier.PUBLIC)
-                    .returns(ParameterizedTypeName.get(ClassName.get(Class.class),
-                            WildcardTypeName.supertypeOf(
-                                    extTypeStr == null ? WildcardTypeName.OBJECT : ClassName.bestGuess(extTypeStr))));
-            if (extTypeStr == null)
-                extClassMethodBuilder.addStatement("return null");
-            else
-                extClassMethodBuilder.addStatement("return $T.class", ClassName.bestGuess(extTypeStr));
+                    .returns(ofClassName)
+                    .addParameters(params);
 
-            builder.addSuperinterface(
-                    ParameterizedTypeName.get(ClassName.get(MetaEntityMetacode.class), ofClassName, implOfClassName))
-                    .addMethod(MethodSpec.methodBuilder("getMetaEntityImpl").addAnnotation(Override.class)
-                            .addModifiers(Modifier.PUBLIC).returns(implOfClassName)
-                            .addStatement("return new MetaEntityImpl()").build())
-                    .addMethod(MethodSpec.methodBuilder("getMetaEntityOfClass").addAnnotation(Override.class)
-                            .addModifiers(Modifier.PUBLIC)
-                            .returns(ParameterizedTypeName.get(ClassName.get(Class.class), ofClassName))
-                            .addStatement("return $T.class", ofClassName).build())
-                    .addMethod(MethodSpec.methodBuilder("getMetaEntityPriority").addAnnotation(Override.class)
-                            .addModifiers(Modifier.PUBLIC).returns(int.class)
-                            .addStatement("return $L", annotation.priority()).build())
-                    .addMethod(extClassMethodBuilder.build());
+            String paramNames = Joiner.on(", ").join(paramValues);
+            if (constructor.getSimpleName().contentEquals("<init>")) {
+                methodBuilder.addStatement("return new $T($L)", elementClassName, paramNames);
 
-            builder.addType(implBuilder.build());
+            } else {
+                String initCode = constructor.getModifiers().contains(Modifier.STATIC) ? "$T"
+                        : annotation.staticConstructor().isEmpty() ? ("new $T()")
+                        : String.format("$T.%s()", annotation.staticConstructor());
+
+                methodBuilder.addStatement("return " + initCode + ".$L($L)", elementClassName,
+                        constructor.getSimpleName().toString(), paramNames);
+            }
+
+            implBuilder.addMethod(methodBuilder.build());
         }
+
+        MethodSpec.Builder extClassMethodBuilder = MethodSpec.methodBuilder("getMetaEntityExtClass")
+                .addAnnotation(Override.class)
+                .addAnnotation(Nullable.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ParameterizedTypeName.get(ClassName.get(Class.class),
+                        WildcardTypeName.supertypeOf(
+                                extTypeStr == null ? WildcardTypeName.OBJECT : ClassName.bestGuess(extTypeStr))));
+        if (extTypeStr == null)
+            extClassMethodBuilder.addStatement("return null");
+        else
+            extClassMethodBuilder.addStatement("return $T.class", ClassName.bestGuess(extTypeStr));
+
+        builder.addSuperinterface(
+                ParameterizedTypeName.get(ClassName.get(MetaEntityMetacode.class), ofClassName, implOfClassName))
+                .addMethod(MethodSpec.methodBuilder("getMetaEntityImpl").addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC).returns(implOfClassName)
+                        .addStatement("return new MetaEntityImpl()").build())
+                .addMethod(MethodSpec.methodBuilder("getMetaEntityOfClass").addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(ParameterizedTypeName.get(ClassName.get(Class.class), ofClassName))
+                        .addStatement("return $T.class", ofClassName).build())
+                .addMethod(MethodSpec.methodBuilder("getMetaEntityPriority").addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC).returns(int.class)
+                        .addStatement("return $L", annotation.priority()).build())
+                .addMethod(extClassMethodBuilder.build());
+
+        builder.addType(implBuilder.build());
+
         return false;
     }
 
@@ -220,21 +178,5 @@ public class MetaEntityProcessor extends AbstractProcessor {
                 annotation.ext();
             }
         });
-    }
-
-    @Override
-    public Set<TypeElement> applicableMastersOfElement(Element element) {
-        Set<TypeElement> masters = super.applicableMastersOfElement(element);
-        MetaEntity annotation = element.getAnnotation(MetaEntity.class);
-        String ofClass = getOfClass(annotation);
-
-        if (!annotation.minor() && !ofClass.equals(Void.class.getCanonicalName())) {
-            TypeElement of = processingContext.processingEnv().getElementUtils().getTypeElement(ofClass);
-            TypeElement master = masters.iterator().next();
-            if (!master.equals(of))
-                masters = Sets.newHashSet(master, of);
-        }
-
-        return masters;
     }
 }

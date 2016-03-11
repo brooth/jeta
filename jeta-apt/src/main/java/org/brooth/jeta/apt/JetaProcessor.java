@@ -188,10 +188,9 @@ public class JetaProcessor extends AbstractProcessor {
         addProcessor(new SingletonProcessor());
         addProcessor(new MultitonProcessor());
         addProcessor(new ImplementationProcessor());
-//        addProcessor(new MetaProcessor());
-//        addProcessor(new MetaEntityProcessor());
         addProcessor(new MetaScopeProcessor());
         addProcessor(new MetaInjectProcessor());
+        addProcessor(new MetaEntityProcessor());
 
         String addProcessors = properties.getProperty("processors.add");
         if (addProcessors != null) {

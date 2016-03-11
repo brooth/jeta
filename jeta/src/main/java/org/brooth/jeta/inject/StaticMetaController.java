@@ -14,11 +14,10 @@
  *  limitations under the License.
  */
 
-package org.brooth.jeta.meta;
+package org.brooth.jeta.inject;
 
 import com.google.common.base.Preconditions;
 import org.brooth.jeta.MasterClassController;
-import org.brooth.jeta.MasterController;
 import org.brooth.jeta.metasitory.Metasitory;
 
 /**
@@ -30,11 +29,7 @@ public class StaticMetaController extends MasterClassController<Object, InjectMe
         super(metasitory, masterClass, Meta.class);
     }
 
-    public void injectStaticMeta(MetaEntityFactory factory) {
-        injectStaticMeta(Scope.Default.getInstance(), factory);
-    }
-
-    public void injectStaticMeta(Scope scope, MetaEntityFactory factory) {
+    public void injectStaticMeta(Object scope, MetaEntityFactory factory) {
         Preconditions.checkNotNull(factory, "factory");
 
         for (InjectMetacode<Object> metacode : metacodes)

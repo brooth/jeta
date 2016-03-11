@@ -22,17 +22,17 @@ import org.brooth.jeta.eventbus.BaseEventBus;
 import org.brooth.jeta.eventbus.EventBus;
 import org.brooth.jeta.eventbus.SubscriberController;
 import org.brooth.jeta.eventbus.SubscriptionHandler;
+import org.brooth.jeta.inject.MetaController;
+import org.brooth.jeta.inject.MetaEntityFactory;
 import org.brooth.jeta.log.LogController;
 import org.brooth.jeta.log.NamedLoggerProvider;
-import org.brooth.jeta.meta.MetaController;
-import org.brooth.jeta.meta.MetaEntityFactory;
-import org.brooth.jeta.meta.Scope;
 import org.brooth.jeta.metasitory.MapMetasitory;
 import org.brooth.jeta.metasitory.Metasitory;
 import org.brooth.jeta.observer.ObservableController;
 import org.brooth.jeta.observer.ObserverController;
 import org.brooth.jeta.observer.ObserverHandler;
 import org.brooth.jeta.proxy.ProxyController;
+import org.brooth.jeta.tests.inject.DefaultScope;
 import org.brooth.jeta.util.*;
 import org.brooth.jeta.validate.ValidationController;
 import org.brooth.jeta.validate.ValidationException;
@@ -50,6 +50,8 @@ public class TestMetaHelper {
     private final Metasitory metasitory;
     private final MetaEntityFactory metaEntityFactory;
     private final BaseEventBus bus;
+
+    private static final DefaultScope defaultScope = new DefaultScope();
 
     private NamedLoggerProvider<Logger> loggerProvider;
 
@@ -72,11 +74,11 @@ public class TestMetaHelper {
     }
 
     public static void injectMeta(Object master) {
-        new MetaController(getInstance().metasitory, master).injectMeta(getInstance().metaEntityFactory);
+        new MetaController(getInstance().metasitory, master).inject(defaultScope, getInstance().metaEntityFactory);
     }
 
-    public static void injectMeta(Scope scope, Object master) {
-        new MetaController(getInstance().metasitory, master).injectMeta(scope, getInstance().metaEntityFactory);
+    public static void injectMeta(Object scope, Object master) {
+        new MetaController(getInstance().metasitory, master).inject(scope, getInstance().metaEntityFactory);
     }
 
     public static <I> ImplementationController<I> implementationController(Class<I> of) {
@@ -111,7 +113,7 @@ public class TestMetaHelper {
         new ProxyController(getInstance().metasitory, master).createProxy(real);
     }
 
-    public static List<Class<?>>  collectTypes(Class<?> masterClass, Class<? extends Annotation> annotationClass) {
+    public static List<Class<?>> collectTypes(Class<?> masterClass, Class<? extends Annotation> annotationClass) {
         return new TypeCollectorController(getInstance().metasitory, masterClass).getTypes(annotationClass);
     }
 

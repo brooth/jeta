@@ -17,12 +17,11 @@
 package org.brooth.jeta.apt.processors;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.Factory;
-import org.brooth.jeta.apt.MetacodeUtils;
-import org.brooth.jeta.apt.ProcessingContext;
-import org.brooth.jeta.apt.ProcessingException;
-import org.brooth.jeta.apt.RoundContext;
+import org.brooth.jeta.apt.*;
 import org.brooth.jeta.inject.InjectMetacode;
 import org.brooth.jeta.inject.Meta;
 import org.brooth.jeta.inject.MetaEntityFactory;
@@ -31,7 +30,6 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
@@ -48,7 +46,7 @@ public class MetaInjectProcessor extends AbstractProcessor {
 
     private static class StatementContext {
         TypeSpec factoryTypeSpec;
-        ClassName scopeClassName;
+        TypeElement scopeElement;
         String format;
         Object[] args;
     }
@@ -63,30 +61,6 @@ public class MetaInjectProcessor extends AbstractProcessor {
         providerAlias = processingContext.processingProperties().getProperty("meta.provider.alias", null);
     }
 
-    @Override
-    public Set<Class<? extends Annotation>> collectElementsAnnotatedWith() {
-        String metaAlias = processingContext.processingProperties().getProperty("meta.alias", "");
-        if (!metaAlias.isEmpty()) {
-            try {
-                Class<?> aliasClass = Class.forName(metaAlias);
-                if (aliasClass.isAssignableFrom(Annotation.class))
-                    throw new IllegalArgumentException(metaAlias + " is not a annotation type.");
-
-                HashSet<Class<? extends Annotation>> set = new HashSet<Class<? extends Annotation>>();
-                set.add(annotation);
-                @SuppressWarnings("unchecked")
-                Class<? extends Annotation> aliasAnnotation = (Class<? extends Annotation>) aliasClass;
-                set.add(aliasAnnotation);
-                return set;
-
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Failed to load meta alias annotation " + metaAlias, e);
-            }
-        }
-
-        return super.collectElementsAnnotatedWith();
-    }
-
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         if (MetaScopeProcessor.scopeEntities == null)
             throw new IllegalStateException("MetaInjectProcessor must follow after MetaScopeProcessor");
@@ -96,7 +70,7 @@ public class MetaInjectProcessor extends AbstractProcessor {
                 ClassName.get(InjectMetacode.class), masterClassName));
 
         for (Boolean staticMeta = true; staticMeta != null; staticMeta = staticMeta ? false : null) {
-            List<StatementContext> statementContexts = new ArrayList<StatementContext>();
+            Multimap<TypeElement, StatementContext> statementContexts = HashMultimap.create();
 
             MethodSpec.Builder methodBuilder;
             if (staticMeta) {
@@ -132,15 +106,29 @@ public class MetaInjectProcessor extends AbstractProcessor {
                 if (fieldStatement == null)
                     continue;
 
-                statementContexts.add(addReturnStatement(element.asType(),
-                        Collections.<String, TypeMirror>emptyMap(), fieldStatement));
+                StatementContext statementContext = addReturnStatement(element.asType(),
+                        Collections.<String, TypeMirror>emptyMap(), fieldStatement);
+
+                if (statementContexts.containsKey(statementContext.scopeElement))
+                    statementContexts.get(statementContext.scopeElement).add(statementContext);
+                else
+                    statementContexts.put(statementContext.scopeElement, statementContext);
             }
 
-            for (StatementContext statementContext : statementContexts) {
-                methodBuilder.addStatement(statementContext.format, statementContext.args);
+            for (TypeElement scopeElement : statementContexts.keySet()) {
+                methodBuilder.beginControlFlow("if($T.isAssignable(scope))",
+                        ClassName.bestGuess(MetacodeUtils.getMetacodeOf(processingContext.processingEnv().getElementUtils(),
+                                scopeElement.getQualifiedName().toString())));
+                Collection<StatementContext> statements = statementContexts.get(scopeElement);
+                for (StatementContext statementContext : statements) {
+                    methodBuilder.addStatement(statementContext.format, statementContext.args);
+                }
+                methodBuilder.endControlFlow();
+            }
+
+            for (StatementContext statementContext : statementContexts.values())
                 if (statementContext.factoryTypeSpec != null)
                     builder.addType(statementContext.factoryTypeSpec);
-            }
 
             builder.addMethod(methodBuilder.build());
         }
@@ -224,16 +212,14 @@ public class MetaInjectProcessor extends AbstractProcessor {
             return addFactoryImpl(typeElement, statementPrefix);
         }
 
-        Elements elementUtils = processingContext.processingEnv().getElementUtils();
-        String scopeClassStr = MetacodeUtils.getMetacodeOf(elementUtils, MetaScopeProcessor.scopeEntities.get(elementTypeStr));
-
+        TypeElement scopeElement = MetaScopeProcessor.scopeEntities.get(elementTypeStr);
+        ClassName scopeClassName = ClassName.get(scopeElement);
         StatementContext statementContext = new StatementContext();
-        statementContext.scopeClassName = ClassName.bestGuess(scopeClassStr);
+        statementContext.scopeElement = scopeElement;
         statementContext.format = statementPrefix + "(($T)\n\tfactory.getMetaEntity($T.class)).$L";
         statementContext.args = new Object[]{
-                ClassName.get(statementContext.scopeClassName.packageName(),
-                        statementContext.scopeClassName.simpleName() + "." +
-                                MetacodeUtils.getMetaNameOf(env.getElementUtils(), elementTypeStr, "_MetaEntity")),
+                ClassName.get(scopeClassName.packageName(), scopeClassName.simpleName() + JetaProcessor.METACODE_CLASS_POSTFIX
+                        + "." + MetacodeUtils.getMetaNameOf(env.getElementUtils(), elementTypeStr, "_MetaEntity")),
                 ClassName.bestGuess(elementTypeStr),
                 getInstanceStr
         };
@@ -276,17 +262,15 @@ public class MetaInjectProcessor extends AbstractProcessor {
                 }
 
                 StatementContext subContext = addReturnStatement(method.getReturnType(), params, "return ");
-                if (context.scopeClassName != null && context.scopeClassName.equals(subContext.scopeClassName)) {
-                    // todo: check assignable flag
-//                    throw new ProcessingException("Factory '" + element.getQualifiedName().toString() + "' has" +
-//                            " elements with not assignable scopes");
+                if (context.scopeElement != null && !context.scopeElement.equals(subContext.scopeElement)) {
+                    throw new ProcessingException("Factory '" + element.getQualifiedName().toString() +
+                            "' has elements with different scopes");
                 }
 
-                context.scopeClassName = subContext.scopeClassName;
+                context.scopeElement = subContext.scopeElement;
                 methodSpec.addStatement(subContext.format, subContext.args);
                 factoryBuilder.addMethod(methodSpec.build());
             }
-
 
         context.format = statementPrefix + "new $L(scope, factory)";
         context.args = new Object[]{name};
@@ -314,5 +298,29 @@ public class MetaInjectProcessor extends AbstractProcessor {
             throw new IllegalStateException(type + " not valid meta structure of generics.");
 
         return genericType;
+    }
+
+    @Override
+    public Set<Class<? extends Annotation>> collectElementsAnnotatedWith() {
+        String metaAlias = processingContext.processingProperties().getProperty("meta.alias", "");
+        if (!metaAlias.isEmpty()) {
+            try {
+                Class<?> aliasClass = Class.forName(metaAlias);
+                if (aliasClass.isAssignableFrom(Annotation.class))
+                    throw new IllegalArgumentException(metaAlias + " is not a annotation type.");
+
+                HashSet<Class<? extends Annotation>> set = new HashSet<Class<? extends Annotation>>();
+                set.add(annotation);
+                @SuppressWarnings("unchecked")
+                Class<? extends Annotation> aliasAnnotation = (Class<? extends Annotation>) aliasClass;
+                set.add(aliasAnnotation);
+                return set;
+
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("Failed to load meta alias annotation " + metaAlias, e);
+            }
+        }
+
+        return super.collectElementsAnnotatedWith();
     }
 }

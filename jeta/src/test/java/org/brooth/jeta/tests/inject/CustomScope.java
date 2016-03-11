@@ -8,5 +8,7 @@ import org.brooth.jeta.inject.Scope;
  */
 @Scope
 public class CustomScope {
-    public String data = "scope data";
+    public String getData() {
+        return "custom scope data";
+    }
 }

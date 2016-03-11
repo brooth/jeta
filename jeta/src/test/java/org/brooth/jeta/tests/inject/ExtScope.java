@@ -7,6 +7,9 @@ import org.brooth.jeta.inject.Scope;
  * @version $Id$
  */
 @Scope(assignable = DefaultScope.class)
-public class ExtScope {
-    public String data = "assignable from default scope";
+public class ExtScope extends DefaultScope {
+    @Override
+    public String getData() {
+        return "ext scope data";
+    }
 }

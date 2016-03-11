@@ -14,6 +14,7 @@ import org.brooth.jeta.inject.MetaEntity;
 import org.brooth.jeta.inject.Scope;
 
 import javax.annotation.Nullable;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.util.*;
@@ -31,12 +32,11 @@ public class MetaScopeProcessor extends AbstractProcessor {
     private static final String assignableExtStatement = assignableStatement + " || $T.isAssignable(scope)";
 
     private TypeElement scopeElement;
-    private TypeMirror scopeTypeMirror;
 
     private Set<? extends Element> allMetaEntities;
 
-    // MetaEntity.class -> Scope.class
-    static Map<String, String> scopeEntities = null;
+    static Map<String, TypeElement> scopeEntities = null;
+    static Map<TypeElement, TypeElement> scopeAssignableFrom = null;
 
     public MetaScopeProcessor() {
         super(Scope.class);
@@ -47,13 +47,14 @@ public class MetaScopeProcessor extends AbstractProcessor {
         super.init(processingContext);
         defaultScopeStr = processingContext.processingProperties().getProperty("meta.scope.default", null);
 
-        if (scopeEntities == null)
-            scopeEntities = new HashMap<String, String>();
+        if (scopeEntities == null) {
+            scopeEntities = new HashMap<String, TypeElement>();
+            scopeAssignableFrom = new HashMap<TypeElement, TypeElement>();
+        }
     }
 
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         scopeElement = (TypeElement) context.elements().iterator().next();
-        scopeTypeMirror = scopeElement.asType();
 
         final String scopeClassStr = context.metacodeContext().masterElement().getQualifiedName().toString();
         final boolean isDefaultScope = defaultScopeStr != null && defaultScopeStr.equals(scopeClassStr);
@@ -64,6 +65,9 @@ public class MetaScopeProcessor extends AbstractProcessor {
         Set<? extends Element> scopeEntities = Sets.filter(allMetaEntities, new Predicate<Element>() {
             public boolean apply(Element input) {
                 final MetaEntity a = input.getAnnotation(MetaEntity.class);
+                if (a.minor())
+                    return false;
+
                 String scope = MetacodeUtils.extractClassName(new Runnable() {
                     public void run() {
                         a.scope();
@@ -89,6 +93,9 @@ public class MetaScopeProcessor extends AbstractProcessor {
             processingContext.logger().warn("Scope '" + scopeClassStr + "' has no entities.");
             return false;
         }
+
+        TypeElement assignableFrom = getAssignableFrom(scopeElement);
+        scopeAssignableFrom.put(scopeElement, assignableFrom);
 
         // build packages tree
         PackageTree tree = new PackageTree();
@@ -126,25 +133,35 @@ public class MetaScopeProcessor extends AbstractProcessor {
         return false;
     }
 
-    private void buildIsAssignableMethod(TypeSpec.Builder builder, RoundContext context) {
-        MethodSpec.Builder assignableMethodBuilder = MethodSpec.methodBuilder("isAssignable")
-                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
-                .addParameter(ClassName.OBJECT, "scope")
-                .returns(boolean.class);
-
+    private TypeElement getAssignableFrom(final TypeElement scopeElement) {
         String assignableStr = MetacodeUtils.extractClassName(new Runnable() {
             public void run() {
                 scopeElement.getAnnotation(Scope.class).assignable();
             }
         });
         if (assignableStr.equals(Void.class.getCanonicalName())) {
+            return scopeElement;
+        }
+
+        return getAssignableFrom(processingContext.processingEnv().getElementUtils().getTypeElement(assignableStr));
+    }
+
+    private void buildIsAssignableMethod(TypeSpec.Builder builder, RoundContext context) {
+        MethodSpec.Builder assignableMethodBuilder = MethodSpec.methodBuilder("isAssignable")
+                .addModifiers(Modifier.STATIC, Modifier.PUBLIC)
+                .addParameter(ClassName.OBJECT, "scope")
+                .returns(boolean.class);
+
+
+        TypeElement assignableFrom = scopeAssignableFrom.get(scopeElement);
+        if (assignableFrom == scopeElement) {
             assignableMethodBuilder.addStatement(assignableStatement,
                     TypeName.get(context.metacodeContext().masterElement().asType()));
         } else {
             assignableMethodBuilder.addStatement(assignableExtStatement,
                     TypeName.get(context.metacodeContext().masterElement().asType()),
                     ClassName.bestGuess(MetacodeUtils.getMetacodeOf(processingContext.processingEnv().getElementUtils(),
-                            assignableStr)));
+                            assignableFrom.getQualifiedName().toString())));
         }
 
         builder.addMethod(assignableMethodBuilder.build());
@@ -155,6 +172,7 @@ public class MetaScopeProcessor extends AbstractProcessor {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 
         if (node.elements != null) {
+            ProcessingEnvironment env = processingContext.processingEnv();
             for (TypeElement element : node.elements) {
                 String elementTypeStr = element.getQualifiedName().toString();
                 final MetaEntity annotation = element.getAnnotation(MetaEntity.class);
@@ -168,21 +186,19 @@ public class MetaScopeProcessor extends AbstractProcessor {
 
                 ClassName ofClassName = ClassName.bestGuess(ofTypeStr);
                 ClassName superClassName;
+
                 if (extTypeStr == null) {
                     superClassName = ClassName.get(IMetaEntity.class);
 
                 } else {
-                    String pkg = processingContext.processingEnv().getElementUtils().getPackageOf(scopeElement)
-                            .getQualifiedName().toString();
+                    String pkg = env.getElementUtils().getPackageOf(scopeElement).getQualifiedName().toString();
                     superClassName = ClassName.get(pkg, scopeElement.getSimpleName().toString() + "_Metacode." +
-                            MetacodeUtils.getMetaNameOf(processingContext.processingEnv().getElementUtils(),
-                                    extTypeStr, "_MetaEntity"));
+                            MetacodeUtils.getMetaNameOf(env.getElementUtils(), extTypeStr, "_MetaEntity"));
                 }
 
                 boolean isSelfProvider = elementTypeStr.equals(ofTypeStr);
 
-                String interfaceName = MetacodeUtils.getSimpleMetaNodeOf(
-                        processingContext.processingEnv().getElementUtils(), ofTypeStr, "_MetaEntity");
+                String interfaceName = MetacodeUtils.getSimpleMetaNodeOf(env.getElementUtils(), ofTypeStr, "_MetaEntity");
                 TypeSpec.Builder interfaceBuilder = TypeSpec.interfaceBuilder(interfaceName)
                         .addJavadoc("emitted by " + elementTypeStr + '\n').addModifiers(Modifier.PUBLIC)
                         .addSuperinterface(superClassName)
@@ -207,8 +223,9 @@ public class MetaScopeProcessor extends AbstractProcessor {
                     params.add(ParameterSpec.builder(ClassName.OBJECT, "__scope__").build());
                     for (VariableElement input : constructor.getParameters()) {
                         TypeMirror paramType = input.asType();
-                        if (!processingContext.processingEnv().getTypeUtils().isAssignable(paramType, scopeTypeMirror)) {
-                            params.add(ParameterSpec.builder(TypeName.get(paramType), input.getSimpleName().toString()).build());
+                        String paramName = input.getSimpleName().toString();
+                        if (!paramName.equals("__scope__")) {
+                            params.add(ParameterSpec.builder(TypeName.get(paramType), paramName).build());
                         }
                     }
 
@@ -219,7 +236,10 @@ public class MetaScopeProcessor extends AbstractProcessor {
                 }
 
                 builder.addType(interfaceBuilder.build());
-                scopeEntities.put(ofTypeStr, scopeElement.getQualifiedName().toString());
+
+                TypeElement definedScope = scopeEntities.put(ofTypeStr, scopeElement);
+                if (definedScope != null && !definedScope.equals(scopeElement))
+                    throw new ProcessingException(ofTypeStr + " defined in different scopes");
             }
         }
         for (PackageTree.PackageNode child : node.children)

@@ -14,11 +14,24 @@
  *  limitations under the License.
  */
 
-package org.brooth.jeta.meta;
+package org.brooth.jeta.inject;
 
+import com.google.common.base.Preconditions;
+import org.brooth.jeta.MasterController;
+import org.brooth.jeta.metasitory.Metasitory;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface IMetaEntity {
-    Class<?> getEntityClass();
+public class MetaController extends MasterController<Object, InjectMetacode<Object>> {
+
+    public MetaController(Metasitory metasitory, Object master) {
+        super(metasitory, master, Meta.class);
+    }
+
+    public void inject(Object scope, MetaEntityFactory factory) {
+        Preconditions.checkNotNull(factory, "factory");
+
+        for (InjectMetacode<Object> metacode : metacodes)
+            metacode.applyMeta(scope, master, factory);
+    }
 }

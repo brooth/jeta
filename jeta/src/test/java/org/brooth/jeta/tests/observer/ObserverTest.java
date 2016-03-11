@@ -227,7 +227,6 @@ public class ObserverTest extends BaseTest {
         Thread[] threads = new Thread[10];
         for (int i = 0; i < threads.length; i++) {
             threads[i] = new Thread(new Runnable() {
-                @Override
                 public void run() {
                     observable.oneObservers.notify(new EventOne("catch async"));
                     otherObservable.oneObservers.notify(new EventOne("catch other async"));

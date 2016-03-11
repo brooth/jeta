@@ -40,7 +40,7 @@ public class MetaEntityFactory {
             if (entity instanceof MetaEntityMetacode) {
                 MetaEntityMetacode<?, ?> impl = (MetaEntityMetacode<?, ?>) entity;
                 MetaEntityMetacode<?, ?> existing = graph.get(impl.getMetaEntityOfClass());
-                if (existing != null && existing.getMetaEntityPriority() < impl.getMetaEntityPriority())
+                if (existing != null && existing.getMetaEntityPriority() >= impl.getMetaEntityPriority())
                     continue;
 
                 graph.put(impl.getMetaEntityOfClass(), impl);
