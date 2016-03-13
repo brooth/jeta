@@ -15,14 +15,13 @@
  *
  */
 
-package org.brooth.jeta.inject;
+package org.brooth.jeta.tests.inject;
+
+import org.brooth.jeta.inject.Module;
 
 /**
- * @author khalidov
- * @version $Id$
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
-public @interface Scope {
-    @Deprecated Class<?> assignable() default Void.class;
-
-    Class<?> ext() default Void.class;
+@Module(scopes = {CustomScope.class, DefaultScope.class, ExtScope.class})
+public class TestModule {
 }

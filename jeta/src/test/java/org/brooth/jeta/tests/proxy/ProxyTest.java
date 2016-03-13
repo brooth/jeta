@@ -1,17 +1,18 @@
 /*
- * Copyright 2015 Oleg Khalidov
+ * Copyright 2016 Oleg Khalidov
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
 
 package org.brooth.jeta.tests.proxy;
@@ -46,55 +47,46 @@ public class ProxyTest extends BaseTest {
     }
 
     public static class Foo implements IFoo {
-        @Override
         public String value1() {
             return "foo";
         }
 
-        @Override
         public int value2() {
             return 12;
         }
 
-        @Override
         public Class<?> value3() {
             return Foo.class;
         }
     }
 
     public static abstract class Value1Foo implements IFoo, AbstractProxy<IFoo> {
-        @Override
         public String value1() {
             return real().value1() + " proxy";
         }
     }
 
     public static abstract class Value2Foo implements IFoo, AbstractProxy<IFoo> {
-        @Override
         public int value2() {
             return real().value2() + 7;
         }
     }
 
     public static abstract class Value3Foo implements IFoo, AbstractProxy<IFoo> {
-        @Override
         public Class<?> value3() {
             return Value3Foo.class;
         }
     }
 
     public static abstract class AllValueFoo implements IFoo, AbstractProxy<IFoo> {
-        @Override
         public String value1() {
             return "all";
         }
 
-        @Override
         public int value2() {
             return 100;
         }
 
-        @Override
         public Class<?> value3() {
             return Boolean.class;
         }

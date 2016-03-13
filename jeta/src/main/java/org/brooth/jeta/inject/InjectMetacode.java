@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Oleg Khalidov
+ * Copyright 2016 Oleg Khalidov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.brooth.jeta.inject;
@@ -21,7 +22,7 @@ package org.brooth.jeta.inject;
  */
 public interface InjectMetacode<M> {
 
-    void applyStaticMeta(Object scope, MetaEntityFactory factory);
+    void applyStaticMeta(MetaScope<?> scope);
 
-    void applyMeta(Object scope, M master, MetaEntityFactory factory);
+    void applyMeta(MetaScope<?> scope, M master);
 }

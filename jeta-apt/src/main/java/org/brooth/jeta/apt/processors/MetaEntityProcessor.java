@@ -1,17 +1,18 @@
 /*
- * Copyright 2015 Oleg Khalidov
+ * Copyright 2016 Oleg Khalidov
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
 
 package org.brooth.jeta.apt.processors;
@@ -43,7 +44,10 @@ public class MetaEntityProcessor extends AbstractProcessor {
 
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         if (MetaScopeProcessor.scopeEntities == null)
-            throw new IllegalStateException("MetaInjectProcessor must follow after MetaScopeProcessor");
+            throw new IllegalStateException("MetaScopeProcessor hasn't been run");
+
+        if(context.round() == 1)
+            return true;
 
         TypeElement element = (TypeElement) context.elements().iterator().next();
 
@@ -84,7 +88,7 @@ public class MetaEntityProcessor extends AbstractProcessor {
                         MetacodeUtils.getMetaNameOf(env.getElementUtils(), ofTypeStr, "_MetaEntity"));
 
         TypeSpec.Builder implBuilder = TypeSpec.classBuilder("MetaEntityImpl")
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addSuperinterface(implOfClassName)
                 .addMethod(MethodSpec.methodBuilder("getEntityClass")
                         .addAnnotation(Override.class)

@@ -1,3 +1,20 @@
+/*
+ * Copyright 2016 Oleg Khalidov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
 package org.brooth.jeta.tests.inject;
 
 import org.brooth.jeta.*;
@@ -9,16 +26,11 @@ import org.brooth.jeta.metasitory.Criteria;
 import org.junit.Test;
 
 import javax.inject.Inject;
-
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -305,7 +317,7 @@ public class MetaInjectTest extends BaseTest {
 
         assertThat(holder.customScopeEntity, nullValue());
 
-        TestMetaHelper.injectMeta(new ExtScope(), holder);
+        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new ExtScope()), holder);
 
         assertThat(holder.scopeEntity, notNullValue());
         assertThat(holder.scopeEntity.value, is("scope"));
@@ -317,7 +329,7 @@ public class MetaInjectTest extends BaseTest {
 
         assertThat(holder.customScopeEntity, nullValue());
 
-        TestMetaHelper.injectMeta(new CustomScope(), holder);
+        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new CustomScope()), holder);
 
         assertThat(holder.customScopeEntity, notNullValue());
         assertThat(holder.customScopeEntity.value, is("custom scope"));
@@ -362,13 +374,13 @@ public class MetaInjectTest extends BaseTest {
 
         MetaFactoryScopeEntityHolder holder = new MetaFactoryScopeEntityHolder();
 
-        TestMetaHelper.injectMeta(new CustomScope(), holder);
+        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new CustomScope()), holder);
         assertThat(holder.customScopeFactory, notNullValue());
         assertThat(holder.customScopeFactory.get(), notNullValue());
         assertThat(holder.defaultScopeFactory, nullValue());
         assertThat(holder.extScopeFactory, nullValue());
 
-        TestMetaHelper.injectMeta(new ExtScope(), holder);
+        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new ExtScope()), holder);
         assertThat(holder.customScopeFactory, notNullValue());
         assertThat(holder.customScopeFactory.get(), notNullValue());
         assertThat(holder.extScopeFactory, notNullValue());
@@ -393,14 +405,14 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
-    @MetaEntity(ext = MetaEntitySix.class, priority = Integer.MIN_VALUE)
+    @MetaEntity(ext = MetaEntitySix.class, extScope = DefaultScope.class, priority = Integer.MIN_VALUE)
     public static class WeakMetaEntitySixExt extends MetaEntitySix {
         public String getValue() {
             throw new IllegalStateException();
         }
     }
 
-    @MetaEntity(ext = MetaEntitySix.class, priority = Integer.MAX_VALUE)
+    @MetaEntity(ext = MetaEntitySix.class, extScope = DefaultScope.class, priority = Integer.MAX_VALUE)
     public static class MetaEntitySixExt extends MetaEntitySix {
         public String getValue() {
             return super.getValue() + " ext";
@@ -416,14 +428,14 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
-    @MetaEntity(ext = MetaEntitySeven.class)
+    @MetaEntity(ext = MetaEntitySeven.class, extScope = DefaultScope.class)
     public static class MetaEntitySevenExt extends MetaEntitySeven {
         public String getValue() {
             return super.getValue() + " ext";
         }
     }
 
-    @MetaEntity(ext = MetaEntitySevenExt.class)
+    @MetaEntity(ext = MetaEntitySevenExt.class, extScope = DefaultScope.class)
     public static class MetaEntitySevenExtExt extends MetaEntitySevenExt {
         public String getValue() {
             return super.getValue() + " ext";

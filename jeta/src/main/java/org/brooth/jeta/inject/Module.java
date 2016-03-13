@@ -18,11 +18,9 @@
 package org.brooth.jeta.inject;
 
 /**
- * @author khalidov
- * @version $Id$
+ * @author Oleg Khalidov (brooth@gmail.com)
  */
-public @interface Scope {
-    @Deprecated Class<?> assignable() default Void.class;
-
-    Class<?> ext() default Void.class;
+public @interface Module {
+    Class<?>[] scopes();
+    Class<?>[] modules() default {};
 }

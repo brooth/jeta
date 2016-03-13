@@ -1,30 +1,31 @@
 /*
- * Copyright 2015 Oleg Khalidov
+ * Copyright 2016 Oleg Khalidov
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
 
 package org.brooth.jeta.apt.processors;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.Factory;
 import org.brooth.jeta.apt.*;
-import org.brooth.jeta.inject.InjectMetacode;
-import org.brooth.jeta.inject.Meta;
-import org.brooth.jeta.inject.MetaEntityFactory;
+import org.brooth.jeta.inject.*;
 
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -38,15 +39,18 @@ import java.util.*;
  */
 public class MetaInjectProcessor extends AbstractProcessor {
 
-    private final TypeName metaEntityFactoryTypeName = TypeName.get(MetaEntityFactory.class);
-    private final ClassName metaFactoryClassName = ClassName.get(MetaEntityFactory.class);
+    private final TypeName metaScopeTypeName = ParameterizedTypeName.get(
+            ClassName.get(MetaScope.class), WildcardTypeName.subtypeOf(TypeName.OBJECT));
 
     @Nullable
     private String providerAlias;
+    private Set<? extends Element> modules;
+
+    private Multimap<String, TypeElement> scopeEntities;
 
     private static class StatementContext {
         TypeSpec factoryTypeSpec;
-        TypeElement scopeElement;
+        Collection<TypeElement> scopes;
         String format;
         Object[] args;
     }
@@ -62,8 +66,18 @@ public class MetaInjectProcessor extends AbstractProcessor {
     }
 
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
-        if (MetaScopeProcessor.scopeEntities == null)
-            throw new IllegalStateException("MetaInjectProcessor must follow after MetaScopeProcessor");
+        if (context.round() == 1) {
+            if (modules == null) {
+                modules = context.roundEnv().getElementsAnnotatedWith(Module.class);
+                if (modules.isEmpty())
+                    throw new ProcessingException("Meta module not found. Did you put @Module annotation on it?");
+            }
+            return true;
+        }
+
+        if (scopeEntities == null) {
+            collectModuleScopes();
+        }
 
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(
@@ -75,14 +89,12 @@ public class MetaInjectProcessor extends AbstractProcessor {
             MethodSpec.Builder methodBuilder;
             if (staticMeta) {
                 methodBuilder = MethodSpec.methodBuilder("applyStaticMeta")
-                        .addParameter(ClassName.OBJECT, "scope", Modifier.FINAL)
-                        .addParameter(metaFactoryClassName, "factory", Modifier.FINAL);
+                        .addParameter(metaScopeTypeName, "scope", Modifier.FINAL);
 
             } else {
                 methodBuilder = MethodSpec.methodBuilder("applyMeta")
-                        .addParameter(ClassName.OBJECT, "scope", Modifier.FINAL)
-                        .addParameter(masterClassName, "master", Modifier.FINAL)
-                        .addParameter(metaFactoryClassName, "factory", Modifier.FINAL);
+                        .addParameter(metaScopeTypeName, "scope", Modifier.FINAL)
+                        .addParameter(masterClassName, "master", Modifier.FINAL);
             }
 
             methodBuilder
@@ -109,16 +121,25 @@ public class MetaInjectProcessor extends AbstractProcessor {
                 StatementContext statementContext = addReturnStatement(element.asType(),
                         Collections.<String, TypeMirror>emptyMap(), fieldStatement);
 
-                if (statementContexts.containsKey(statementContext.scopeElement))
-                    statementContexts.get(statementContext.scopeElement).add(statementContext);
-                else
-                    statementContexts.put(statementContext.scopeElement, statementContext);
+                for (TypeElement scopeElement : statementContext.scopes) {
+                    if (statementContexts.containsKey(scopeElement))
+                        statementContexts.get(scopeElement).add(statementContext);
+                    else
+                        statementContexts.put(scopeElement, statementContext);
+                }
             }
 
             for (TypeElement scopeElement : statementContexts.keySet()) {
-                methodBuilder.beginControlFlow("if($T.isAssignable(scope))",
-                        ClassName.bestGuess(MetacodeUtils.getMetacodeOf(processingContext.processingEnv().getElementUtils(),
-                                scopeElement.getQualifiedName().toString())));
+                ClassName scopeMetacodeClassName = ClassName.get(processingContext.processingEnv().getElementUtils()
+                                .getPackageOf(scopeElement).getQualifiedName().toString(),
+                        scopeElement.getSimpleName().toString());
+                ClassName metaScopeClassName = ClassName.get(scopeMetacodeClassName.packageName(),
+                        scopeElement.getSimpleName().toString() + ".MetaScope");
+
+                methodBuilder
+                        .beginControlFlow("if($T.isAssignable(scope))", scopeMetacodeClassName)
+                        .addStatement("$T s = ($T) scope", metaScopeClassName, metaScopeClassName);
+
                 Collection<StatementContext> statements = statementContexts.get(scopeElement);
                 for (StatementContext statementContext : statements) {
                     methodBuilder.addStatement(statementContext.format, statementContext.args);
@@ -136,11 +157,65 @@ public class MetaInjectProcessor extends AbstractProcessor {
         return false;
     }
 
+    private void collectModuleScopes() {
+        scopeEntities = HashMultimap.create();
+        for (final Element module : modules)
+            collectModuleScopes(module);
+
+        for (final Element module : modules) {
+            Iterable<TypeElement> extModules = Iterables.transform(
+                    MetacodeUtils.extractClassesNames(new Runnable() {
+                        public void run() {
+                            Module moduleAnnotation = module.getAnnotation(Module.class);
+                            if (moduleAnnotation == null)
+                                throw new ProcessingException(module.getSimpleName().toString() +
+                                        " is not a meta module. Put @Module on it");
+                            moduleAnnotation.modules();
+                        }
+                    }), new Function<String, TypeElement>() {
+                        public TypeElement apply(String input) {
+                            return processingContext.processingEnv().getElementUtils().getTypeElement(input);
+                        }
+                    });
+            for (TypeElement extModule : extModules)
+                collectModuleScopes(extModule);
+        }
+    }
+
+    private void collectModuleScopes(Element module) {
+        final Module moduleAnnotation = module.getAnnotation(Module.class);
+        Iterable<TypeElement> scopesElements =
+                Iterables.transform(MetacodeUtils.extractClassesNames(new Runnable() {
+                    public void run() {
+                        moduleAnnotation.scopes();
+                    }
+                }), new Function<String, TypeElement>() {
+                    public TypeElement apply(String input) {
+                        return processingContext.processingEnv().getElementUtils()
+                                .getTypeElement(input + JetaProcessor.METACODE_CLASS_POSTFIX);
+                    }
+                });
+
+        for (TypeElement scopeElement : scopesElements) {
+            final MetaScopeConfig config = scopeElement.getAnnotation(MetaScopeConfig.class);
+            if (config == null)
+                throw new ProcessingException(scopeElement.getSimpleName() + " is not a meta scope. Put @Scope on it.");
+
+            List<String> scopeElements = MetacodeUtils.extractClassesNames(new Runnable() {
+                public void run() {
+                    config.entities();
+                }
+            });
+            for (String scopeEntity : scopeElements)
+                scopeEntities.put(scopeEntity, scopeElement);
+        }
+    }
+
     private StatementContext addReturnStatement(TypeMirror returnTypeMirror, Map<String, TypeMirror> params, String statementPrefix) {
         ProcessingEnvironment env = processingContext.processingEnv();
         String returnTypeStr = env.getTypeUtils().erasure(returnTypeMirror).toString();
         Collection<String> paramValues = new ArrayList<String>(params.size() + 1);
-        paramValues.add("scope");
+        paramValues.add("s.getScope()");
         paramValues.addAll(params.keySet());
         String getInstanceStr = String.format("getInstance(%s)", Joiner.on(", ").join(paramValues));
 
@@ -212,17 +287,12 @@ public class MetaInjectProcessor extends AbstractProcessor {
             return addFactoryImpl(typeElement, statementPrefix);
         }
 
-        TypeElement scopeElement = MetaScopeProcessor.scopeEntities.get(elementTypeStr);
-        ClassName scopeClassName = ClassName.get(scopeElement);
         StatementContext statementContext = new StatementContext();
-        statementContext.scopeElement = scopeElement;
-        statementContext.format = statementPrefix + "(($T)\n\tfactory.getMetaEntity($T.class)).$L";
-        statementContext.args = new Object[]{
-                ClassName.get(scopeClassName.packageName(), scopeClassName.simpleName() + JetaProcessor.METACODE_CLASS_POSTFIX
-                        + "." + MetacodeUtils.getMetaNameOf(env.getElementUtils(), elementTypeStr, "_MetaEntity")),
-                ClassName.bestGuess(elementTypeStr),
-                getInstanceStr
-        };
+        statementContext.format = statementPrefix + "s.$L_MetaEntity().$L";
+        statementContext.args = new Object[]{elementTypeStr.replaceAll("\\.", "_"), getInstanceStr};
+        statementContext.scopes = scopeEntities.get(elementTypeStr);
+        if (statementContext.scopes == null)
+            throw new ProcessingException("Undefined scope for '" + elementTypeStr + "' element.");
 
         return statementContext;
     }
@@ -233,15 +303,7 @@ public class MetaInjectProcessor extends AbstractProcessor {
         String name = element.getSimpleName().toString() + "Impl" + factoryIndex++;
         TypeSpec.Builder factoryBuilder = TypeSpec.classBuilder(name)
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC)
-                .addSuperinterface(ClassName.bestGuess(element.getQualifiedName().toString()))
-                .addField(ClassName.OBJECT, "scope", Modifier.PRIVATE, Modifier.FINAL)
-                .addField(metaEntityFactoryTypeName, "factory", Modifier.PRIVATE, Modifier.FINAL)
-                .addMethod(MethodSpec.constructorBuilder()
-                        .addParameter(ClassName.OBJECT, "scope")
-                        .addParameter(metaEntityFactoryTypeName, "factory")
-                        .addStatement("this.scope = scope")
-                        .addStatement("this.factory = factory")
-                        .build());
+                .addSuperinterface(ClassName.bestGuess(element.getQualifiedName().toString()));
 
         StatementContext context = new StatementContext();
         for (Element subElement : element.getEnclosedElements())
@@ -262,17 +324,31 @@ public class MetaInjectProcessor extends AbstractProcessor {
                 }
 
                 StatementContext subContext = addReturnStatement(method.getReturnType(), params, "return ");
-                if (context.scopeElement != null && !context.scopeElement.equals(subContext.scopeElement)) {
+                if (subContext.scopes.size() > 1)
+                    throw new ProcessingException("Factory '" + element.getSimpleName().toString() + "' has element " +
+                            subElement.getSimpleName().toString() + " from multiple scopes");
+                if (context.scopes != null && !context.scopes.equals(subContext.scopes)) {
                     throw new ProcessingException("Factory '" + element.getQualifiedName().toString() +
-                            "' has elements with different scopes");
+                            "' has elements from different scopes");
                 }
 
-                context.scopeElement = subContext.scopeElement;
+                context.scopes = subContext.scopes;
                 methodSpec.addStatement(subContext.format, subContext.args);
                 factoryBuilder.addMethod(methodSpec.build());
             }
 
-        context.format = statementPrefix + "new $L(scope, factory)";
+        TypeElement scopeElement = context.scopes.iterator().next();
+        ClassName metaScopeClassName = ClassName.get(processingContext.processingEnv().getElementUtils()
+                .getPackageOf(scopeElement).getQualifiedName().toString(),
+                scopeElement.getSimpleName().toString() + ".MetaScope");
+
+        factoryBuilder.addField(metaScopeClassName, "s", Modifier.PRIVATE, Modifier.FINAL)
+                .addMethod(MethodSpec.constructorBuilder()
+                        .addParameter(metaScopeClassName, "s")
+                        .addStatement("this.s = s")
+                        .build());
+
+        context.format = statementPrefix + "new $L(s)";
         context.args = new Object[]{name};
         context.factoryTypeSpec = factoryBuilder.build();
         return context;

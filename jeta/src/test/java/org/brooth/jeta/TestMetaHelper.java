@@ -1,17 +1,18 @@
 /*
- * Copyright 2015 Oleg Khalidov
+ * Copyright 2016 Oleg Khalidov
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
 
 package org.brooth.jeta;
@@ -22,8 +23,7 @@ import org.brooth.jeta.eventbus.BaseEventBus;
 import org.brooth.jeta.eventbus.EventBus;
 import org.brooth.jeta.eventbus.SubscriberController;
 import org.brooth.jeta.eventbus.SubscriptionHandler;
-import org.brooth.jeta.inject.MetaController;
-import org.brooth.jeta.inject.MetaEntityFactory;
+import org.brooth.jeta.inject.*;
 import org.brooth.jeta.log.LogController;
 import org.brooth.jeta.log.NamedLoggerProvider;
 import org.brooth.jeta.metasitory.MapMetasitory;
@@ -33,6 +33,7 @@ import org.brooth.jeta.observer.ObserverController;
 import org.brooth.jeta.observer.ObserverHandler;
 import org.brooth.jeta.proxy.ProxyController;
 import org.brooth.jeta.tests.inject.DefaultScope;
+import org.brooth.jeta.tests.inject.TestModule;
 import org.brooth.jeta.util.*;
 import org.brooth.jeta.validate.ValidationController;
 import org.brooth.jeta.validate.ValidationException;
@@ -48,10 +49,10 @@ public class TestMetaHelper {
     private static TestMetaHelper instance;
 
     private final Metasitory metasitory;
-    private final MetaEntityFactory metaEntityFactory;
     private final BaseEventBus bus;
 
-    private static final DefaultScope defaultScope = new DefaultScope();
+    private final MetaModule metaModule;
+    private final MetaScope<DefaultScope> defaultScope;
 
     private NamedLoggerProvider<Logger> loggerProvider;
 
@@ -63,7 +64,8 @@ public class TestMetaHelper {
 
     private TestMetaHelper(String metaPackage) {
         metasitory = new MapMetasitory(metaPackage);
-        metaEntityFactory = new MetaEntityFactory(metasitory);
+        metaModule = new MetaModuleController(metasitory, TestModule.class).get();
+        defaultScope = getMetaScope(new DefaultScope());
         bus = new BaseEventBus();
 
         loggerProvider = new NamedLoggerProvider<Logger>() {
@@ -74,11 +76,11 @@ public class TestMetaHelper {
     }
 
     public static void injectMeta(Object master) {
-        new MetaController(getInstance().metasitory, master).inject(defaultScope, getInstance().metaEntityFactory);
+        new MetaController(getInstance().metasitory, master).inject(getInstance().defaultScope);
     }
 
-    public static void injectMeta(Object scope, Object master) {
-        new MetaController(getInstance().metasitory, master).inject(scope, getInstance().metaEntityFactory);
+    public static void injectMeta(MetaScope<?> scope, Object master) {
+        new MetaController(getInstance().metasitory, master).inject(scope);
     }
 
     public static <I> ImplementationController<I> implementationController(Class<I> of) {
@@ -131,5 +133,9 @@ public class TestMetaHelper {
 
     public static <M> MultitonMetacode<M> getMultiton(Class<M> masterClass) {
         return new MultitonController<M>(getInstance().metasitory, masterClass).getMetacode();
+    }
+
+    public static <S> MetaScope<S> getMetaScope(S scope) {
+        return new MetaScopeController<S>(getInstance().metasitory, scope).get(getInstance().metaModule);
     }
 }

@@ -17,12 +17,12 @@
 
 package org.brooth.jeta.inject;
 
-/**
- * @author khalidov
- * @version $Id$
- */
-public @interface Scope {
-    @Deprecated Class<?> assignable() default Void.class;
+import javax.annotation.Nullable;
 
-    Class<?> ext() default Void.class;
+/**
+ * @author Oleg Khalidov (brooth@gmail.com)
+ */
+public interface MetaModule {
+    @Nullable
+    <E> MetaEntityProvider<E> getProvider(Class<?> scope, Class<E> entity);
 }

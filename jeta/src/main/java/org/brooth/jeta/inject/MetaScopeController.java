@@ -18,18 +18,28 @@
 package org.brooth.jeta.inject;
 
 import org.brooth.jeta.MasterController;
+import org.brooth.jeta.metasitory.Criteria;
 import org.brooth.jeta.metasitory.Metasitory;
+
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MetaController extends MasterController<Object, InjectMetacode<Object>> {
+public class MetaScopeController<S> extends MasterController<S, MetaScopeMetacode<S>> {
 
-    public MetaController(Metasitory metasitory, Object master) {
-        super(metasitory, master, Meta.class);
+    public MetaScopeController(Metasitory metasitory, S scope) {
+        super(metasitory, scope);
     }
 
-    public void inject(MetaScope<?> scope) {
-        for (InjectMetacode<Object> metacode : metacodes)
-            metacode.applyMeta(scope, master);
+    @Override
+    protected Criteria criteria() {
+        Criteria.Builder builder = new Criteria.Builder().masterEq(masterClass);
+        builder.usesAny(Scope.class);
+        return builder.build();
+    }
+
+    public MetaScope<S> get(MetaModule module) {
+        if (metacodes.isEmpty())
+            throw new IllegalArgumentException(masterClass + " is not a meta scope. Put @Scope annotation on it");
+        return metacodes.iterator().next().getMetaScope(module, master);
     }
 }
