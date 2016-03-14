@@ -285,7 +285,6 @@ public class JetaProcessor extends AbstractProcessor {
         }
     }
 
-    // todo: what if
     private void assembleMetacodeContextList(RoundEnvironment roundEnv) {
         logger.debug("assemble metacode context list");
 
@@ -380,27 +379,23 @@ public class JetaProcessor extends AbstractProcessor {
                         if (Files.exists(Paths.get(getMetacodeFileObject(context.metacodeCanonicalName).toUri()))) {
                             context.utd = true;
                             for (Processor processor : context.processors.keySet()) {
-                                if (processor instanceof UtdProcessor) {
-                                    Path path = Paths.get(getSourceJavaFile(context.masterElement));
-                                    if (Files.exists(path)) {
-                                        try {
-                                            if (((UtdProcessor) processor).ignoreUpToDate() ||
-                                                    Files.getLastModifiedTime(path).toMillis() != modifiedTs) {
-                                                context.utd = false;
-                                                break;
-                                            }
-                                        } catch (IOException e) {
-                                            throw new ProcessingException("failed to read last modify date of " + path.toString(), e);
+                                Path path = Paths.get(getSourceJavaFile(context.masterElement));
+                                if (Files.exists(path)) {
+                                    try {
+                                        if (processor.ignoreUpToDate() ||
+                                                Files.getLastModifiedTime(path).toMillis() != modifiedTs) {
+                                            context.utd = false;
+                                            break;
                                         }
-                                    } else {
-                                        logger.debug("Can't check utd state. No source file of " + path.toUri().getPath());
-                                        context.utd = false;
+                                    } catch (IOException e) {
+                                        throw new ProcessingException("failed to read last modify date of " + path.toString(), e);
                                     }
-
                                 } else {
+                                    logger.debug("Can't check utd state. No source file of " + path.toUri().getPath());
                                     context.utd = false;
-                                    break;
                                 }
+
+
                             }
 
                         } else {
@@ -661,7 +656,7 @@ public class JetaProcessor extends AbstractProcessor {
         }
     }
 
-    private static class MetacodeContextImpl implements UtdMetacodeContext {
+    private static class MetacodeContextImpl implements MetacodeContext {
         private Multimap<Processor, Element> processors;
 
         private TypeSpec.Builder builder;

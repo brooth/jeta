@@ -77,6 +77,18 @@ public class MetaInjectProcessor extends AbstractProcessor {
             return true;
         }
 
+        // check all scopes have processed
+        Elements elementUtils = processingContext.processingEnv().getElementUtils();
+        for(Element scopeElement : scopes) {
+            String scopeName = ((TypeElement) scopeElement).getQualifiedName().toString();
+            String extTypeMetacodeStr = MetacodeUtils.getMetacodeOf(elementUtils, scopeName);
+            TypeElement metaScopeTypeElement = elementUtils.getTypeElement(extTypeMetacodeStr);
+            if(metaScopeTypeElement == null) {
+                processingContext.logger().debug("scope '" + scopeName + "' is being processed. skip round");
+                return true;
+            }
+        }
+
         if (scopeEntities == null) {
             collectModuleScopes();
         }

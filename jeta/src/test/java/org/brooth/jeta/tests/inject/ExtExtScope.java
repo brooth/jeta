@@ -15,15 +15,18 @@
  *
  */
 
-package org.brooth.jeta.apt;
+package org.brooth.jeta.tests.inject;
+
+import org.brooth.jeta.inject.Scope;
 
 /**
- * @author Oleg Khalidov (brooth@gmail.com)
+ * @author khalidov
+ * @version $Id$
  */
-public interface UtdMetacodeContext extends MetacodeContext {
-
-    /**
-     * true if masters source code hasn't been changed since metacode generated
-     */
-    boolean isUpToDate();
+@Scope(ext = ExtScope.class)
+public class ExtExtScope extends ExtScope {
+    @Override
+    public String getData() {
+        return "ext " + super.getData();
+    }
 }

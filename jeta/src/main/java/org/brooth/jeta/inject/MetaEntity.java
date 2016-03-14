@@ -33,7 +33,4 @@ public @interface MetaEntity {
     String staticConstructor() default "";
 
     Class<?> scope() default Void.class;
-
-    // todo: scope from ext()?
-    Class<?> extScope() default Void.class;
 }

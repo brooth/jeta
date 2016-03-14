@@ -23,7 +23,9 @@ import org.brooth.jeta.eventbus.BaseEventBus;
 import org.brooth.jeta.eventbus.EventBus;
 import org.brooth.jeta.eventbus.SubscriberController;
 import org.brooth.jeta.eventbus.SubscriptionHandler;
-import org.brooth.jeta.inject.*;
+import org.brooth.jeta.inject.MetaController;
+import org.brooth.jeta.inject.MetaScope;
+import org.brooth.jeta.inject.MetaScopeController;
 import org.brooth.jeta.log.LogController;
 import org.brooth.jeta.log.NamedLoggerProvider;
 import org.brooth.jeta.metasitory.MapMetasitory;
@@ -64,7 +66,6 @@ public class TestMetaHelper {
         metasitory = new MapMetasitory(metaPackage);
         defaultScope = new MetaScopeController<DefaultScope>(metasitory, new DefaultScope()).get();
         bus = new BaseEventBus();
-
         loggerProvider = new NamedLoggerProvider<Logger>() {
             public Logger get(String name) {
                 return new Logger(name);

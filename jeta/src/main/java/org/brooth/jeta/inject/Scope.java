@@ -22,7 +22,5 @@ package org.brooth.jeta.inject;
  * @version $Id$
  */
 public @interface Scope {
-    @Deprecated Class<?> assignable() default Void.class;
-
     Class<?> ext() default Void.class;
 }

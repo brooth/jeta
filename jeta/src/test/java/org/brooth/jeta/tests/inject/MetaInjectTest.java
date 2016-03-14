@@ -378,15 +378,15 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
-    @MetaEntity(ext = MetaEntitySix.class, extScope = DefaultScope.class)
-    public static class WeakMetaEntitySixExt extends MetaEntitySix {
+    @MetaEntity(ext = MetaEntitySix.class, scope = ExtScope.class)
+    public static class MetaEntitySixExt extends MetaEntitySix {
         public String getValue() {
-            throw new IllegalStateException();
+            return super.getValue() + " ext";
         }
     }
 
-    @MetaEntity(ext = MetaEntitySix.class, extScope = DefaultScope.class)
-    public static class MetaEntitySixExt extends MetaEntitySix {
+    @MetaEntity(ext = MetaEntitySixExt.class, scope = ExtExtScope.class)
+    public static class MetaEntitySixExtExt extends MetaEntitySixExt {
         public String getValue() {
             return super.getValue() + " ext";
         }
@@ -401,23 +401,16 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
-    @MetaEntity(ext = MetaEntitySeven.class, extScope = DefaultScope.class)
-    public static class MetaEntitySevenExt extends MetaEntitySeven {
+    @MetaEntity(ext = MetaEntitySeven.class, scope = ExtExtScope.class)
+    public static class MetaEntitySevenExtExt extends MetaEntitySeven {
         public String getValue() {
-            return super.getValue() + " ext";
-        }
-    }
-
-    @MetaEntity(ext = MetaEntitySevenExt.class, extScope = DefaultScope.class)
-    public static class MetaEntitySevenExtExt extends MetaEntitySevenExt {
-        public String getValue() {
-            return super.getValue() + " ext";
+            return super.getValue() + " ext ext";
         }
     }
 
     public static class ExtMetaHolder {
         @Meta
-        public MetaEntitySix entity;
+        public MetaEntitySix entitySix;
         @Meta
         public MetaEntitySeven entitySeven;
     }
@@ -426,15 +419,28 @@ public class MetaInjectTest extends BaseTest {
     public void testMetaExt() {
         logger.debug("testMetaExt()");
 
-        //todo:
-//        ExtMetaHolder holder = new ExtMetaHolder();
-//        TestMetaHelper.injectMeta(holder);
-//
-//        assertThat(holder.entity, notNullValue());
-//        assertThat(holder.entity.getValue(), is("six ext"));
-//
-//        assertThat(holder.entitySeven, notNullValue());
-//        assertThat(holder.entitySeven.getValue(), is("seven ext ext"));
+        ExtMetaHolder holder = new ExtMetaHolder();
+        TestMetaHelper.injectMeta(holder);
+        assertThat(holder.entitySix, notNullValue());
+        assertThat(holder.entitySix.getValue(), is("six"));
+        assertThat(holder.entitySeven, notNullValue());
+        assertThat(holder.entitySeven.getValue(), is("seven"));
+        holder.entitySix = null;
+        holder.entitySeven = null;
+
+        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new ExtScope()), holder);
+        assertThat(holder.entitySix, notNullValue());
+        assertThat(holder.entitySix.getValue(), is("six ext"));
+        assertThat(holder.entitySeven, notNullValue());
+        assertThat(holder.entitySeven.getValue(), is("seven"));
+        holder.entitySix = null;
+        holder.entitySeven = null;
+
+        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new ExtExtScope()), holder);
+        assertThat(holder.entitySix, notNullValue());
+        assertThat(holder.entitySix.getValue(), is("six ext ext"));
+        assertThat(holder.entitySeven, notNullValue());
+        assertThat(holder.entitySeven.getValue(), is("seven ext ext"));
     }
 
     @MetaEntity(of = String.class)
@@ -468,18 +474,18 @@ public class MetaInjectTest extends BaseTest {
 
         ClassForNameMetasitory metasitory = new ClassForNameMetasitory();
 
-        Criteria criteria = new Criteria.Builder().masterEq(MetaEntitySevenExt.class).build();
+        Criteria criteria = new Criteria.Builder().masterEq(MetaEntitySixExt.class).build();
         List<IMetacode<?>> items = metasitory.search(criteria);
         assertThat(items, notNullValue());
         assertThat(items.size(), is(1));
-        assertTrue(items.get(0).getMasterClass() == MetaEntitySevenExt.class);
+        assertTrue(items.get(0).getMasterClass() == MetaEntitySixExt.class);
 
-        criteria = new Criteria.Builder().masterEqDeep(MetaEntitySevenExtExt.class).build();
+        criteria = new Criteria.Builder().masterEqDeep(MetaEntitySixExtExt.class).build();
         items = metasitory.search(criteria);
         assertThat(items, notNullValue());
         assertThat(items.size(), is(3));
-        assertTrue(items.get(0).getMasterClass() == MetaEntitySevenExtExt.class);
-        assertTrue(items.get(1).getMasterClass() == MetaEntitySevenExt.class);
-        assertTrue(items.get(2).getMasterClass() == MetaEntitySeven.class);
+        assertTrue(items.get(0).getMasterClass() == MetaEntitySixExtExt.class);
+        assertTrue(items.get(1).getMasterClass() == MetaEntitySixExt.class);
+        assertTrue(items.get(2).getMasterClass() == MetaEntitySix.class);
     }
 }

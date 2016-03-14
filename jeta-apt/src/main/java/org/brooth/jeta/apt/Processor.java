@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Oleg Khalidov
+ * Copyright 2016 Oleg Khalidov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,17 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.brooth.jeta.apt;
 
-import java.lang.annotation.Annotation;
-import java.util.Set;
+import com.squareup.javapoet.TypeSpec;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-
-import com.squareup.javapoet.TypeSpec;
+import java.lang.annotation.Annotation;
+import java.util.Set;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -57,4 +57,10 @@ public interface Processor {
 	 * return true if current rounds set of annotations is needed in the next round
 	 */
 	boolean needReclaim();
+
+    /**
+     * If masters source code hasn't been changed since its meta code generated,
+     * return false to avoid regenerating
+     */
+    boolean ignoreUpToDate();
 }

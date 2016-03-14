@@ -30,6 +30,7 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
 import java.util.*;
 
 /**
@@ -44,6 +45,7 @@ public class MetaScopeProcessor extends AbstractProcessor {
     private static final String assignableExtStatement = assignableStatement + " || super.isAssignable(scopeClass)";
 
     private Set<? extends Element> allMetaEntities;
+    private Map<String, List<String>> scopesEntities;
 
     public MetaScopeProcessor() {
         super(Scope.class);
@@ -56,14 +58,34 @@ public class MetaScopeProcessor extends AbstractProcessor {
     }
 
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
+        if (scopesEntities == null) {
+            Set<? extends Element> scopes = context.roundEnv().getElementsAnnotatedWith(Scope.class);
+            scopesEntities = new HashMap<String, List<String>>(scopes.size());
+            for (Element scopeElement : scopes)
+                scopesEntities.put(((TypeElement) scopeElement).getQualifiedName().toString(), new ArrayList<String>());
+        }
+
         ProcessingEnvironment env = processingContext.processingEnv();
         TypeElement masterElement = (TypeElement) context.elements().iterator().next();
-        Scope annotation = masterElement.getAnnotation(Scope.class);
+        Scope scopeAnnotation = masterElement.getAnnotation(Scope.class);
+        String scopeExtClassStr = getExtClass(scopeAnnotation);
+        if (!scopeExtClassStr.equals(Void.class.getCanonicalName())) {
+            if (!scopesEntities.containsKey(scopeExtClassStr)) {
+                Elements elementUtils = env.getElementUtils();
+                String extTypeMetacodeStr = MetacodeUtils.getMetacodeOf(elementUtils, scopeExtClassStr);
+                TypeElement extTypeElement = elementUtils.getTypeElement(extTypeMetacodeStr);
+                if (extTypeElement == null)
+                    throw new ProcessingException("Can't extend '" + scopeExtClassStr + "'. Meta scope not found.");
+
+            } else if (scopesEntities.get(scopeExtClassStr).isEmpty()) {
+                processingContext.logger().debug("ext scope '" + scopeExtClassStr + "' not processed yet. skip round");
+                return true;
+            }
+        }
 
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(ClassName.get(MetaScopeMetacode.class), masterClassName));
 
-        String masterSimpleNameStr = masterElement.getSimpleName().toString();
         String metaScopeSimpleNameStr = "MetaScope";
 
         builder.addMethod(MethodSpec.methodBuilder("getMetaScope")
@@ -116,34 +138,35 @@ public class MetaScopeProcessor extends AbstractProcessor {
         TypeSpec.Builder metaScopeTypeSpecBuilder = TypeSpec.classBuilder(metaScopeSimpleNameStr)
                 .addTypeVariable(sTypeVariableName)
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .addField(masterClassName, "scope", Modifier.PRIVATE, Modifier.FINAL)
+                .addField(sTypeVariableName, "scope", Modifier.PRIVATE, Modifier.FINAL)
                 .addMethod(MethodSpec.methodBuilder("getScope")
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
-                        .addStatement("return (S) scope")
+                        .addStatement("return scope")
                         .returns(sTypeVariableName)
                         .build());
 
         MethodSpec.Builder metaScopeConstructorBuilder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(masterClassName, "scope");
+                .addParameter(sTypeVariableName, "scope");
 
         MethodSpec.Builder assignableMethodBuilder = MethodSpec.methodBuilder("isAssignable")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(Class.class), "scopeClass")
                 .returns(boolean.class);
 
-        TypeElement assignableFrom = getAssignableFrom(masterElement);
-        if (assignableFrom == masterElement) {
+        if (scopeExtClassStr.equals(Void.class.getCanonicalName())) {
             metaScopeTypeSpecBuilder.addSuperinterface(metaScopeTypeName);
+            assignableMethodBuilder.addStatement(assignableStatement,
+                    TypeName.get(context.metacodeContext().masterElement().asType()));
         } else {
             metaScopeConstructorBuilder.addStatement("super(scope)");
-            ClassName assignableFromClassName = ClassName.get(assignableFrom);
-            metaScopeTypeSpecBuilder.superclass(ParameterizedTypeName.get(ClassName.get(assignableFromClassName.packageName(),
-                    assignableFromClassName.simpleName() + JetaProcessor.METACODE_CLASS_POSTFIX + ".MetaScope"), sTypeVariableName));
+            ClassName scopeExtClassName = ClassName.bestGuess(scopeExtClassStr);
+            metaScopeTypeSpecBuilder.superclass(ParameterizedTypeName.get(ClassName.get(scopeExtClassName.packageName(),
+                    scopeExtClassName.simpleName() + JetaProcessor.METACODE_CLASS_POSTFIX + ".MetaScope"), sTypeVariableName));
+            assignableMethodBuilder.addStatement(assignableExtStatement,
+                    TypeName.get(context.metacodeContext().masterElement().asType()));
         }
-        assignableMethodBuilder.addStatement(assignableFrom == masterElement ? assignableStatement : assignableExtStatement,
-                TypeName.get(context.metacodeContext().masterElement().asType()));
         metaScopeTypeSpecBuilder.addMethod(assignableMethodBuilder.build());
 
         metaScopeConstructorBuilder.addStatement("this.scope = scope");
@@ -154,6 +177,7 @@ public class MetaScopeProcessor extends AbstractProcessor {
         for (Element entityElement : scopeEntities) {
             MetaEntity metaEntityAnnotation = entityElement.getAnnotation(MetaEntity.class);
             String metaEntityClassStr = ((TypeElement) entityElement).getQualifiedName().toString();
+            scopesEntities.get(masterElement.getQualifiedName().toString()).add(metaEntityClassStr);
 
             String ofTypeStr = getOfClass(metaEntityAnnotation);
             if (ofTypeStr.equals(Void.class.getCanonicalName()))
@@ -174,15 +198,12 @@ public class MetaScopeProcessor extends AbstractProcessor {
                     env.getElementUtils(), metaEntityClassStr));
 
             metaScopeTypeSpecBuilder
-                    .addField(FieldSpec.builder(ClassName.OBJECT, providerNameStr + "_MONITOR", Modifier.PRIVATE, Modifier.FINAL)
-                            .initializer("new $T()", ClassName.OBJECT)
-                            .build())
                     .addField(providerTypeName, providerNameStr, Modifier.PRIVATE)
                     .addMethod(MethodSpec.methodBuilder(metaEntityNameStr)
                             .addModifiers(Modifier.PUBLIC)
                             .returns(metaEntityClassName)
                             .beginControlFlow("if ($L == null)", providerNameStr)
-                            .beginControlFlow("synchronized($L_MONITOR)", providerNameStr)
+                            .beginControlFlow("synchronized($T.class)", metaEntityClassName)
                             .beginControlFlow("if ($L == null)", providerNameStr)
                             .addStatement("$L = new $T.MetaEntityProvider()", providerNameStr, metaEntityProviderMetacode)
                             .endControlFlow()
@@ -205,18 +226,23 @@ public class MetaScopeProcessor extends AbstractProcessor {
                 extTypeStr = null;
 
             if (extTypeStr != null) {
-                String extScope = getExtScopeClass(metaEntityAnnotation);
-                if (extScope.equals(Void.class.getCanonicalName())) {
-                    extScope = getExtClass(annotation);
-                    if (extScope.equals(Void.class.getCanonicalName()))
-                        throw new ProcessingException("Unknown scope of extending entity '" + extTypeStr +
-                                "'. Set the scope via '@MetaEntity(extScope=?) " + entityElement.getSimpleName().toString() +
-                                "' or '@Scope(ext=?) " + masterSimpleNameStr + "'");
-                }
+                ClassName extScopeClassName = lookupExtEntityScope(scopeExtClassStr, extTypeStr);
+                if (extScopeClassName == null)
+                    throw new ProcessingException("Undefined scope of '" + extTypeStr + "' element. Allowed to extents " +
+                            "entities from super scopes only");
+                ClassName extMetaEntityClassName = ClassName.get(extScopeClassName.packageName(),
+                        extScopeClassName.simpleName() + "_Metacode." + extTypeStr.replace('.', '_') + "_MetaEntity");
+                interfaceBuilder.addSuperinterface(extMetaEntityClassName);
 
-                ClassName extScopeClassName = ClassName.bestGuess(extScope);
-                interfaceBuilder.addSuperinterface(ClassName.get(extScopeClassName.packageName(),
-                        extScopeClassName.simpleName() + "_Metacode." + extTypeStr.replace('.', '_') + "_MetaEntity"));
+                String extScopeClassStr = extScopeClassName.packageName().replace('.', '_') + '_' +
+                        MetacodeUtils.getSimpleMetaNodeOf(env.getElementUtils(), extTypeStr, "_MetaEntity");
+                metaScopeTypeSpecBuilder
+                        .addMethod(MethodSpec.methodBuilder(extScopeClassStr)
+                                .addAnnotation(Override.class)
+                                .addModifiers(Modifier.PUBLIC)
+                                .returns(extMetaEntityClassName)
+                                .addStatement("return $L()", metaEntityNameStr)
+                                .build());
             }
 
             boolean isSelfProvider = metaEntityClassStr.equals(ofTypeStr);
@@ -263,17 +289,41 @@ public class MetaScopeProcessor extends AbstractProcessor {
         return false;
     }
 
-    private TypeElement getAssignableFrom(final TypeElement scopeElement) {
-        String assignableStr = MetacodeUtils.extractClassName(new Runnable() {
+    @Nullable
+    private ClassName lookupExtEntityScope(@Nullable String extScopeStr, String extTypeStr) {
+        if (extScopeStr == null)
+            return null;
+
+        List<String> scopeEntities = scopesEntities.get(extScopeStr);
+        if (scopeEntities == null) {
+            Elements elementUtils = processingContext.processingEnv().getElementUtils();
+            String extTypeMetacodeStr = MetacodeUtils.getMetacodeOf(elementUtils, extScopeStr);
+            TypeElement extTypeElement = elementUtils.getTypeElement(extTypeMetacodeStr);
+            final MetaScopeConfig config = extTypeElement.getAnnotation(MetaScopeConfig.class);
+            if (config == null)
+                throw new ProcessingException(extTypeMetacodeStr + " is not a scope. Can't extend it.");
+            scopeEntities = getScopeEntities(config);
+        }
+        for (String scopeEntity : scopeEntities)
+            if (extTypeStr.equals(scopeEntity))
+                return ClassName.bestGuess(extScopeStr);
+
+        Scope extExtScopeAnnotation = processingContext.processingEnv().getElementUtils()
+                .getTypeElement(extScopeStr).getAnnotation(Scope.class);
+        String extExtScopeStr = getExtClass(extExtScopeAnnotation);
+        if (extExtScopeStr != null)
+            return lookupExtEntityScope(extExtScopeStr, extTypeStr);
+
+        return null;
+    }
+
+    private List<String> getScopeEntities(final MetaScopeConfig config) {
+        return MetacodeUtils.extractClassesNames(new Runnable() {
+            @Override
             public void run() {
-                scopeElement.getAnnotation(Scope.class).assignable();
+                config.entities();
             }
         });
-        if (assignableStr.equals(Void.class.getCanonicalName())) {
-            return scopeElement;
-        }
-
-        return getAssignableFrom(processingContext.processingEnv().getElementUtils().getTypeElement(assignableStr));
     }
 
     private String getOfClass(final MetaEntity annotation) {
@@ -288,14 +338,6 @@ public class MetaScopeProcessor extends AbstractProcessor {
         return MetacodeUtils.extractClassName(new Runnable() {
             public void run() {
                 annotation.ext();
-            }
-        });
-    }
-
-    private String getExtScopeClass(final MetaEntity annotation) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            public void run() {
-                annotation.extScope();
             }
         });
     }

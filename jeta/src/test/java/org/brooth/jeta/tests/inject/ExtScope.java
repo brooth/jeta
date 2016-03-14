@@ -23,7 +23,7 @@ import org.brooth.jeta.inject.Scope;
  * @author khalidov
  * @version $Id$
  */
-@Scope(assignable = DefaultScope.class)
+@Scope(ext = DefaultScope.class)
 public class ExtScope extends DefaultScope {
     @Override
     public String getData() {
