@@ -33,7 +33,6 @@ import org.brooth.jeta.observer.ObserverController;
 import org.brooth.jeta.observer.ObserverHandler;
 import org.brooth.jeta.proxy.ProxyController;
 import org.brooth.jeta.tests.inject.DefaultScope;
-import org.brooth.jeta.tests.inject.TestModule;
 import org.brooth.jeta.util.*;
 import org.brooth.jeta.validate.ValidationController;
 import org.brooth.jeta.validate.ValidationException;
@@ -51,7 +50,6 @@ public class TestMetaHelper {
     private final Metasitory metasitory;
     private final BaseEventBus bus;
 
-    private final MetaModule metaModule;
     private final MetaScope<DefaultScope> defaultScope;
 
     private NamedLoggerProvider<Logger> loggerProvider;
@@ -64,8 +62,7 @@ public class TestMetaHelper {
 
     private TestMetaHelper(String metaPackage) {
         metasitory = new MapMetasitory(metaPackage);
-        metaModule = new MetaModuleController(metasitory, TestModule.class).get();
-        defaultScope = getMetaScope(new DefaultScope());
+        defaultScope = new MetaScopeController<DefaultScope>(metasitory, new DefaultScope()).get();
         bus = new BaseEventBus();
 
         loggerProvider = new NamedLoggerProvider<Logger>() {
@@ -136,6 +133,6 @@ public class TestMetaHelper {
     }
 
     public static <S> MetaScope<S> getMetaScope(S scope) {
-        return new MetaScopeController<S>(getInstance().metasitory, scope).get(getInstance().metaModule);
+        return new MetaScopeController<S>(getInstance().metasitory, scope).get();
     }
 }

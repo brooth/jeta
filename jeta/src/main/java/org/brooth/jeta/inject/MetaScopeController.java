@@ -37,9 +37,9 @@ public class MetaScopeController<S> extends MasterController<S, MetaScopeMetacod
         return builder.build();
     }
 
-    public MetaScope<S> get(MetaModule module) {
+    public MetaScope<S> get() {
         if (metacodes.isEmpty())
             throw new IllegalArgumentException(masterClass + " is not a meta scope. Put @Scope annotation on it");
-        return metacodes.iterator().next().getMetaScope(module, master);
+        return metacodes.iterator().next().getMetaScope(master);
     }
 }

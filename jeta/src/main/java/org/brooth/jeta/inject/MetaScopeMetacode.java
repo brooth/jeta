@@ -21,5 +21,5 @@ package org.brooth.jeta.inject;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface MetaScopeMetacode<S> {
-    MetaScope<S> getMetaScope(MetaModule module, S scope);
+    MetaScope<S> getMetaScope(S scope);
 }

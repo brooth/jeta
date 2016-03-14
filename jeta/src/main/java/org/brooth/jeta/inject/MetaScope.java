@@ -21,5 +21,6 @@ package org.brooth.jeta.inject;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface MetaScope<S> {
+    boolean isAssignable(Class scopeClass);
     S getScope();
 }

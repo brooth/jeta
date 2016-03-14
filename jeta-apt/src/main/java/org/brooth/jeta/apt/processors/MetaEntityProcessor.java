@@ -20,14 +20,11 @@ package org.brooth.jeta.apt.processors;
 import com.google.common.base.Joiner;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.Constructor;
-import org.brooth.jeta.apt.JetaProcessor;
-import org.brooth.jeta.apt.MetacodeUtils;
-import org.brooth.jeta.apt.RoundContext;
+import org.brooth.jeta.Provider;
+import org.brooth.jeta.apt.*;
 import org.brooth.jeta.inject.MetaEntity;
-import org.brooth.jeta.inject.MetaEntityMetacode;
 
 import javax.annotation.Nullable;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
@@ -38,15 +35,21 @@ import java.util.List;
  */
 public class MetaEntityProcessor extends AbstractProcessor {
 
+    @Nullable
+    private String defaultScopeStr;
+
     public MetaEntityProcessor() {
         super(MetaEntity.class);
     }
 
-    public boolean process(TypeSpec.Builder builder, RoundContext context) {
-        if (MetaScopeProcessor.scopeEntities == null)
-            throw new IllegalStateException("MetaScopeProcessor hasn't been run");
+    @Override
+    public void init(ProcessingContext processingContext) {
+        super.init(processingContext);
+        defaultScopeStr = processingContext.processingProperties().getProperty("meta.scope.default", null);
+    }
 
-        if(context.round() == 1)
+    public boolean process(TypeSpec.Builder builder, RoundContext context) {
+        if (context.round() == 1)
             return true;
 
         TypeElement element = (TypeElement) context.elements().iterator().next();
@@ -62,9 +65,6 @@ public class MetaEntityProcessor extends AbstractProcessor {
         String ofTypeStr = getOfClass(annotation);
         if (ofTypeStr.equals(Void.class.getCanonicalName()))
             ofTypeStr = masterTypeStr;
-        String extTypeStr = getExtClass(annotation);
-        if (extTypeStr.equals(Void.class.getCanonicalName()))
-            extTypeStr = null;
 
         ClassName ofClassName = ClassName.bestGuess(ofTypeStr);
         boolean isSelfProvider = masterTypeStr.equals(ofTypeStr);
@@ -80,12 +80,34 @@ public class MetaEntityProcessor extends AbstractProcessor {
                 constructors.add((ExecutableElement) subElement);
         }
 
-        ProcessingEnvironment env = processingContext.processingEnv();
-        TypeElement scopeElement = MetaScopeProcessor.scopeEntities.get(ofTypeStr);
-        ClassName entityScopeClassName = ClassName.get(scopeElement);
+        ClassName entityScopeClassName;
+        String scopeClassStr = getScopeClass(annotation);
+        if (!scopeClassStr.equals(Void.class.getCanonicalName())) {
+            entityScopeClassName = ClassName.bestGuess(scopeClassStr);
+        } else {
+            if (defaultScopeStr == null)
+                throw new ProcessingException("Undefined meta entity scope");
+            entityScopeClassName = ClassName.bestGuess(defaultScopeStr);
+        }
+
         ClassName implOfClassName = ClassName.get(entityScopeClassName.packageName(),
                 entityScopeClassName.simpleName() + JetaProcessor.METACODE_CLASS_POSTFIX + "." +
-                        MetacodeUtils.getMetaNameOf(env.getElementUtils(), ofTypeStr, "_MetaEntity"));
+                        ofTypeStr.replaceAll("\\.", "_") + "_MetaEntity");
+
+        ParameterizedTypeName providerTypeName = ParameterizedTypeName.get(ClassName.get(Provider.class), implOfClassName);
+
+        /* todo: singleton */
+        builder.addType(TypeSpec.classBuilder("MetaEntityProvider")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addSuperinterface(providerTypeName)
+                .addMethod(
+                        MethodSpec.methodBuilder("get")
+                                .returns(implOfClassName)
+                                .addAnnotation(Override.class)
+                                .addModifiers(Modifier.PUBLIC)
+                                .addStatement("return new MetaEntityImpl()")
+                                .build())
+                .build());
 
         TypeSpec.Builder implBuilder = TypeSpec.classBuilder("MetaEntityImpl")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -137,49 +159,22 @@ public class MetaEntityProcessor extends AbstractProcessor {
             implBuilder.addMethod(methodBuilder.build());
         }
 
-        MethodSpec.Builder extClassMethodBuilder = MethodSpec.methodBuilder("getMetaEntityExtClass")
-                .addAnnotation(Override.class)
-                .addAnnotation(Nullable.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(ClassName.get(Class.class),
-                        WildcardTypeName.supertypeOf(
-                                extTypeStr == null ? WildcardTypeName.OBJECT : ClassName.bestGuess(extTypeStr))));
-        if (extTypeStr == null)
-            extClassMethodBuilder.addStatement("return null");
-        else
-            extClassMethodBuilder.addStatement("return $T.class", ClassName.bestGuess(extTypeStr));
-
-        builder.addSuperinterface(
-                ParameterizedTypeName.get(ClassName.get(MetaEntityMetacode.class), ofClassName, implOfClassName))
-                .addMethod(MethodSpec.methodBuilder("getMetaEntityImpl").addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC).returns(implOfClassName)
-                        .addStatement("return new MetaEntityImpl()").build())
-                .addMethod(MethodSpec.methodBuilder("getMetaEntityOfClass").addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(ParameterizedTypeName.get(ClassName.get(Class.class), ofClassName))
-                        .addStatement("return $T.class", ofClassName).build())
-                .addMethod(MethodSpec.methodBuilder("getMetaEntityPriority").addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC).returns(int.class)
-                        .addStatement("return $L", annotation.priority()).build())
-                .addMethod(extClassMethodBuilder.build());
-
         builder.addType(implBuilder.build());
-
         return false;
+    }
+
+    private String getScopeClass(final MetaEntity annotation) {
+        return MetacodeUtils.extractClassName(new Runnable() {
+            public void run() {
+                annotation.scope();
+            }
+        });
     }
 
     private String getOfClass(final MetaEntity annotation) {
         return MetacodeUtils.extractClassName(new Runnable() {
             public void run() {
                 annotation.of();
-            }
-        });
-    }
-
-    private String getExtClass(final MetaEntity annotation) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            public void run() {
-                annotation.ext();
             }
         });
     }

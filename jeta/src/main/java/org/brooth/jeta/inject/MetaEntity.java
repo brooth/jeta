@@ -32,13 +32,8 @@ public @interface MetaEntity {
 
     String staticConstructor() default "";
 
-    boolean minor() default false;
-
-    // according scopes ordering
-    @Deprecated
-    int priority() default 0;
-
     Class<?> scope() default Void.class;
 
+    // todo: scope from ext()?
     Class<?> extScope() default Void.class;
 }
