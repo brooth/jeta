@@ -18,7 +18,7 @@ package org.brooth.jeta.tests.validate;
 
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
-import org.brooth.jeta.TestMetaHelper;
+import org.brooth.jeta.MetaHelper;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.validate.*;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public class ClassValidatorsTest extends BaseTest {
         logger.debug("testNotNullValidator()");
 
         NotNullObjectHolder holder = new NotNullObjectHolder();
-        ValidationController controller = TestMetaHelper.validationController(holder);
+        ValidationController controller = MetaHelper.validationController(holder);
         logger.debug("error: '%s'", checkThrows(controller));
 
         List<String> errors = controller.validateSafe();
@@ -71,7 +71,7 @@ public class ClassValidatorsTest extends BaseTest {
         logger.debug("testNotBlankValidator()");
 
         NotBlankStringHolder holder = new NotBlankStringHolder();
-        ValidationController controller = TestMetaHelper.validationController(holder);
+        ValidationController controller = MetaHelper.validationController(holder);
         logger.debug("error: '%s'", checkThrows(controller));
 
         List<String> errors = controller.validateSafe();
@@ -104,7 +104,7 @@ public class ClassValidatorsTest extends BaseTest {
         logger.debug("testNotEmptyValidator()");
 
         NotEmptyHolder holder = new NotEmptyHolder();
-        ValidationController controller = TestMetaHelper.validationController(holder);
+        ValidationController controller = MetaHelper.validationController(holder);
         logger.debug("error: '%s'", checkThrows(controller));
 
         List<String> errors = controller.validateSafe();
@@ -150,7 +150,7 @@ public class ClassValidatorsTest extends BaseTest {
         logger.debug("testMultipleValidators()");
 
         MultiValidatorHolder holder = new MultiValidatorHolder();
-        ValidationController controller = TestMetaHelper.validationController(holder);
+        ValidationController controller = MetaHelper.validationController(holder);
         logger.debug(String.format("error: '%s'", checkThrows(controller)));
         assertThat(controller.validateSafe(), hasSize(3));
 

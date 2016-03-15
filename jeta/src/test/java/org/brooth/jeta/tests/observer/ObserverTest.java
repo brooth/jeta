@@ -18,7 +18,7 @@ package org.brooth.jeta.tests.observer;
 
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
-import org.brooth.jeta.TestMetaHelper;
+import org.brooth.jeta.MetaHelper;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.observer.Observe;
 import org.brooth.jeta.observer.ObserverHandler;
@@ -63,7 +63,7 @@ public class ObserverTest extends BaseTest {
         volatile EventOne lastOtherEventOne;
 
         public ObserverHolder() {
-            TestMetaHelper.createLogger(this);
+            MetaHelper.createLogger(this);
         }
 
         @Observe(ObservableHolder.class)
@@ -96,7 +96,7 @@ public class ObserverTest extends BaseTest {
         volatile EventOne lastOtherEventOne;
 
         public OtherObserverHolder() {
-            TestMetaHelper.createLogger(this);
+            MetaHelper.createLogger(this);
         }
 
         @Observe(OtherObservableHolder.class)
@@ -111,7 +111,7 @@ public class ObserverTest extends BaseTest {
     public void testSimpleNotify() {
         logger.debug("testSimpleNotify()");
         ObservableHolder observable = new ObservableHolder();
-        TestMetaHelper.createObservable(observable);
+        MetaHelper.createObservable(observable);
 
         observable.oneObservers.notify(new EventOne("none"));
 
@@ -120,7 +120,7 @@ public class ObserverTest extends BaseTest {
         assertThat(observer.onEventOneInvokes, is(0));
         assertThat(observer.lastEventOne, nullValue());
 
-        ObserverHandler handler = TestMetaHelper.registerObserver(observer, observable);
+        ObserverHandler handler = MetaHelper.registerObserver(observer, observable);
         observable.oneObservers.notify(new EventOne("catch it"));
         assertThat(observer.onEventOneInvokes, is(1));
         assertThat(observer.lastEventOne, not(nullValue()));
@@ -142,13 +142,13 @@ public class ObserverTest extends BaseTest {
         assertThat(observer.lastEventTwo.value, is("catch two 4"));
 
         OtherObservableHolder otherObservable = new OtherObservableHolder();
-        TestMetaHelper.createObservable(otherObservable);
+        MetaHelper.createObservable(otherObservable);
         otherObservable.oneObservers.notify(new EventOne("other none"));
         assertThat(observer.onOtherEventOneInvokes, is(0));
         assertThat(observer.lastOtherEventOne, nullValue());
         assertThat(observer.onEventOneInvokes, is(1));
 
-        handler.add(TestMetaHelper.registerObserver(observer, otherObservable));
+        handler.add(MetaHelper.registerObserver(observer, otherObservable));
         otherObservable.oneObservers.notify(new EventOne("catch other"));
         assertThat(observer.onOtherEventOneInvokes, is(1));
         assertThat(observer.lastOtherEventOne, not(nullValue()));
@@ -176,14 +176,14 @@ public class ObserverTest extends BaseTest {
         assertThat(observer.onOtherEventOneInvokes, is(1));
 
         OtherObserverHolder otherObserver = new OtherObserverHolder();
-        handler.add(TestMetaHelper.registerObserver(otherObserver, otherObservable));
+        handler.add(MetaHelper.registerObserver(otherObserver, otherObservable));
         otherObservable.oneObservers.notify(new EventOne("catch other 3"));
         assertThat(otherObserver.lastOtherEventOne.value, is("catch other 3"));
         assertThat(otherObserver.onOtherEventOneInvokes, is(1));
 
         // register back
-        handler.add(TestMetaHelper.registerObserver(observer, observable));
-        handler.add(TestMetaHelper.registerObserver(observer, otherObservable));
+        handler.add(MetaHelper.registerObserver(observer, observable));
+        handler.add(MetaHelper.registerObserver(observer, otherObservable));
         otherObservable.oneObservers.notify(new EventOne("catch other 4"));
         assertThat(observer.lastOtherEventOne.value, is("catch other 4"));
         assertThat(observer.onOtherEventOneInvokes, is(2));
@@ -196,7 +196,7 @@ public class ObserverTest extends BaseTest {
         assertThat(handler.unregisterAll(), is(2));
 
         // handler.unregister()
-        handler = TestMetaHelper.registerObserver(observer, observable);
+        handler = MetaHelper.registerObserver(observer, observable);
         observable.oneObservers.notify(new EventOne("catch it 2"));
         observable.twoObservers.notify(new EventTwo("catch two 8"));
         assertThat(observer.onEventOneInvokes, is(2));
@@ -214,15 +214,15 @@ public class ObserverTest extends BaseTest {
         logger.debug("testAsyncNotify()");
 
         final ObservableHolder observable = new ObservableHolder();
-        TestMetaHelper.createObservable(observable);
+        MetaHelper.createObservable(observable);
         final OtherObservableHolder otherObservable = new OtherObservableHolder();
-        TestMetaHelper.createObservable(otherObservable);
+        MetaHelper.createObservable(otherObservable);
 
         ObserverHolder observer = new ObserverHolder();
-        TestMetaHelper.registerObserver(observer, observable);
-        TestMetaHelper.registerObserver(observer, otherObservable);
+        MetaHelper.registerObserver(observer, observable);
+        MetaHelper.registerObserver(observer, otherObservable);
         OtherObserverHolder otherObserver = new OtherObserverHolder();
-        TestMetaHelper.registerObserver(otherObserver, otherObservable);
+        MetaHelper.registerObserver(otherObserver, otherObservable);
 
         Thread[] threads = new Thread[10];
         for (int i = 0; i < threads.length; i++) {
@@ -254,8 +254,8 @@ public class ObserverTest extends BaseTest {
         ObserverHandler handler;
 
         public ConcurrentModificationTestHolder(OtherObservableHolder observable) {
-            TestMetaHelper.createLogger(this);
-            handler = TestMetaHelper.registerObserver(this, observable);
+            MetaHelper.createLogger(this);
+            handler = MetaHelper.registerObserver(this, observable);
         }
 
         @Observe(OtherObservableHolder.class)
@@ -271,7 +271,7 @@ public class ObserverTest extends BaseTest {
         logger.debug("testConcurrentModificationException()");
 
         OtherObservableHolder observable = new OtherObservableHolder();
-        TestMetaHelper.createObservable(observable);
+        MetaHelper.createObservable(observable);
         ConcurrentModificationTestHolder holder = new ConcurrentModificationTestHolder(observable);
         observable.oneObservers.notify(new EventOne("boom"));
         assertThat(observable.oneObservers.getAll().size(), is(0));

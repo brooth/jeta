@@ -18,7 +18,7 @@ package org.brooth.jeta.tests.singleton;
 
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
-import org.brooth.jeta.TestMetaHelper;
+import org.brooth.jeta.MetaHelper;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.util.Multiton;
 import org.brooth.jeta.util.MultitonMetacode;
@@ -45,7 +45,7 @@ public class SingletonTest extends BaseTest {
     @Singleton
     public static class SingletonHolder {
         static SingletonMetacode<SingletonHolder> singleton = 
-            TestMetaHelper.getSingleton(SingletonHolder.class);
+            MetaHelper.getSingleton(SingletonHolder.class);
 
         static volatile int instances = 0;
 
@@ -61,7 +61,7 @@ public class SingletonTest extends BaseTest {
     @Multiton(staticConstructor = "newInstance")
     public static class MultitonHolder {
         static MultitonMetacode<MultitonHolder> multiton = 
-            TestMetaHelper.getMultiton(MultitonHolder.class);
+            MetaHelper.getMultiton(MultitonHolder.class);
 
         private static List<String> instances = new ArrayList<String>();
         private String key;

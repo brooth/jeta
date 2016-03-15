@@ -45,9 +45,9 @@ import java.util.List;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class TestMetaHelper {
+public class MetaHelper {
 
-    private static TestMetaHelper instance;
+    private static MetaHelper instance;
 
     private final Metasitory metasitory;
     private final BaseEventBus bus;
@@ -56,13 +56,13 @@ public class TestMetaHelper {
 
     private NamedLoggerProvider<Logger> loggerProvider;
 
-    public static TestMetaHelper getInstance() {
+    public static MetaHelper getInstance() {
         if (instance == null)
-            instance = new TestMetaHelper("org.brooth.jeta.tests");
+            instance = new MetaHelper("org.brooth.jeta.tests");
         return instance;
     }
 
-    private TestMetaHelper(String metaPackage) {
+    private MetaHelper(String metaPackage) {
         metasitory = new MapMetasitory(metaPackage);
         defaultScope = new MetaScopeController<DefaultScope>(metasitory, new DefaultScope()).get();
         bus = new BaseEventBus();

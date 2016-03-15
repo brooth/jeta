@@ -20,6 +20,7 @@ package org.brooth.jeta.tests.inject;
 import org.brooth.jeta.*;
 import org.brooth.jeta.inject.Meta;
 import org.brooth.jeta.inject.MetaEntity;
+import org.brooth.jeta.inject.MetaScope;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.metasitory.ClassForNameMetasitory;
 import org.brooth.jeta.metasitory.Criteria;
@@ -61,7 +62,7 @@ public class MetaInjectTest extends BaseTest {
         logger.debug("testSimpleInject()");
 
         MetaEntityHolder holder = new MetaEntityHolder();
-        TestMetaHelper.injectMeta(holder);
+        MetaHelper.injectMeta(holder);
         assertThat(holder.entity, notNullValue());
         assertThat(holder.entity.value, is("one"));
 
@@ -82,6 +83,70 @@ public class MetaInjectTest extends BaseTest {
         assertFalse(holder.lazy.get() == holder.provider.get());
     }
 
+    @MetaEntity(singleton = true)
+    public static class SingletonEntity {
+        String value = "default";
+
+        public SingletonEntity() {
+        }
+
+        public SingletonEntity(String value) {
+            this.value = value;
+        }
+    }
+
+    @MetaEntity(of = MetaInjectTest.SingletonEntity.class, singleton = true, scope = CustomScope.class)
+    public static class SingletonEntityCustomScopProvider {
+        @Constructor
+        public static SingletonEntity get() {
+            return new SingletonEntity("provider");
+        }
+    }
+
+    public static class SingletonHolder {
+        @Meta
+        SingletonEntity entity;
+    }
+
+    public static class SingletonHolder2 {
+        @Meta
+        SingletonEntity entity;
+    }
+
+    @Test
+    public void testSingleton() {
+        logger.debug("testSingleton()");
+
+        SingletonHolder holder = new SingletonHolder();
+        MetaHelper.injectMeta(holder);
+        assertThat(holder.entity, notNullValue());
+        assertThat(holder.entity.value, notNullValue());
+        assertThat(holder.entity.value, is("default"));
+
+        SingletonEntity entityOne = holder.entity;
+        MetaHelper.injectMeta(holder);
+        assertTrue(entityOne == holder.entity);
+
+        MetaScope<CustomScope> customMetaScope = MetaHelper.getMetaScope(new CustomScope());
+        MetaHelper.injectMeta(customMetaScope, holder);
+        assertTrue(entityOne != holder.entity);
+        assertThat(holder.entity, notNullValue());
+        assertThat(holder.entity.value, notNullValue());
+        assertThat(holder.entity.value, is("provider"));
+
+        entityOne = holder.entity;
+        MetaHelper.injectMeta(customMetaScope, holder);
+        assertTrue(entityOne == holder.entity);
+
+        SingletonHolder2 holder2 = new SingletonHolder2();
+        MetaHelper.injectMeta(customMetaScope, holder2);
+        assertTrue(holder.entity == holder2.entity);
+
+        customMetaScope = MetaHelper.getMetaScope(new CustomScope());
+        MetaHelper.injectMeta(customMetaScope, holder2);
+        assertTrue(holder.entity != holder2.entity);
+    }
+
     public static class MetaAliasEntityHolder {
         @Inject
         MetaEntityOne entity;
@@ -100,7 +165,7 @@ public class MetaInjectTest extends BaseTest {
         logger.debug("testAliasInject()");
 
         MetaAliasEntityHolder holder = new MetaAliasEntityHolder();
-        TestMetaHelper.injectMeta(holder);
+        MetaHelper.injectMeta(holder);
         assertThat(holder.entity, notNullValue());
         assertThat(holder.entity.value, is("one"));
 
@@ -185,7 +250,7 @@ public class MetaInjectTest extends BaseTest {
         logger.debug("testMetaProvider()");
 
         MetaProviderHolder holder = new MetaProviderHolder();
-        TestMetaHelper.injectMeta(holder);
+        MetaHelper.injectMeta(holder);
         assertThat(holder.entityTwo, notNullValue());
         assertThat(holder.entityTwo.value, is("two"));
         logger.debug("entityTwo.value: %s", holder.entityTwo.value);
@@ -229,7 +294,7 @@ public class MetaInjectTest extends BaseTest {
         logger.debug("testMetaFactory()");
 
         MetaFactoryHolder holder = new MetaFactoryHolder();
-        TestMetaHelper.injectMeta(holder);
+        MetaHelper.injectMeta(holder);
         assertThat(holder.factory, notNullValue());
         assertThat(holder.factory.get(null), notNullValue());
         assertThat(holder.factory.get("five").value, is("five"));
@@ -298,7 +363,7 @@ public class MetaInjectTest extends BaseTest {
 
         MetaScopeEntityHolder holder = new MetaScopeEntityHolder();
 
-        TestMetaHelper.injectMeta(holder);
+        MetaHelper.injectMeta(holder);
         assertThat(holder.scopeEntity, notNullValue());
         assertThat(holder.scopeEntity.value, is("scope"));
         assertThat(holder.scopeEntity.scopeData, is("default scope data"));
@@ -306,7 +371,7 @@ public class MetaInjectTest extends BaseTest {
         assertThat(holder.customScopeEntity, nullValue());
         holder.scopeEntity = null;
 
-        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new ExtScope()), holder);
+        MetaHelper.injectMeta(MetaHelper.getMetaScope(new ExtScope()), holder);
         assertThat(holder.scopeEntity, notNullValue());
         assertThat(holder.scopeEntity.value, is("scope"));
         assertThat(holder.scopeEntity.scopeData, is("ext scope data"));
@@ -317,7 +382,7 @@ public class MetaInjectTest extends BaseTest {
         holder.scopeEntity = null;
         holder.extScopeEntity = null;
 
-        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new CustomScope()), holder);
+        MetaHelper.injectMeta(MetaHelper.getMetaScope(new CustomScope()), holder);
         assertThat(holder.customScopeEntity, notNullValue());
         assertThat(holder.customScopeEntity.value, is("custom scope"));
         assertThat(holder.customScopeEntity.scopeData, is("custom scope data"));
@@ -332,6 +397,8 @@ public class MetaInjectTest extends BaseTest {
         ExtScopeMetaFactory extScopeFactory;
         @Meta
         CustomScopeMetaFactory customScopeFactory;
+        @Meta
+        MixedScopeMetaFactory mixedScopeFactory;
 
         @Factory
         interface DefaultScopeMetaFactory {
@@ -347,6 +414,13 @@ public class MetaInjectTest extends BaseTest {
         interface CustomScopeMetaFactory {
             MetaCustomScopeEntity get();
         }
+
+        @Factory
+        interface MixedScopeMetaFactory {
+            MetaDefaultScopeEntity getDefault();
+
+            MetaExtScopeEntity getExt();
+        }
     }
 
     @Test
@@ -355,19 +429,21 @@ public class MetaInjectTest extends BaseTest {
 
         MetaFactoryScopeEntityHolder holder = new MetaFactoryScopeEntityHolder();
 
-        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new CustomScope()), holder);
+        MetaHelper.injectMeta(MetaHelper.getMetaScope(new CustomScope()), holder);
         assertThat(holder.customScopeFactory, notNullValue());
         assertThat(holder.customScopeFactory.get(), notNullValue());
         assertThat(holder.defaultScopeFactory, nullValue());
         assertThat(holder.extScopeFactory, nullValue());
+        assertThat(holder.mixedScopeFactory, nullValue());
 
-        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new ExtScope()), holder);
+        MetaHelper.injectMeta(MetaHelper.getMetaScope(new ExtScope()), holder);
         assertThat(holder.customScopeFactory, notNullValue());
         assertThat(holder.customScopeFactory.get(), notNullValue());
         assertThat(holder.extScopeFactory, notNullValue());
         assertThat(holder.extScopeFactory.get(), notNullValue());
         assertThat(holder.defaultScopeFactory, notNullValue());
         assertThat(holder.defaultScopeFactory.get(), notNullValue());
+        assertThat(holder.mixedScopeFactory, nullValue());
     }
 
     @MetaEntity
@@ -421,7 +497,7 @@ public class MetaInjectTest extends BaseTest {
         logger.debug("testMetaExt()");
 
         ExtMetaHolder holder = new ExtMetaHolder();
-        TestMetaHelper.injectMeta(holder);
+        MetaHelper.injectMeta(holder);
         assertThat(holder.entitySix, notNullValue());
         assertThat(holder.entitySix.getValue(), is("six"));
         assertThat(holder.entitySeven, notNullValue());
@@ -429,7 +505,7 @@ public class MetaInjectTest extends BaseTest {
         holder.entitySix = null;
         holder.entitySeven = null;
 
-        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new ExtScope()), holder);
+        MetaHelper.injectMeta(MetaHelper.getMetaScope(new ExtScope()), holder);
         assertThat(holder.entitySix, notNullValue());
         assertThat(holder.entitySix.getValue(), is("six ext"));
         assertThat(holder.entitySeven, notNullValue());
@@ -437,7 +513,7 @@ public class MetaInjectTest extends BaseTest {
         holder.entitySix = null;
         holder.entitySeven = null;
 
-        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new ExtExtScope()), holder);
+        MetaHelper.injectMeta(MetaHelper.getMetaScope(new ExtExtScope()), holder);
         assertThat(holder.entitySix, notNullValue());
         assertThat(holder.entitySix.getValue(), is("six ext ext"));
         assertThat(holder.entitySeven, notNullValue());
@@ -462,7 +538,7 @@ public class MetaInjectTest extends BaseTest {
         logger.debug("testExternalMeta()");
 
         ExternalMetaHolder holder = new ExternalMetaHolder();
-        TestMetaHelper.injectMeta(holder);
+        MetaHelper.injectMeta(holder);
 
         assertThat(holder.stringEntity, notNullValue());
         assertThat(holder.stringEntity, is("str"));
@@ -478,8 +554,16 @@ public class MetaInjectTest extends BaseTest {
         SchemeEntity get();
     }
 
-    @MetaEntity(of = SchemeEntity.class, ext = MetaScheme.class, scope = ExtScope.class)
+    @MetaEntity(of = SchemeEntity.class, ext = SchemeEntity.class, scope = ExtScope.class)
     public static class SchemeEntityProvider {
+        @Constructor
+        public static SchemeEntity get() {
+            return new SchemeEntity();
+        }
+    }
+
+    @MetaEntity(of = SchemeEntity.class, ext = SchemeEntity.class, scope = ExtExtScope.class)
+    public static class ExtSchemeEntityProvider {
         @Constructor
         public static SchemeEntity get() {
             return new SchemeEntity();
@@ -496,10 +580,10 @@ public class MetaInjectTest extends BaseTest {
         logger.debug("testMetaScheme()");
 
         MetaSchemeHolder holder = new MetaSchemeHolder();
-        TestMetaHelper.injectMeta(holder);
+        MetaHelper.injectMeta(holder);
         Assert.assertThat(holder.entity, nullValue());
 
-        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new ExtScope()), holder);
+        MetaHelper.injectMeta(MetaHelper.getMetaScope(new ExtScope()), holder);
         Assert.assertThat(holder.entity, notNullValue());
     }
 

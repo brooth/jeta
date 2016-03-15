@@ -18,7 +18,7 @@ package org.brooth.jeta.tests.collector;
 
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
-import org.brooth.jeta.TestMetaHelper;
+import org.brooth.jeta.MetaHelper;
 import org.brooth.jeta.collector.ObjectCollector;
 import org.brooth.jeta.collector.TypeCollector;
 import org.brooth.jeta.log.Log;
@@ -50,14 +50,14 @@ public class CollectorTest extends BaseTest {
     public void testUsedAnnotation() {
         logger.debug("testUsedAnnotation()");
 
-        List<Class<?>>  types = TestMetaHelper.collectTypes(TypeCollectorHolder.class, UsedAnnotation.class);
+        List<Class<?>>  types = MetaHelper.collectTypes(TypeCollectorHolder.class, UsedAnnotation.class);
         assertThat(types, allOf(notNullValue(), hasSize(6)));
 
         for(Class<?> type : types) {
             logger.debug("type: %s", type.getCanonicalName());
         }
 
-        List<Provider<?>> objects = TestMetaHelper.collectObjects(ObjectCollectorHolder.class, UsedAnnotation.class);
+        List<Provider<?>> objects = MetaHelper.collectObjects(ObjectCollectorHolder.class, UsedAnnotation.class);
         assertThat(objects, allOf(notNullValue(), hasSize(3)));
 
         for(Provider<?> provider : objects) {
@@ -69,19 +69,19 @@ public class CollectorTest extends BaseTest {
     public void testNoneAnnotation() {
         logger.debug("testNoneAnnotation()");
 
-        List<Class<?>>  types = TestMetaHelper.collectTypes(TypeCollectorHolder.class, NoneAnnotation.class);
+        List<Class<?>>  types = MetaHelper.collectTypes(TypeCollectorHolder.class, NoneAnnotation.class);
         assertThat(types, allOf(notNullValue(), hasSize(0)));
 
-        types = TestMetaHelper.collectTypes(TypeCollectorHolder.class, Log.class);
+        types = MetaHelper.collectTypes(TypeCollectorHolder.class, Log.class);
         assertThat(types, allOf(notNullValue(), hasSize(0)));
 
-        List<Provider<?>> objects = TestMetaHelper.collectObjects(ObjectCollectorHolder.class, NoneAnnotation.class);
+        List<Provider<?>> objects = MetaHelper.collectObjects(ObjectCollectorHolder.class, NoneAnnotation.class);
         assertThat(objects, allOf(notNullValue(), hasSize(0)));
 
-        types = TestMetaHelper.collectTypes(TypeCollectorHolder.class, NoneAnnotation.class);
+        types = MetaHelper.collectTypes(TypeCollectorHolder.class, NoneAnnotation.class);
         assertThat(types, allOf(notNullValue(), hasSize(0)));
 
-        objects = TestMetaHelper.collectObjects(ObjectCollectorHolder.class, Override.class);
+        objects = MetaHelper.collectObjects(ObjectCollectorHolder.class, Override.class);
         assertThat(objects, allOf(notNullValue(), hasSize(0)));
     }
 }

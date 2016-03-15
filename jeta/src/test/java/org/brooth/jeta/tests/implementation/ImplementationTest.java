@@ -18,7 +18,7 @@ package org.brooth.jeta.tests.implementation;
 
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
-import org.brooth.jeta.TestMetaHelper;
+import org.brooth.jeta.MetaHelper;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.util.ImplementationController;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class ImplementationTest extends BaseTest {
     public void testFooImplementer() {
         logger.debug("testFooImplementer()");
 
-        ImplementationController<AbstractFoo> controller = TestMetaHelper.implementationController(AbstractFoo.class);
+        ImplementationController<AbstractFoo> controller = MetaHelper.implementationController(AbstractFoo.class);
         assertThat(controller, notNullValue());
         assertThat(controller.hasImplementation(), is(true));
 
@@ -68,7 +68,7 @@ public class ImplementationTest extends BaseTest {
     public void testNoImplementation() {
         logger.debug("testNoImplementation()");
 
-        ImplementationController<AbstractNone> controller = TestMetaHelper.implementationController(AbstractNone.class);
+        ImplementationController<AbstractNone> controller = MetaHelper.implementationController(AbstractNone.class);
         assertThat(controller, notNullValue());
         assertThat(controller.hasImplementation(), is(false));
         assertThat(controller.getImplementation(), is(nullValue()));
@@ -79,7 +79,7 @@ public class ImplementationTest extends BaseTest {
     public void testPriority() {
         logger.debug("testPriority()");
 
-        ImplementationController<AbstractPriority> controller = TestMetaHelper.implementationController(AbstractPriority.class);
+        ImplementationController<AbstractPriority> controller = MetaHelper.implementationController(AbstractPriority.class);
         assertThat(controller, notNullValue());
         assertThat(controller.hasImplementation(), is(true));
 

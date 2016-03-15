@@ -19,7 +19,7 @@ package org.brooth.jeta.tests.proxy;
 
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
-import org.brooth.jeta.TestMetaHelper;
+import org.brooth.jeta.MetaHelper;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.proxy.AbstractProxy;
 import org.brooth.jeta.proxy.Proxy;
@@ -116,7 +116,7 @@ public class ProxyTest extends BaseTest {
         assertThat(foo1.value2(), is(12));
         assertEquals(foo1.value3(), Foo.class);
 
-        TestMetaHelper.createProxy(this, foo1);
+        MetaHelper.createProxy(this, foo1);
         assertThat(foo1.value1(), is("foo proxy"));
         assertThat(foo1.value2(), is(12));
         assertEquals(foo1.value3(), Foo.class);
@@ -126,7 +126,7 @@ public class ProxyTest extends BaseTest {
         assertThat(foo2.value2(), is(12));
         assertEquals(foo2.value3(), Foo.class);
 
-        TestMetaHelper.createProxy(this, foo2);
+        MetaHelper.createProxy(this, foo2);
         assertThat(foo2.value1(), is("foo"));
         assertThat(foo2.value2(), is(19));
         assertEquals(foo2.value3(), Foo.class);
@@ -136,13 +136,13 @@ public class ProxyTest extends BaseTest {
         assertThat(foo3.value2(), is(12));
         assertEquals(foo3.value3(), Foo.class);
 
-        TestMetaHelper.createProxy(this, foo3);
+        MetaHelper.createProxy(this, foo3);
         assertThat(foo3.value1(), is("foo"));
         assertThat(foo3.value2(), is(12));
         assertEquals(foo3.value3(), Value3Foo.class);
 
         foo4 = foo;
-        TestMetaHelper.createProxy(this, foo4);
+        MetaHelper.createProxy(this, foo4);
         assertThat(foo4.value1(), is("all"));
         assertThat(foo4.value2(), is(100));
         assertEquals(foo4.value3(), Boolean.class);

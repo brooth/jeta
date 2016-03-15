@@ -18,7 +18,7 @@ package org.brooth.jeta.tests.log;
 
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
-import org.brooth.jeta.TestMetaHelper;
+import org.brooth.jeta.MetaHelper;
 import org.brooth.jeta.log.Log;
 import org.junit.Test;
 
@@ -42,7 +42,7 @@ public class LogTest extends BaseTest {
         Logger customNameLogger;
 
         private LoggerHolder() {
-            TestMetaHelper.createLogger(this);
+            MetaHelper.createLogger(this);
         }
     }
 

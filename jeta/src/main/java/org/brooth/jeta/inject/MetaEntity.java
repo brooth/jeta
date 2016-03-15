@@ -33,4 +33,6 @@ public @interface MetaEntity {
     String staticConstructor() default "";
 
     Class<?> scope() default Void.class;
+
+    boolean singleton() default false;
 }

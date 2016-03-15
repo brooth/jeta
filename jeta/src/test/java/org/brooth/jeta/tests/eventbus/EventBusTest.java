@@ -19,7 +19,7 @@ package org.brooth.jeta.tests.eventbus;
 
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
-import org.brooth.jeta.TestMetaHelper;
+import org.brooth.jeta.MetaHelper;
 import org.brooth.jeta.eventbus.*;
 import org.brooth.jeta.log.Log;
 import org.hamcrest.MatcherAssert;
@@ -47,7 +47,7 @@ public class EventBusTest extends BaseTest {
         volatile MessageTwo lastMessageTwo;
 
         public SubscribeHolder() {
-            TestMetaHelper.createLogger(this);
+            MetaHelper.createLogger(this);
         }
 
         @Subscribe
@@ -70,15 +70,15 @@ public class EventBusTest extends BaseTest {
         logger.debug("testSimpleNotify()");
 
         final SubscribeHolder subscriber = new SubscribeHolder();
-        SubscriptionHandler handler = TestMetaHelper.registerSubscriber(subscriber);
+        SubscriptionHandler handler = MetaHelper.registerSubscriber(subscriber);
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(1, "one"));
+        MetaHelper.getEventBus().publish(new MessageOne(1, "one"));
         assertThat(subscriber.onMessageOneInvokes, is(1));
         MatcherAssert.assertThat(subscriber.lastMessageOne.getTopic(), is("one"));
         MatcherAssert.assertThat(subscriber.lastMessageOne.getId(), is(1));
 
         handler.unregisterAll();
-        TestMetaHelper.getEventBus().publish(new MessageOne(1, "none"));
+        MetaHelper.getEventBus().publish(new MessageOne(1, "none"));
         assertThat(subscriber.onMessageOneInvokes, is(1));
     }
 
@@ -87,14 +87,14 @@ public class EventBusTest extends BaseTest {
         logger.debug("testAsyncNotify()");
 
         SubscribeHolder subscriber = new SubscribeHolder();
-        SubscriptionHandler handler = TestMetaHelper.registerSubscriber(subscriber);
+        SubscriptionHandler handler = MetaHelper.registerSubscriber(subscriber);
 
         Thread[] threads = new Thread[10];
         for (int i = 0; i < threads.length; i++) {
             threads[i] = new Thread(new Runnable() {
                 public void run() {
-                    TestMetaHelper.getEventBus().publish(new MessageOne(1, "one"));
-                    TestMetaHelper.getEventBus().publish(new MessageTwo(2, "two"));
+                    MetaHelper.getEventBus().publish(new MessageOne(1, "one"));
+                    MetaHelper.getEventBus().publish(new MessageTwo(2, "two"));
                 }
             });
         }
@@ -117,7 +117,7 @@ public class EventBusTest extends BaseTest {
         int onMessageOneInvokes = 0;
 
         public HighPrioritySubscribeHolder() {
-            TestMetaHelper.createLogger(this);
+            MetaHelper.createLogger(this);
         }
 
         @Subscribe(priority = Integer.MAX_VALUE)
@@ -136,7 +136,7 @@ public class EventBusTest extends BaseTest {
         int onMessageOneInvokes = 0;
 
         public LowPrioritySubscribeHolder() {
-            TestMetaHelper.createLogger(this);
+            MetaHelper.createLogger(this);
         }
 
         @Subscribe(priority = Integer.MIN_VALUE)
@@ -152,14 +152,14 @@ public class EventBusTest extends BaseTest {
         logger.debug("testPriority()");
 
         LowPrioritySubscribeHolder low = new LowPrioritySubscribeHolder();
-        SubscriptionHandler handler = TestMetaHelper.registerSubscriber(low);
+        SubscriptionHandler handler = MetaHelper.registerSubscriber(low);
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(2, "one"));
+        MetaHelper.getEventBus().publish(new MessageOne(2, "one"));
         assertThat(low.onMessageOneInvokes, is(1));
 
         HighPrioritySubscribeHolder high = new HighPrioritySubscribeHolder();
-        handler.add(TestMetaHelper.registerSubscriber(high));
-        TestMetaHelper.getEventBus().publish(new MessageOne(1, "two"));
+        handler.add(MetaHelper.registerSubscriber(high));
+        MetaHelper.getEventBus().publish(new MessageOne(1, "two"));
         assertThat(high.onMessageOneInvokes, is(1));
         assertThat(low.onMessageOneInvokes, is(2));
 
@@ -174,7 +174,7 @@ public class EventBusTest extends BaseTest {
         int onMessageOneId2Invokes = 0;
 
         public IdFilterSubscribeHolder() {
-            TestMetaHelper.createLogger(this);
+            MetaHelper.createLogger(this);
         }
 
         @Subscribe(ids = 1)
@@ -197,21 +197,21 @@ public class EventBusTest extends BaseTest {
         logger.debug("testIdFilter()");
 
         IdFilterSubscribeHolder subscriber = new IdFilterSubscribeHolder();
-        SubscriptionHandler handler = TestMetaHelper.registerSubscriber(subscriber);
+        SubscriptionHandler handler = MetaHelper.registerSubscriber(subscriber);
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(1, "one"));
+        MetaHelper.getEventBus().publish(new MessageOne(1, "one"));
         assertThat(subscriber.onMessageOneId1Invokes, is(1));
         assertThat(subscriber.onMessageOneId2Invokes, is(0));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(2, "two"));
+        MetaHelper.getEventBus().publish(new MessageOne(2, "two"));
         assertThat(subscriber.onMessageOneId1Invokes, is(1));
         assertThat(subscriber.onMessageOneId2Invokes, is(1));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(3, "none"));
+        MetaHelper.getEventBus().publish(new MessageOne(3, "none"));
         assertThat(subscriber.onMessageOneId1Invokes, is(1));
         assertThat(subscriber.onMessageOneId2Invokes, is(1));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(4, "four"));
+        MetaHelper.getEventBus().publish(new MessageOne(4, "four"));
         assertThat(subscriber.onMessageOneId1Invokes, is(1));
         assertThat(subscriber.onMessageOneId2Invokes, is(2));
 
@@ -226,7 +226,7 @@ public class EventBusTest extends BaseTest {
         int onMessageOneTopicTwoInvokes = 0;
 
         public TopicFilterSubscribeHolder() {
-            TestMetaHelper.createLogger(this);
+            MetaHelper.createLogger(this);
         }
 
         @Subscribe(topics = "one")
@@ -249,37 +249,37 @@ public class EventBusTest extends BaseTest {
         logger.debug("testTopicFilter()");
 
         TopicFilterSubscribeHolder subscriber = new TopicFilterSubscribeHolder();
-        SubscriptionHandler handler = TestMetaHelper.registerSubscriber(subscriber);
+        SubscriptionHandler handler = MetaHelper.registerSubscriber(subscriber);
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(1, "one"));
+        MetaHelper.getEventBus().publish(new MessageOne(1, "one"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(0));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(2, "two"));
+        MetaHelper.getEventBus().publish(new MessageOne(2, "two"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(1));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(3, "none"));
+        MetaHelper.getEventBus().publish(new MessageOne(3, "none"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(1));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(4, "four"));
+        MetaHelper.getEventBus().publish(new MessageOne(4, "four"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(2));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(5, "twofour"));
+        MetaHelper.getEventBus().publish(new MessageOne(5, "twofour"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(2));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(6, "two "));
+        MetaHelper.getEventBus().publish(new MessageOne(6, "two "));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(2));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(7, " four"));
+        MetaHelper.getEventBus().publish(new MessageOne(7, " four"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(2));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(8, "tw.*"));
+        MetaHelper.getEventBus().publish(new MessageOne(8, "tw.*"));
         assertThat(subscriber.onMessageOneTopicOneInvokes, is(1));
         assertThat(subscriber.onMessageOneTopicTwoInvokes, is(2));
 
@@ -306,7 +306,7 @@ public class EventBusTest extends BaseTest {
         int onMessageOneEventInvokes = 0;
 
         public CustomFilterSubscribeHolder() {
-            TestMetaHelper.createLogger(this);
+            MetaHelper.createLogger(this);
         }
 
         @Subscribe(filters = OddIdFilter.class)
@@ -335,21 +335,21 @@ public class EventBusTest extends BaseTest {
         logger.debug("testCustomFilter()");
 
         CustomFilterSubscribeHolder subscriber = new CustomFilterSubscribeHolder();
-        SubscriptionHandler handler = TestMetaHelper.registerSubscriber(subscriber);
+        SubscriptionHandler handler = MetaHelper.registerSubscriber(subscriber);
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(1, "one"));
+        MetaHelper.getEventBus().publish(new MessageOne(1, "one"));
         assertThat(subscriber.onMessageOneOddInvokes, is(1));
         assertThat(subscriber.onMessageOneEventInvokes, is(0));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(2, "two"));
+        MetaHelper.getEventBus().publish(new MessageOne(2, "two"));
         assertThat(subscriber.onMessageOneOddInvokes, is(1));
         assertThat(subscriber.onMessageOneEventInvokes, is(1));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(3, "none"));
+        MetaHelper.getEventBus().publish(new MessageOne(3, "none"));
         assertThat(subscriber.onMessageOneOddInvokes, is(2));
         assertThat(subscriber.onMessageOneEventInvokes, is(1));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(4, "four"));
+        MetaHelper.getEventBus().publish(new MessageOne(4, "four"));
         assertThat(subscriber.onMessageOneOddInvokes, is(2));
         assertThat(subscriber.onMessageOneEventInvokes, is(2));
 
@@ -372,7 +372,7 @@ public class EventBusTest extends BaseTest {
         int onMessageOneEventInvokes = 0;
 
         public MetaFilterSubscribeHolder() {
-            TestMetaHelper.createLogger(this);
+            MetaHelper.createLogger(this);
         }
 
         @Subscribe(filters = OddIdMetaFilter.class)
@@ -401,21 +401,21 @@ public class EventBusTest extends BaseTest {
         logger.debug("testMetaFilter()");
 
         MetaFilterSubscribeHolder subscriber = new MetaFilterSubscribeHolder();
-        SubscriptionHandler handler = TestMetaHelper.registerSubscriber(subscriber);
+        SubscriptionHandler handler = MetaHelper.registerSubscriber(subscriber);
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(1, "one"));
+        MetaHelper.getEventBus().publish(new MessageOne(1, "one"));
         assertThat(subscriber.onMessageOneOddInvokes, is(1));
         assertThat(subscriber.onMessageOneEventInvokes, is(0));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(2, "two"));
+        MetaHelper.getEventBus().publish(new MessageOne(2, "two"));
         assertThat(subscriber.onMessageOneOddInvokes, is(1));
         assertThat(subscriber.onMessageOneEventInvokes, is(1));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(3, "none"));
+        MetaHelper.getEventBus().publish(new MessageOne(3, "none"));
         assertThat(subscriber.onMessageOneOddInvokes, is(2));
         assertThat(subscriber.onMessageOneEventInvokes, is(1));
 
-        TestMetaHelper.getEventBus().publish(new MessageOne(4, "four"));
+        MetaHelper.getEventBus().publish(new MessageOne(4, "four"));
         assertThat(subscriber.onMessageOneOddInvokes, is(2));
         assertThat(subscriber.onMessageOneEventInvokes, is(2));
 

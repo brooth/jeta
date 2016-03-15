@@ -18,7 +18,7 @@ package org.brooth.jeta.tests.validate;
 
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
-import org.brooth.jeta.TestMetaHelper;
+import org.brooth.jeta.MetaHelper;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.validate.*;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public class MetaValidatorsTest extends BaseTest {
         logger.debug("testSimpleValidator()");
 
         SimpleValidatorHolder holder = new SimpleValidatorHolder();
-        ValidationController controller = TestMetaHelper.validationController(holder);
+        ValidationController controller = MetaHelper.validationController(holder);
         String error = checkThrows(controller);
         logger.debug("error: '%s'", error);
         assertThat(error, is("value must be in [1..5]"));
@@ -88,7 +88,7 @@ public class MetaValidatorsTest extends BaseTest {
         logger.debug("testComplexValidator()");
 
         ComplexValidatorHolder holder = new ComplexValidatorHolder();
-        ValidationController controller = TestMetaHelper.validationController(holder);
+        ValidationController controller = MetaHelper.validationController(holder);
         controller.validate();
 
         holder.age = 38;

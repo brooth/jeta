@@ -22,7 +22,7 @@ package org.brooth.jeta;
 public class BaseTest {
 
     protected BaseTest() {
-        TestMetaHelper.createLogger(this);
+        MetaHelper.createLogger(this);
     }
 
     protected boolean sleepQuietly(long millis) {
