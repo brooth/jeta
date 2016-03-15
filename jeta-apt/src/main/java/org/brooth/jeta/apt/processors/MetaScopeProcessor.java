@@ -192,25 +192,33 @@ public class MetaScopeProcessor extends AbstractProcessor {
                     + metaEntityNameStr);
 
             String providerNameStr = "provider" + providerFieldIndex++;
-            ParameterizedTypeName providerTypeName = ParameterizedTypeName.get(ClassName.get(Provider.class), metaEntityClassName);
+            ParameterizedTypeName providerTypeName = ParameterizedTypeName.get(ClassName.get(Provider.class),
+                    metaEntityClassName);
 
             ClassName metaEntityProviderMetacode = ClassName.bestGuess(MetacodeUtils.getMetacodeOf(
                     env.getElementUtils(), metaEntityClassStr));
 
-            metaScopeTypeSpecBuilder
-                    .addField(providerTypeName, providerNameStr, Modifier.PRIVATE)
-                    .addMethod(MethodSpec.methodBuilder(metaEntityNameStr)
-                            .addModifiers(Modifier.PUBLIC)
-                            .returns(metaEntityClassName)
-                            .beginControlFlow("if ($L == null)", providerNameStr)
-                            .beginControlFlow("synchronized($T.class)", metaEntityClassName)
-                            .beginControlFlow("if ($L == null)", providerNameStr)
-                            .addStatement("$L = new $T.MetaEntityProvider()", providerNameStr, metaEntityProviderMetacode)
-                            .endControlFlow()
-                            .endControlFlow()
-                            .endControlFlow()
-                            .addStatement("return $L.get()", providerNameStr)
-                            .build());
+            MethodSpec.Builder providerMethodBuilder = MethodSpec.methodBuilder(metaEntityNameStr)
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(metaEntityClassName);
+            // meta scheme
+            TypeElement metaEntityElement = env.getElementUtils().getTypeElement(metaEntityClassStr);
+            if (metaEntityElement.getKind().isClass()) {
+                metaScopeTypeSpecBuilder.addField(providerTypeName, providerNameStr, Modifier.PRIVATE);
+                providerMethodBuilder
+                        .beginControlFlow("if ($L == null)", providerNameStr)
+                        .beginControlFlow("synchronized($T.class)", metaEntityClassName)
+                        .beginControlFlow("if ($L == null)", providerNameStr)
+                        .addStatement("$L = new $T.MetaEntityProvider()", providerNameStr, metaEntityProviderMetacode)
+                        .endControlFlow()
+                        .endControlFlow()
+                        .endControlFlow()
+                        .addStatement("return $L.get()", providerNameStr);
+            } else {
+                providerMethodBuilder.addStatement("return null");
+            }
+
+            metaScopeTypeSpecBuilder.addMethod(providerMethodBuilder.build());
 
             TypeSpec.Builder interfaceBuilder = TypeSpec.interfaceBuilder(metaEntityNameStr)
                     .addJavadoc("emitted by " + metaEntityClassStr + '\n').addModifiers(Modifier.PUBLIC)

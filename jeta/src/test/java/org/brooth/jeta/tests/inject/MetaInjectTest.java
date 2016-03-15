@@ -23,6 +23,7 @@ import org.brooth.jeta.inject.MetaEntity;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.metasitory.ClassForNameMetasitory;
 import org.brooth.jeta.metasitory.Criteria;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -465,6 +466,41 @@ public class MetaInjectTest extends BaseTest {
 
         assertThat(holder.stringEntity, notNullValue());
         assertThat(holder.stringEntity, is("str"));
+    }
+
+    public static class SchemeEntity {
+
+    }
+
+    @MetaEntity(of = SchemeEntity.class)
+    public interface MetaScheme {
+        @Constructor
+        SchemeEntity get();
+    }
+
+    @MetaEntity(of = SchemeEntity.class, ext = MetaScheme.class, scope = ExtScope.class)
+    public static class SchemeEntityProvider {
+        @Constructor
+        public static SchemeEntity get() {
+            return new SchemeEntity();
+        }
+    }
+
+    public static class MetaSchemeHolder {
+        @Meta
+        SchemeEntity entity;
+    }
+
+    @Test
+    public void testMetaScheme() {
+        logger.debug("testMetaScheme()");
+
+        MetaSchemeHolder holder = new MetaSchemeHolder();
+        TestMetaHelper.injectMeta(holder);
+        Assert.assertThat(holder.entity, nullValue());
+
+        TestMetaHelper.injectMeta(TestMetaHelper.getMetaScope(new ExtScope()), holder);
+        Assert.assertThat(holder.entity, notNullValue());
     }
 
     // test ClassForNameMetasitory here. there are compatable entities right above
