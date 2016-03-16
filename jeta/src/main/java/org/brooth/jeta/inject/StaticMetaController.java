@@ -29,7 +29,7 @@ public class StaticMetaController extends MasterClassController<Object, InjectMe
         super(metasitory, masterClass, Meta.class);
     }
 
-    public void injectStaticMeta(MetaScope<?> scope) {
+    public void inject(MetaScope<?> scope) {
         for (InjectMetacode<Object> metacode : metacodes)
             metacode.applyStaticMeta(scope);
     }

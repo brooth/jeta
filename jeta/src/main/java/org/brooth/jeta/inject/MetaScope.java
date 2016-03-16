@@ -22,5 +22,8 @@ package org.brooth.jeta.inject;
  */
 public interface MetaScope<S> {
     boolean isAssignable(Class scopeClass);
+
     S getScope();
+
+    <E> IMetaEntity<? extends E> getMetaEntity(Class<E> entityClass);
 }

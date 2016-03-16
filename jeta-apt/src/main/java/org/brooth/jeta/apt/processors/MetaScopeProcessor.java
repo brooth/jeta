@@ -38,11 +38,15 @@ import java.util.*;
  */
 public class MetaScopeProcessor extends AbstractProcessor {
 
+    private final AnnotationSpec suppressWarningsUnchecked = AnnotationSpec.builder(SuppressWarnings.class)
+            .addMember("value", "\"unchecked\"").build();
     @Nullable
     private String defaultScopeStr;
 
     private static final String assignableStatement = "return scopeClass == $T.class";
     private static final String assignableExtStatement = assignableStatement + " || super.isAssignable(scopeClass)";
+
+    private final ClassName iMetaEntityClassName = ClassName.get(IMetaEntity.class);
 
     private Set<? extends Element> allMetaEntities;
     private Map<String, List<String>> scopesEntities;
@@ -90,6 +94,7 @@ public class MetaScopeProcessor extends AbstractProcessor {
 
         builder.addMethod(MethodSpec.methodBuilder("getMetaScope")
                 .addAnnotation(Override.class)
+                .addAnnotation(suppressWarningsUnchecked)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(ClassName.get(MetaScope.class), masterClassName))
                 .addParameter(masterClassName, "scope")
@@ -144,8 +149,17 @@ public class MetaScopeProcessor extends AbstractProcessor {
                     TypeName.get(context.metacodeContext().masterElement().asType()));
         }
         metaScopeTypeSpecBuilder.addMethod(assignableMethodBuilder.build());
-
         metaScopeConstructorBuilder.addStatement("this.scope = scope");
+
+        TypeVariableName eTypeVariableName = TypeVariableName.get("E", ClassName.OBJECT);
+        MethodSpec.Builder getMetaEntityMethodBuilder = MethodSpec.methodBuilder("getMetaEntity")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addAnnotation(suppressWarningsUnchecked)
+                .addTypeVariable(eTypeVariableName)
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Class.class), eTypeVariableName), "entityClass")
+                .returns(ParameterizedTypeName.get(ClassName.get(IMetaEntity.class),
+                        WildcardTypeName.subtypeOf(eTypeVariableName)));
 
         String masterPackageStr = env.getElementUtils().getPackageOf(masterElement).getQualifiedName().toString();
         int entityImplFieldIndex = 0;
@@ -190,12 +204,7 @@ public class MetaScopeProcessor extends AbstractProcessor {
                             .build());
 
             TypeSpec.Builder interfaceBuilder = TypeSpec.interfaceBuilder(metaEntityNameStr)
-                    .addJavadoc("emitted by " + metaEntityClassStr + '\n').addModifiers(Modifier.PUBLIC)
-                    .addMethod(MethodSpec.methodBuilder("getEntityClass")
-                            .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                            .returns(ParameterizedTypeName.get(ClassName.get(Class.class),
-                                    WildcardTypeName.subtypeOf(ofClassName)))
-                            .build());
+                    .addJavadoc("emitted by " + metaEntityClassStr + '\n').addModifiers(Modifier.PUBLIC);
 
             String extTypeStr = getExtClass(metaEntityAnnotation);
             if (isVoid(extTypeStr))
@@ -222,6 +231,8 @@ public class MetaScopeProcessor extends AbstractProcessor {
                                 .returns(extMetaEntityClassName)
                                 .addStatement("return $L()", metaEntityImplMethodName)
                                 .build());
+            } else {
+                interfaceBuilder.addSuperinterface(ParameterizedTypeName.get(iMetaEntityClassName, ofClassName));
             }
 
             boolean isSelfProvider = metaEntityClassStr.equals(ofTypeStr);
@@ -246,9 +257,14 @@ public class MetaScopeProcessor extends AbstractProcessor {
                 }
 
                 interfaceBuilder.addMethod(MethodSpec.methodBuilder("getInstance")
-                                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                                .returns(ofClassName).addParameters(params).build());
+                        .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                        .returns(ofClassName).addParameters(params).build());
             }
+
+            getMetaEntityMethodBuilder
+                    .beginControlFlow("if (entityClass == $T.class)", ofClassName)
+                    .addStatement("return (IMetaEntity<? extends E>) $L()", metaEntityImplMethodName)
+                    .endControlFlow();
 
             builder.addType(interfaceBuilder.build());
             scopesEntities.get(masterElement.getQualifiedName().toString()).add(ofTypeStr);
@@ -261,7 +277,11 @@ public class MetaScopeProcessor extends AbstractProcessor {
                 .addMember("entities", "{" + Joiner.on(',').join(types) + "\n}", args)
                 .build());
 
-        metaScopeTypeSpecBuilder.addMethod(metaScopeConstructorBuilder.build());
+        metaScopeTypeSpecBuilder
+                .addMethod(metaScopeConstructorBuilder.build())
+                .addMethod(getMetaEntityMethodBuilder
+                        .addStatement("return " + (isVoid(scopeExtClassStr) ? "null" : "super.getMetaEntity(entityClass)"))
+                        .build());
         builder.addType(metaScopeTypeSpecBuilder.build());
         return false;
     }

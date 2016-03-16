@@ -177,14 +177,14 @@ public class EventBusTest extends BaseTest {
             MetaHelper.createLogger(this);
         }
 
-        @Subscribe(ids = 1)
+        @Subscribe(id = 1)
         void onMessageOneId1(MessageOne message) {
             logger.debug("onMessageOneId1(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneId1Invokes++;
             MatcherAssert.assertThat(message.getId(), is(1));
         }
 
-        @Subscribe(ids = {2, 4})
+        @Subscribe(id = {2, 4})
         void onMessageOneId2(MessageOne message) {
             logger.debug("onMessageOneId2(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneId2Invokes++;
@@ -229,14 +229,14 @@ public class EventBusTest extends BaseTest {
             MetaHelper.createLogger(this);
         }
 
-        @Subscribe(topics = "one")
+        @Subscribe(topic = "one")
         void onMessageOneTopicOne(MessageOne message) {
             logger.debug("onMessageOneTopicOne(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneTopicOneInvokes++;
             MatcherAssert.assertThat(message.getId(), is(1));
         }
 
-        @Subscribe(topics = {"two", "four"})
+        @Subscribe(topic = {"two", "four"})
         void onMessageOneTopicTwo(MessageOne message) {
             logger.debug("onMessageOneTopicTwo(id: %d, topic: %s)", message.getId(), message.getTopic());
             onMessageOneTopicTwoInvokes++;

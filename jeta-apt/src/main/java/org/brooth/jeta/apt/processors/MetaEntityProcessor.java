@@ -83,15 +83,18 @@ public class MetaEntityProcessor extends AbstractProcessor {
             entityScopeClassName = ClassName.bestGuess(defaultScopeStr);
         }
 
-        ClassName implOfClassName = ClassName.get(entityScopeClassName.packageName(),
-                entityScopeClassName.simpleName() + JetaProcessor.METACODE_CLASS_POSTFIX + "." +
-                        ofTypeStr.replaceAll("\\.", "_") + "_MetaEntity");
+        // think it's a bag in java poet.
+        ClassName metaScopeClassName = ClassName.get(entityScopeClassName.packageName(),
+                entityScopeClassName.simpleName() + JetaProcessor.METACODE_CLASS_POSTFIX);
+        ClassName implOfClassName = ClassName.get(metaScopeClassName.packageName() + '.' + metaScopeClassName.simpleName(),
+                (ofTypeStr.replaceAll("\\.", "_") + "_MetaEntity"));
 
         TypeSpec.Builder implBuilder = TypeSpec.classBuilder("MetaEntityImpl")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addSuperinterface(implOfClassName)
                 .addField(FieldSpec.builder(entityScopeClassName, "__scope__", Modifier.PUBLIC).build())
                 .addMethod(MethodSpec.constructorBuilder()
+                        .addModifiers(Modifier.PUBLIC)
                         .addParameter(entityScopeClassName, "__scope__")
                         .addStatement("this.__scope__ = __scope__")
                         .build())
@@ -100,6 +103,12 @@ public class MetaEntityProcessor extends AbstractProcessor {
                         .addModifiers(Modifier.PUBLIC)
                         .addStatement("return $T.class", ofClassName)
                         .returns(ParameterizedTypeName.get(ClassName.get(Class.class), WildcardTypeName.subtypeOf(ofClassName)))
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("isImplemented")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addStatement("return " + !element.getKind().isInterface())
+                        .returns(boolean.class)
                         .build());
 
         if (annotation.singleton())

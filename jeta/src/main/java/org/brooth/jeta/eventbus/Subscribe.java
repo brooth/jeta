@@ -23,9 +23,9 @@ public @interface Subscribe {
 
     Class<? extends Filter>[] filters() default {};
 
-    int[] ids() default {};
+    int[] id() default {};
 
-    String[] topics() default {};
+    String[] topic() default {};
 
     int priority() default 0;
 }

@@ -22,10 +22,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.Factory;
-import org.brooth.jeta.apt.MetacodeUtils;
-import org.brooth.jeta.apt.ProcessingContext;
-import org.brooth.jeta.apt.ProcessingException;
-import org.brooth.jeta.apt.RoundContext;
+import org.brooth.jeta.apt.*;
 import org.brooth.jeta.inject.*;
 
 import javax.annotation.Nullable;
@@ -83,11 +80,9 @@ public class MetaInjectProcessor extends AbstractProcessor {
         // check all scopes have processed
         Elements elementUtils = processingContext.processingEnv().getElementUtils();
         for (Element scopeElement : scopes) {
-            String scopeName = ((TypeElement) scopeElement).getQualifiedName().toString();
-            String extTypeMetacodeStr = MetacodeUtils.getMetacodeOf(elementUtils, scopeName);
-            TypeElement metaScopeTypeElement = elementUtils.getTypeElement(extTypeMetacodeStr);
+            TypeElement metaScopeTypeElement = elementUtils.getTypeElement(((TypeElement) scopeElement).getQualifiedName().toString());
             if (metaScopeTypeElement == null) {
-                processingContext.logger().debug("scope '" + scopeName + "' is being processed. skip round");
+                processingContext.logger().debug("scope '" + scopeElement.getSimpleName().toString() + "' is being processed. skip round");
                 return true;
             }
         }
@@ -138,15 +133,13 @@ public class MetaInjectProcessor extends AbstractProcessor {
                 }
 
                 if (!statements.isEmpty()) {
-                    ClassName scopeMetacodeClassName = ClassName.get(processingContext.processingEnv().getElementUtils()
-                                    .getPackageOf(scopeElement).getQualifiedName().toString(),
-                            scopeElement.getSimpleName().toString());
-                    ClassName metaScopeClassName = ClassName.get(scopeMetacodeClassName.packageName(),
-                            scopeElement.getSimpleName().toString() + "_Metacode.MetaScope");
+                    ClassName scopeClassName = ClassName.get(scopeElement);
+                    ClassName scopeMetacodeClassName = ClassName.get(scopeClassName.packageName(),
+                            scopeClassName.simpleName() + JetaProcessor.METACODE_CLASS_POSTFIX);
 
                     methodBuilder
                             .beginControlFlow("if(scope.isAssignable($T.class))", ClassName.get(scopeElement))
-                            .addStatement("final $T s = ($T) scope", metaScopeClassName, metaScopeClassName);
+                            .addStatement("final $T.MetaScope s = ($T.MetaScope) scope", scopeMetacodeClassName, scopeMetacodeClassName);
 
                     for (StatementSpec statement : statements) {
                         methodBuilder.addStatement(statement.format, statement.args);
@@ -283,9 +276,7 @@ public class MetaInjectProcessor extends AbstractProcessor {
                 factoryBuilder.addMethod(methodSpec.build());
             }
 
-        ClassName metaScopeClassName = ClassName.get(processingContext.processingEnv().getElementUtils()
-                        .getPackageOf(scopeElement).getQualifiedName().toString(),
-                scopeElement.getSimpleName().toString() + "_Metacode.MetaScope");
+        ClassName metaScopeClassName = ClassName.get("", scopeElement.getSimpleName().toString() + "_Metacode.MetaScope");
 
         statement.factory = factoryBuilder
                 .addField(metaScopeClassName, "s", Modifier.PRIVATE, Modifier.FINAL)

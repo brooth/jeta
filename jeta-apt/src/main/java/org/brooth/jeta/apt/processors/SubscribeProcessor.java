@@ -67,10 +67,10 @@ public class SubscribeProcessor extends AbstractProcessor {
                     .returns(void.class);
 
             // IdsFilter
-            if (annotation.ids().length > 0) {
-                String[] ids = new String[annotation.ids().length];
+            if (annotation.id().length > 0) {
+                String[] ids = new String[annotation.id().length];
                 for (int i = 0; i < ids.length; i++)
-                    ids[i] = String.valueOf(annotation.ids()[i]);
+                    ids[i] = String.valueOf(annotation.id()[i]);
 
                 onEventMethodBuilder
                         .beginControlFlow("if(!(new $T($L).accepts(null, null, event)))",
@@ -79,10 +79,10 @@ public class SubscribeProcessor extends AbstractProcessor {
                         .endControlFlow();
             }
             // TopicsFilter
-            if (annotation.topics().length > 0) {
+            if (annotation.topic().length > 0) {
                 onEventMethodBuilder
                         .beginControlFlow("if(!(new $T($L).accepts(null, null, event)))",
-                                TypeName.get(TopicsFilter.class), '"' + Joiner.on("\", \"").join(annotation.topics()) + '"')
+                                TypeName.get(TopicsFilter.class), '"' + Joiner.on("\", \"").join(annotation.topic()) + '"')
                         .addStatement("return")
                         .endControlFlow();
             }
