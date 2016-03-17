@@ -90,7 +90,7 @@ public class MetaScopeProcessor extends AbstractProcessor {
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         builder.addSuperinterface(ParameterizedTypeName.get(ClassName.get(MetaScopeMetacode.class), masterClassName));
 
-        String metaScopeSimpleNameStr = "MetaScope";
+        String metaScopeSimpleNameStr = "MetaScopeImpl";
 
         builder.addMethod(MethodSpec.methodBuilder("getMetaScope")
                 .addAnnotation(Override.class)
@@ -144,7 +144,7 @@ public class MetaScopeProcessor extends AbstractProcessor {
             metaScopeConstructorBuilder.addStatement("super(scope)");
             ClassName scopeExtClassName = ClassName.bestGuess(scopeExtClassStr);
             metaScopeTypeSpecBuilder.superclass(ParameterizedTypeName.get(ClassName.get(scopeExtClassName.packageName(),
-                    scopeExtClassName.simpleName() + JetaProcessor.METACODE_CLASS_POSTFIX + ".MetaScope"), sTypeVariableName));
+                    scopeExtClassName.simpleName() + JetaProcessor.METACODE_CLASS_POSTFIX + ".MetaScopeImpl"), sTypeVariableName));
             assignableMethodBuilder.addStatement(assignableExtStatement,
                     TypeName.get(context.metacodeContext().masterElement().asType()));
         }

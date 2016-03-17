@@ -43,8 +43,9 @@ public class MetaInjectProcessor extends AbstractProcessor {
 
     @Nullable
     private String providerAlias;
-    private Set<? extends Element> scopes;
+    private Map<TypeElement, MetaScopeConfig> scopes;
     private Multimap<TypeElement, String> scopeEntities;
+    private int skipRound = 1;
 
     private static class StatementSpec {
         String format;
@@ -68,27 +69,48 @@ public class MetaInjectProcessor extends AbstractProcessor {
     }
 
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
-        if (context.round() == 1) {
+        if (context.round() <= skipRound) {
             if (scopes == null) {
-                scopes = context.roundEnv().getElementsAnnotatedWith(Scope.class);
-                if (scopes.isEmpty())
+                Set<? extends Element> currentScopes = context.roundEnv().getElementsAnnotatedWith(Scope.class);
+                if (currentScopes.isEmpty())
                     throw new ProcessingException("No meta scope found. You need to define one and pot @Scope annotation on it.");
+
+                scopes = new HashMap<>(currentScopes.size());
+                for (Element currentScope : currentScopes)
+                    scopes.put((TypeElement) currentScope, null);
             }
             return true;
         }
 
         // check all scopes have processed
         Elements elementUtils = processingContext.processingEnv().getElementUtils();
-        for (Element scopeElement : scopes) {
-            TypeElement metaScopeTypeElement = elementUtils.getTypeElement(((TypeElement) scopeElement).getQualifiedName().toString());
-            if (metaScopeTypeElement == null) {
-                processingContext.logger().debug("scope '" + scopeElement.getSimpleName().toString() + "' is being processed. skip round");
-                return true;
+        for (TypeElement scopeElement : scopes.keySet()) {
+            if (scopes.get(scopeElement) == null) {
+                TypeElement metaScopeTypeElement = elementUtils.getTypeElement(scopeElement.getQualifiedName().toString()
+                        + JetaProcessor.METACODE_CLASS_POSTFIX);
+                final MetaScopeConfig config = metaScopeTypeElement != null ?
+                        metaScopeTypeElement.getAnnotation(MetaScopeConfig.class) : null;
+                if (config == null) {
+                    processingContext.logger().debug("scope '" + scopeElement.getSimpleName().toString() +
+                            "' is being processed. skip round");
+                    skipRound = context.round();
+                    return true;
+                }
+                scopes.put(scopeElement, config);
             }
         }
 
         if (scopeEntities == null) {
-            collectScopesEntities();
+            scopeEntities = HashMultimap.create();
+            for (TypeElement scopeElement : scopes.keySet()) {
+                final MetaScopeConfig config = scopes.get(scopeElement);
+                List<String> scopeElements = MetacodeUtils.extractClassesNames(new Runnable() {
+                    public void run() {
+                        config.entities();
+                    }
+                });
+                scopeEntities.putAll(scopeElement, scopeElements);
+            }
         }
 
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
@@ -107,9 +129,7 @@ public class MetaInjectProcessor extends AbstractProcessor {
                         .addParameter(masterClassName, "master", Modifier.FINAL);
             }
             methodBuilder.addAnnotation(Override.class).addModifiers(Modifier.PUBLIC).returns(void.class);
-
-            for (Element e : scopes) {
-                TypeElement scopeElement = (TypeElement) e;
+            for (TypeElement scopeElement : scopes.keySet()) {
                 List<StatementSpec> statements = new ArrayList<>();
                 for (Element element : context.elements()) {
                     String elementTypeStr = element.asType().toString();
@@ -139,7 +159,8 @@ public class MetaInjectProcessor extends AbstractProcessor {
 
                     methodBuilder
                             .beginControlFlow("if(scope.isAssignable($T.class))", ClassName.get(scopeElement))
-                            .addStatement("final $T.MetaScope s = ($T.MetaScope) scope", scopeMetacodeClassName, scopeMetacodeClassName);
+                            .addStatement("final $T.MetaScopeImpl s = ($T.MetaScopeImpl) scope",
+                                    scopeMetacodeClassName, scopeMetacodeClassName);
 
                     for (StatementSpec statement : statements) {
                         methodBuilder.addStatement(statement.format, statement.args);
@@ -276,7 +297,7 @@ public class MetaInjectProcessor extends AbstractProcessor {
                 factoryBuilder.addMethod(methodSpec.build());
             }
 
-        ClassName metaScopeClassName = ClassName.get("", scopeElement.getSimpleName().toString() + "_Metacode.MetaScope");
+        ClassName metaScopeClassName = ClassName.get("", scopeElement.getSimpleName().toString() + "_Metacode.MetaScopeImpl");
 
         statement.factory = factoryBuilder
                 .addField(metaScopeClassName, "s", Modifier.PRIVATE, Modifier.FINAL)
@@ -286,27 +307,6 @@ public class MetaInjectProcessor extends AbstractProcessor {
                         .build())
                 .build();
         return statement;
-    }
-
-    private void collectScopesEntities() {
-        scopeEntities = HashMultimap.create();
-        for (final Element e : scopes) {
-            TypeElement scopeElement = (TypeElement) e;
-            Elements elementUtils = processingContext.processingEnv().getElementUtils();
-            String metaScopeStr = MetacodeUtils.getMetacodeOf(elementUtils, scopeElement.getQualifiedName().toString());
-            TypeElement metaScopeElement = elementUtils.getTypeElement(metaScopeStr);
-
-            final MetaScopeConfig config = metaScopeElement.getAnnotation(MetaScopeConfig.class);
-            if (config == null)
-                throw new ProcessingException(scopeElement.getSimpleName() + " is not a meta scope. Put @Scope on it.");
-
-            List<String> scopeElements = MetacodeUtils.extractClassesNames(new Runnable() {
-                public void run() {
-                    config.entities();
-                }
-            });
-            scopeEntities.putAll(scopeElement, scopeElements);
-        }
     }
 
     private String getGenericType(String type) {
