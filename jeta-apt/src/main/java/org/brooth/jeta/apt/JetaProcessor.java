@@ -36,7 +36,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
@@ -61,7 +60,6 @@ public class JetaProcessor extends AbstractProcessor {
     public static final String METACODE_CLASS_POSTFIX = "_Metacode";
 
     private Messager logger;
-    private Elements elementUtils;
 
     private List<Processor> processors = new ArrayList<Processor>();
     private List<MetacodeContextImpl> metacodeContextList = new ArrayList<MetacodeContextImpl>(500);
@@ -86,7 +84,6 @@ public class JetaProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        this.elementUtils = processingEnv.getElementUtils();
 
         logger = new Messager();
         logger.messager = processingEnv.getMessager();
@@ -189,6 +186,7 @@ public class JetaProcessor extends AbstractProcessor {
         addProcessor(new SingletonProcessor());
         addProcessor(new MultitonProcessor());
         addProcessor(new ImplementationProcessor());
+        addProcessor(new MetaModuleProcessor());
         addProcessor(new MetaScopeProcessor());
         addProcessor(new MetaInjectProcessor());
         addProcessor(new MetaEntityProcessor());
@@ -327,7 +325,7 @@ public class JetaProcessor extends AbstractProcessor {
                         MetacodeContextImpl context = Iterables.find(metacodeContextList,
                                 new MasterTypePredicate(masterTypeElement), null);
                         if (context == null) {
-                            context = new MetacodeContextImpl(elementUtils, masterTypeElement);
+                            context = new MetacodeContextImpl(masterTypeElement);
                             metacodeContextList.add(context);
                             logger.debug("         metacode: " + context.metacodeCanonicalName);
                         }
@@ -673,12 +671,12 @@ public class JetaProcessor extends AbstractProcessor {
 
         private boolean utd = false;
 
-        public MetacodeContextImpl(Elements elementUtils, TypeElement masterElement) {
+        public MetacodeContextImpl(TypeElement masterElement) {
             this.processors = HashMultimap.create();
             this.masterElement = masterElement;
             this.metacodeAnnotations = new HashSet<Class<? extends Annotation>>();
 
-            metacodeCanonicalName = MetacodeUtils.getMetacodeOf(elementUtils, masterElement.toString());
+            metacodeCanonicalName = MetacodeUtils.toMetacodeName(masterElement.toString());
             int i = metacodeCanonicalName.lastIndexOf('.');
             metacodeSimpleName = i >= 0 ? metacodeCanonicalName.substring(i + 1) : metacodeCanonicalName;
         }

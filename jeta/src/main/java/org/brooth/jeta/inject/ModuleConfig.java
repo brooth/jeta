@@ -17,9 +17,22 @@
 
 package org.brooth.jeta.inject;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public @interface MetaScopeConfig {
-    Class<?>[] entities() default {};
+@Target(value = {ElementType.TYPE})
+public @interface ModuleConfig {
+    ScopeConfig[] scopes();
+
+    Class<?> ext() default Void.class;
+
+    @Target(value = {ElementType.ANNOTATION_TYPE})
+    @interface ScopeConfig {
+        Class<?> scope();
+
+        Class<?>[] entities();
+    }
 }

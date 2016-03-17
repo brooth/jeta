@@ -17,13 +17,14 @@
 package org.brooth.jeta.apt;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.squareup.javapoet.ClassName;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
 import java.util.List;
 
 /**
@@ -31,22 +32,23 @@ import java.util.List;
  */
 public class MetacodeUtils {
 
-    public static String getMetacodeOf(Elements elementsUtils, String canonicalName) {
-        return getMetaNameOf(elementsUtils, canonicalName, JetaProcessor.METACODE_CLASS_POSTFIX);
+    public static String toMetacodeName(String canonicalName) {
+        return toMetaName(canonicalName, JetaProcessor.METACODE_CLASS_POSTFIX);
     }
 
-    public static String getMetaNameOf(Elements elementsUtils, String canonicalName, String postfix) {
-        TypeElement typeElement = elementsUtils.getTypeElement(canonicalName);
-        Object packageName = elementsUtils.getPackageOf(typeElement).getQualifiedName().toString();
-        return packageName + "." + canonicalName.replace(packageName + ".", "")
-                .replaceAll("\\.", "_") + postfix;
+    public static String toMetaName(String canonicalName, String postfix) {
+        ClassName className = ClassName.bestGuess(canonicalName);
+        return className.packageName() + "." + Joiner.on('_').join(className.simpleNames()) + postfix;
     }
 
-    public static String getSimpleMetaNodeOf(Elements elementUtils, String canonicalName, String postfix) {
-        String metacodeCanonicalName = getMetaNameOf(elementUtils, canonicalName, postfix);
+    public static String toSimpleMetacodeName(String canonicalName) {
+        return toSimpleMetaName(canonicalName, JetaProcessor.METACODE_CLASS_POSTFIX);
+    }
+
+    public static String toSimpleMetaName(String canonicalName, String postfix) {
+        String metacodeCanonicalName = toMetaName(canonicalName, postfix);
         int i = metacodeCanonicalName.lastIndexOf('.');
         return i >= 0 ? metacodeCanonicalName.substring(i + 1) : metacodeCanonicalName;
-
     }
 
     public static TypeElement sourceElementOf(Element element) {

@@ -62,13 +62,14 @@ import java.util.List;
                 }
             });
             ClassName observableTypeName = ClassName.bestGuess(observableClass);
-            ClassName metacodeTypeName = ClassName.bestGuess(MetacodeUtils.
-                    getMetacodeOf(processingContext.processingEnv().getElementUtils(), observableClass));
+            ClassName metacodeTypeName = ClassName.bestGuess(MetacodeUtils.toMetacodeName(observableClass));
 
             List<? extends VariableElement> params = ((ExecutableElement) element).getParameters();
             if (params.size() != 1)
                 throw new IllegalArgumentException("Observer method must have one parameter (event)");
             TypeName eventTypeName = TypeName.get(params.get(0).asType());
+            if (eventTypeName instanceof ParameterizedTypeName)
+                eventTypeName = ((ParameterizedTypeName) eventTypeName).rawType;
 
             String methodHashName = "get" +
                     CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL,

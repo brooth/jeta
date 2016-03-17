@@ -59,6 +59,8 @@ public class SubscribeProcessor extends AbstractProcessor {
             if (params.size() != 1)
                 throw new IllegalArgumentException("Subscriber method must have one parameter (event)");
             TypeName eventTypeName = TypeName.get(params.get(0).asType());
+            if (eventTypeName instanceof ParameterizedTypeName)
+                eventTypeName = ((ParameterizedTypeName) eventTypeName).rawType;
 
             MethodSpec.Builder onEventMethodBuilder = MethodSpec.methodBuilder("onEvent")
                     .addAnnotation(Override.class)

@@ -156,8 +156,6 @@ public class MetaInjectTest extends BaseTest {
         Lazy<MetaEntityOne> lazy;
         @Inject
         Provider<MetaEntityOne> provider;
-        @Inject
-        javax.inject.Provider<MetaEntityOne> javaxProvider;
     }
 
     @Test
@@ -184,9 +182,6 @@ public class MetaInjectTest extends BaseTest {
         assertFalse(holder.entity == holder.lazy.get());
         assertFalse(holder.entity == holder.provider.get());
         assertFalse(holder.lazy.get() == holder.provider.get());
-
-        assertThat(holder.javaxProvider, notNullValue());
-        assertThat(holder.javaxProvider.get().value, is("one"));
     }
 
     public static class MetaEntityTwo {

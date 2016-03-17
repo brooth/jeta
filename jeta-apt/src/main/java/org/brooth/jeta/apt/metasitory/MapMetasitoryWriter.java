@@ -71,7 +71,7 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
     @Override
     public void write(MetacodeContext context) {
         String master = context.masterElement().toString();
-        String metacode = MetacodeUtils.getMetacodeOf(env.processingEnv().getElementUtils(), master);
+        String metacode = MetacodeUtils.toMetacodeName(master);
         String annotations = Joiner.on(",").join(
                 Iterables.transform(context.metacodeAnnotations(), new Function<Class<? extends Annotation>, String>() {
                     @Override

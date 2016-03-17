@@ -41,7 +41,7 @@ class EchoMetasitoryWriter implements MetasitoryWriter {
     public void write(MetacodeContext context) {
         String master = context.masterElement().toString();
         logger.debug(String.format("master: %1$s, metacode: %2$s, annotations: {%3$s}",
-                master, MetacodeUtils.getMetacodeOf(env.getElementUtils(), master),
+                master, MetacodeUtils.toMetacodeName(master),
                 Joiner.on(", ").join(context.metacodeAnnotations())));
     }
 
