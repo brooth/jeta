@@ -17,34 +17,42 @@
 package org.brooth.jeta;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import org.brooth.jeta.metasitory.Criteria;
 import org.brooth.jeta.metasitory.Metasitory;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * @param <M> master's class
  * @param <C> metacode extension
- *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public abstract class MasterClassController<M, C> {
 
+    protected Metasitory metasitory;
     protected Class<? extends M> masterClass;
     protected Collection<C> metacodes;
     @Nullable
-    protected Class<? extends Annotation> annotationClass;
+    protected Set<Class<? extends Annotation>> annotations;
 
-    protected MasterClassController(Metasitory metasitory, Class<? extends M> masterClass) {
-        this.masterClass = masterClass;
-        searchMetacodes(metasitory);
+    public MasterClassController(Metasitory metasitory, Class<? extends M> masterClass) {
+        this(metasitory, masterClass, (Set<Class<? extends Annotation>>) null);
     }
 
-    public MasterClassController(Metasitory metasitory, Class<? extends M> masterClass, @Nullable Class<? extends Annotation> annotationClass) {
-        this(metasitory, masterClass);
-        this.annotationClass = annotationClass;
+    public MasterClassController(Metasitory metasitory, Class<? extends M> masterClass, Class<? extends Annotation> annotation) {
+        this(metasitory, masterClass, Collections.<Class<? extends Annotation>>singleton(annotation));
+    }
+
+    public MasterClassController(Metasitory metasitory, Class<? extends M> masterClass, @Nullable Set<Class<? extends Annotation>> annotations) {
+        this.metasitory = metasitory;
+        this.masterClass = masterClass;
+        this.annotations = annotations;
+        searchMetacodes(metasitory);
     }
 
     @SuppressWarnings("unchecked")
@@ -55,8 +63,8 @@ public abstract class MasterClassController<M, C> {
 
     protected Criteria criteria() {
         Criteria.Builder builder = new Criteria.Builder().masterEqDeep(masterClass);
-        if (annotationClass != null)
-            builder.usesAny(annotationClass);
+        if (annotations != null)
+            builder.usesAny(annotations);
         return builder.build();
     }
 }

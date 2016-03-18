@@ -17,34 +17,36 @@
 
 package org.brooth.jeta.apt.processors;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.Lists;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.Factory;
 import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.ProcessingException;
 import org.brooth.jeta.apt.RoundContext;
-import org.brooth.jeta.inject.*;
+import org.brooth.jeta.inject.InjectMetacode;
+import org.brooth.jeta.inject.Meta;
+import org.brooth.jeta.inject.MetaScope;
+import org.brooth.jeta.inject.Module;
 
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MetaInjectProcessor extends AbstractProcessor {
+public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
 
     private final TypeName metaScopeTypeName = ParameterizedTypeName.get(
             ClassName.get(MetaScope.class), WildcardTypeName.subtypeOf(TypeName.OBJECT));
 
     private TypeElement module;
-    private Multimap<TypeElement, String> scopeEntities;
+    private List<TypeElement> moduleScopes;
 
     private static class StatementSpec {
         String format;
@@ -63,105 +65,89 @@ public class MetaInjectProcessor extends AbstractProcessor {
 
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         if (context.round() == 1) {
-            if(module == null) {
+            if (module == null) {
                 Set<? extends Element> modules = context.roundEnv().getElementsAnnotatedWith(Module.class);
                 if (modules.isEmpty())
                     throw new ProcessingException("No module defined. Create one and put @Module on it.");
                 module = (TypeElement) modules.iterator().next();
+
+                List<String> scopes = MetacodeUtils.extractClassesNames(new Runnable() {
+                    @Override
+                    public void run() {
+                        module.getAnnotation(Module.class).scopes();
+                    }
+                });
+                moduleScopes = Lists.transform(scopes, new Function<String, TypeElement>() {
+                    @Override
+                    public TypeElement apply(String input) {
+                        return processingContext.processingEnv().getElementUtils().getTypeElement(input);
+                    }
+                });
             }
             return true;
         }
 
-        if (scopeEntities == null) {
-            collectScopeEntities();
-        }
-
-        ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
+        TypeElement masterElement = context.metacodeContext().masterElement();
+        ClassName masterClassName = ClassName.get(masterElement);
         builder.addSuperinterface(ParameterizedTypeName.get(ClassName.get(InjectMetacode.class), masterClassName));
-
-        for (Boolean staticMeta = true; staticMeta != null; staticMeta = staticMeta ? false : null) {
-            MethodSpec.Builder methodBuilder;
-            if (staticMeta) {
-                methodBuilder = MethodSpec.methodBuilder("applyStaticMeta")
-                        .addParameter(metaScopeTypeName, "scope", Modifier.FINAL);
-
-            } else {
-                methodBuilder = MethodSpec.methodBuilder("applyMeta")
-                        .addParameter(metaScopeTypeName, "scope", Modifier.FINAL)
-                        .addParameter(masterClassName, "master", Modifier.FINAL);
-            }
-            methodBuilder.addAnnotation(Override.class).addModifiers(Modifier.PUBLIC).returns(void.class);
-            for (TypeElement scopeElement : scopeEntities.keySet()) {
-                List<StatementSpec> statements = new ArrayList<>();
-                for (Element element : context.elements()) {
-                    String elementTypeStr = element.asType().toString();
-                    String fieldNameStr = element.getSimpleName().toString();
-                    String fieldStatement = null;
-
-                    if (staticMeta) {
-                        if (element.getModifiers().contains(Modifier.STATIC))
-                            fieldStatement = String.format("%1$s.%2$s = ", elementTypeStr, fieldNameStr);
-
-                    } else {
-                        if (!element.getModifiers().contains(Modifier.STATIC))
-                            fieldStatement = String.format("master.%1$s = ", fieldNameStr);
-                    }
-                    if (fieldStatement == null)
-                        continue;
-
-                    StatementSpec statement = getResultStatement(scopeElement, element.asType(), fieldStatement, "getInstance()");
-                    if (statement != null)
-                        statements.add(statement);
-                }
-
-                if (!statements.isEmpty()) {
-                    ClassName scopeClassName = ClassName.get(scopeElement);
-                    ClassName scopeMetacodeClassName = ClassName.get(scopeClassName.packageName(),
-                            MetacodeUtils.toSimpleMetacodeName(scopeClassName.toString()), "MetaScopeImpl");
-                    methodBuilder
-                            .beginControlFlow("if(scope.isAssignable($T.class))", ClassName.get(scopeElement))
-                            .addStatement("final $T s = ($T) scope",
-                                    scopeMetacodeClassName, scopeMetacodeClassName);
-
-                    for (StatementSpec statement : statements) {
-                        methodBuilder.addStatement(statement.format, statement.args);
-                        if (statement.factory != null)
-                            builder.addType(statement.factory);
-                    }
-
-                    methodBuilder.endControlFlow();
-                }
-            }
-            builder.addMethod(methodBuilder.build());
-        }
-
+        buildInjectMethod(builder, context, masterElement, masterClassName, false);
+        buildInjectMethod(builder, context, masterElement, masterClassName, true);
         return false;
     }
 
-    private void collectScopeEntities() {
-        Elements elementUtils = processingContext.processingEnv().getElementUtils();
-        String moduleName = module.getQualifiedName().toString();
-        TypeElement metaModuleElement = elementUtils.getTypeElement(MetacodeUtils.toMetacodeName(moduleName));
-        ModuleConfig moduleConfig = metaModuleElement != null ?
-                metaModuleElement.getAnnotation(ModuleConfig.class) : null;
-        if (moduleConfig == null)
-            throw new ProcessingException("Unknown error. Meta module config for '" + moduleName + "' not found or broken");
+    private void buildInjectMethod(TypeSpec.Builder builder, RoundContext context, TypeElement masterElement, ClassName masterClassName, Boolean staticMeta) {
+        MethodSpec.Builder methodBuilder;
+        if (staticMeta) {
+            methodBuilder = MethodSpec.methodBuilder("applyStaticMeta")
+                    .addParameter(metaScopeTypeName, "scope", Modifier.FINAL);
 
-        scopeEntities = HashMultimap.create();
-        for (final ModuleConfig.ScopeConfig scopeConfig : moduleConfig.scopes()) {
-            String scopeClassStr = MetacodeUtils.extractClassName(new Runnable() {
-                @Override
-                public void run() {
-                    scopeConfig.scope();
-                }
-            });
-            List<String> scopeElements = MetacodeUtils.extractClassesNames(new Runnable() {
-                public void run() {
-                    scopeConfig.entities();
-                }
-            });
-            scopeEntities.putAll(elementUtils.getTypeElement(scopeClassStr), scopeElements);
+        } else {
+            methodBuilder = MethodSpec.methodBuilder("applyMeta")
+                    .addParameter(metaScopeTypeName, "scope", Modifier.FINAL)
+                    .addParameter(masterClassName, "master", Modifier.FINAL);
         }
+        methodBuilder.addAnnotation(Override.class).addModifiers(Modifier.PUBLIC).returns(void.class);
+        for (TypeElement scopeElement : moduleScopes) {
+            List<StatementSpec> statements = new ArrayList<>();
+            for (Element element : context.elements()) {
+                String fieldNameStr = element.getSimpleName().toString();
+                String fieldStatement = null;
+
+                if (staticMeta) {
+                    if (element.getModifiers().contains(Modifier.STATIC))
+                        fieldStatement = String.format("%1$s.%2$s =\n",
+                                masterElement.getQualifiedName().toString(), fieldNameStr);
+
+                } else {
+                    if (!element.getModifiers().contains(Modifier.STATIC))
+                        fieldStatement = String.format("master.%1$s = ", fieldNameStr);
+                }
+                if (fieldStatement == null)
+                    continue;
+
+                StatementSpec statement = getResultStatement(scopeElement, element.asType(), fieldStatement, "getInstance()");
+                if (statement != null)
+                    statements.add(statement);
+            }
+
+            if (!statements.isEmpty()) {
+                ClassName scopeClassName = ClassName.get(scopeElement);
+                ClassName scopeMetacodeClassName = ClassName.get(scopeClassName.packageName(),
+                        MetacodeUtils.toSimpleMetacodeName(scopeClassName.toString()), "MetaScopeImpl");
+                methodBuilder
+                        .beginControlFlow("if(scope.isAssignable($T.class))", ClassName.get(scopeElement))
+                        .addStatement("final $T s = ($T) scope", scopeMetacodeClassName, scopeMetacodeClassName);
+
+                for (StatementSpec statement : statements) {
+                    methodBuilder.addStatement(statement.format, statement.args);
+                    if (statement.factory != null)
+                        builder.addType(statement.factory);
+                }
+
+                methodBuilder.endControlFlow();
+            }
+        }
+        builder.addMethod(methodBuilder.build());
     }
 
     @Nullable
@@ -171,10 +157,11 @@ public class MetaInjectProcessor extends AbstractProcessor {
 
         if (returnTypeStr.equals("org.brooth.jeta.Provider")) {
             returnTypeStr = getGenericType(returnTypeMirror.toString());
-            if (!scopeEntities.get(scopeElement).contains(returnTypeStr))
+            String scopeStr = lookupEntityScope(module, scopeElement.getQualifiedName().toString(), returnTypeStr);
+            if (scopeStr == null)
                 return null;
 
-            StatementSpec statement = getAssignmentStatement(scopeElement, returnTypeStr, "return ", getInstanceStr);
+            StatementSpec statement = getAssignmentStatement(scopeStr, returnTypeStr, "return ", getInstanceStr);
             TypeSpec providerTypeSpec = TypeSpec.anonymousClassBuilder("")
                     .addSuperinterface(TypeName.get(returnTypeMirror))
                     .addMethod(MethodSpec.methodBuilder("get")
@@ -189,11 +176,12 @@ public class MetaInjectProcessor extends AbstractProcessor {
 
         if (returnTypeStr.equals("org.brooth.jeta.Lazy")) {
             returnTypeStr = getGenericType(returnTypeMirror.toString());
-            if (!scopeEntities.get(scopeElement).contains(returnTypeStr))
+            String scopeStr = lookupEntityScope(module, scopeElement.getQualifiedName().toString(), returnTypeStr);
+            if (scopeStr == null)
                 return null;
 
             ClassName returnClassName = ClassName.bestGuess(returnTypeStr);
-            StatementSpec statement = getAssignmentStatement(scopeElement, returnTypeStr, "instance = ", getInstanceStr);
+            StatementSpec statement = getAssignmentStatement(scopeStr, returnTypeStr, "instance = ", getInstanceStr);
             TypeSpec lazyTypeSpec = TypeSpec.anonymousClassBuilder("")
                     .addSuperinterface(TypeName.get(returnTypeMirror))
                     .addField(returnClassName, "instance", Modifier.PRIVATE)
@@ -216,10 +204,10 @@ public class MetaInjectProcessor extends AbstractProcessor {
 
         if (returnTypeStr.equals("java.lang.Class")) {
             returnTypeStr = getGenericType(returnTypeMirror.toString());
-            if (!scopeEntities.get(scopeElement).contains(returnTypeStr))
+            String scopeStr = lookupEntityScope(module, scopeElement.getQualifiedName().toString(), returnTypeStr);
+            if (scopeStr == null)
                 return null;
-
-            return getAssignmentStatement(scopeElement, returnTypeStr, statementPrefix, "getEntityClass()");
+            return getAssignmentStatement(scopeStr, returnTypeStr, statementPrefix, "getEntityClass()");
         }
 
         TypeElement typeElement = (TypeElement) env.getTypeUtils().asElement(returnTypeMirror);
@@ -232,15 +220,15 @@ public class MetaInjectProcessor extends AbstractProcessor {
                 throw new IllegalStateException(returnTypeStr + " not allowed. Only interfaces can be used as a meta factory.");
             return getFactoryStatement(scopeElement, typeElement, statementPrefix);
         }
-
-        if (!scopeEntities.get(scopeElement).contains(returnTypeStr))
+        String scopeStr = lookupEntityScope(module, scopeElement.getQualifiedName().toString(), returnTypeStr);
+        if (scopeStr == null)
             return null;
-        return getAssignmentStatement(scopeElement, returnTypeStr, statementPrefix, getInstanceStr);
+        return getAssignmentStatement(scopeStr, returnTypeStr, statementPrefix, getInstanceStr);
     }
 
-    private StatementSpec getAssignmentStatement(TypeElement scopeElement, String elementTypeStr, String statementPrefix, String getInstanceStr) {
+    private StatementSpec getAssignmentStatement(String scopeStr, String elementTypeStr, String statementPrefix, String getInstanceStr) {
         return new StatementSpec(statementPrefix + "s.$L_$L_MetaEntity().$L",
-                elementTypeStr.replaceAll("\\.", "_"), scopeElement.getSimpleName().toString(), getInstanceStr);
+                elementTypeStr.replaceAll("\\.", "_"), ClassName.bestGuess(scopeStr).simpleName(), getInstanceStr);
     }
 
     private int factoryIndex = 0;

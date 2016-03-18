@@ -32,15 +32,12 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MetaScopeProcessor extends AbstractProcessor {
+public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
 
     @Nullable
     private String defaultScopeStr;
@@ -202,21 +199,23 @@ public class MetaScopeProcessor extends AbstractProcessor {
                 extTypeStr = null;
 
             if (extTypeStr != null) {
-                ClassName extScopeClassName = lookupExtEntityScope(module, scopeExtClassStr, extTypeStr);
-                if (extScopeClassName == null)
+                String extScopeClassStr = lookupEntityScope(module, scopeExtClassStr, extTypeStr);
+                if (extScopeClassStr == null)
                     throw new ProcessingException("Undefined scope of '" + extTypeStr + "' element. Allowed to extents " +
                             "entities from super scopes only");
 
+                ClassName extScopeClassName = ClassName.bestGuess(extScopeClassStr);
                 ClassName extMetaEntityClassName = ClassName.get(extScopeClassName.packageName(),
                         MetacodeUtils.toSimpleMetacodeName(extScopeClassName.simpleName()),
                         extTypeStr.replace('.', '_') + "_MetaEntity");
                 interfaceBuilder.addSuperinterface(extMetaEntityClassName);
 
-                String extScopeSomeValueClassStr = extScopeClassName.packageName().replace('.', '_') + '_' +
+                ClassName extTypeClassName = ClassName.bestGuess(extTypeStr);
+                String extScopeProverMethodStr = extTypeClassName.packageName().replace('.', '_') + '_' +
                         MetacodeUtils.toSimpleMetaName(extTypeStr, '_' + extScopeClassName.simpleName() + "_MetaEntity");
 
                 metaScopeTypeSpecBuilder
-                        .addMethod(MethodSpec.methodBuilder(extScopeSomeValueClassStr)
+                        .addMethod(MethodSpec.methodBuilder(extScopeProverMethodStr)
                                 .addAnnotation(Override.class)
                                 .addModifiers(Modifier.PUBLIC)
                                 .returns(extMetaEntityClassName)
@@ -295,83 +294,6 @@ public class MetaScopeProcessor extends AbstractProcessor {
         });
     }
 
-    @Nullable
-    private ClassName lookupExtEntityScope(TypeElement module, @Nullable String extScopeStr, String extTypeStr) {
-        if (extScopeStr == null)
-            return null;
-
-        Elements elementUtils = processingContext.processingEnv().getElementUtils();
-        String moduleName = module.getQualifiedName().toString();
-        TypeElement metaModuleElement = elementUtils.getTypeElement(MetacodeUtils.toMetacodeName(moduleName));
-        ModuleConfig moduleConfig = metaModuleElement != null ? metaModuleElement.getAnnotation(ModuleConfig.class) : null;
-        if (moduleConfig == null)
-            throw new ProcessingException("Unknown error. Meta module config for '" + moduleName + "' not found or broken");
-
-        for (final ModuleConfig.ScopeConfig scopeConfig : moduleConfig.scopes()) {
-            String scopeClassStr = getScopeClass(scopeConfig);
-            if (extScopeStr.equals(scopeClassStr)) {
-                List<String> scopeElements = getEntitiesClasses(scopeConfig);
-                if (scopeElements.contains(extTypeStr))
-                    return ClassName.bestGuess(scopeClassStr);
-            }
-        }
-
-        // no in current module, current ext scope. in ext-ext scope?
-        Scope extExtScopeAnnotation = elementUtils.getTypeElement(extScopeStr).getAnnotation(Scope.class);
-        String extExtScopeStr = getExtClass(extExtScopeAnnotation);
-        ClassName extExtScopeClassName = null;
-        if (!isVoid(extExtScopeStr))
-            extExtScopeClassName = lookupExtEntityScope(module, extExtScopeStr, extTypeStr);
-
-        // in ext module?
-        if (extExtScopeClassName == null) {
-            String extModuleClassStr = getExtClass(moduleConfig);
-            if (!isVoid(extModuleClassStr)) {
-                TypeElement extModuleTypeElement = elementUtils.getTypeElement(extModuleClassStr);
-                if (extModuleTypeElement == null)
-                    throw new ProcessingException(extModuleClassStr + " is not valid module. Can't extend");
-
-                return lookupExtEntityScope(extModuleTypeElement, extScopeStr, extTypeStr);
-            }
-        }
-
-        return extExtScopeClassName;
-    }
-
-    @Nonnull
-    private String getExtClass(final ModuleConfig annotation) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            @Override
-            public void run() {
-                annotation.ext();
-            }
-        });
-    }
-
-    @Nonnull
-    private List<String> getEntitiesClasses(final ModuleConfig.ScopeConfig scopeConfig) {
-        return MetacodeUtils.extractClassesNames(new Runnable() {
-            public void run() {
-                scopeConfig.entities();
-            }
-        });
-    }
-
-    @Nonnull
-    private String getScopeClass(final ModuleConfig.ScopeConfig scopeConfig) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            @Override
-            public void run() {
-                scopeConfig.scope();
-            }
-        });
-    }
-
-    @Nonnull
-    private boolean isVoid(String str) {
-        return str.equals(Void.class.getCanonicalName());
-    }
-
     @Nonnull
     private String getOfClass(final MetaEntity annotation) {
         return MetacodeUtils.extractClassName(new Runnable() {
@@ -383,15 +305,6 @@ public class MetaScopeProcessor extends AbstractProcessor {
 
     @Nonnull
     private String getExtClass(final MetaEntity annotation) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            public void run() {
-                annotation.ext();
-            }
-        });
-    }
-
-    @Nonnull
-    private String getExtClass(final Scope annotation) {
         return MetacodeUtils.extractClassName(new Runnable() {
             public void run() {
                 annotation.ext();

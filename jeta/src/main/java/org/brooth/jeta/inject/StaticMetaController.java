@@ -17,8 +17,11 @@
 
 package org.brooth.jeta.inject;
 
+import com.google.common.collect.Sets;
 import org.brooth.jeta.MasterClassController;
 import org.brooth.jeta.metasitory.Metasitory;
+
+import java.lang.annotation.Annotation;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -27,6 +30,10 @@ public class StaticMetaController extends MasterClassController<Object, InjectMe
 
     public StaticMetaController(Metasitory metasitory, Class masterClass) {
         super(metasitory, masterClass, Meta.class);
+    }
+
+    public StaticMetaController(Metasitory metasitory, Class masterClass, Class<? extends Annotation> alias) {
+        super(metasitory, masterClass, Sets.newHashSet(Meta.class, alias));
     }
 
     public void inject(MetaScope<?> scope) {

@@ -20,6 +20,7 @@ import org.brooth.jeta.metasitory.Metasitory;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
+import java.util.Set;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -28,13 +29,21 @@ public abstract class MasterController<M, C> extends MasterClassController<M, C>
 
     protected M master;
 
-    protected MasterController(Metasitory metasitory, M master) {
-        this(metasitory, master, null);
+    @SuppressWarnings("unchecked")
+    public MasterController(Metasitory metasitory, M master) {
+        super(metasitory, (Class<? extends M>) master.getClass());
+        this.master = master;
     }
 
     @SuppressWarnings("unchecked")
-    public MasterController(Metasitory metasitory, M master, @Nullable Class<? extends Annotation> annotationClass) {
-        super(metasitory, (Class<? extends M>) master.getClass(), annotationClass);
+    public MasterController(Metasitory metasitory, M master, Class<? extends Annotation> annotation) {
+        super(metasitory, (Class<? extends M>) master.getClass(), annotation);
+        this.master = master;
+    }
+
+    @SuppressWarnings("unchecked")
+    public MasterController(Metasitory metasitory, M master, @Nullable Set<Class<? extends Annotation>> annotations) {
+        super(metasitory, (Class<? extends M>) master.getClass(), annotations);
         this.master = master;
     }
 }

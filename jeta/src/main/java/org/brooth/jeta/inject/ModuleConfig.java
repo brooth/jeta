@@ -27,6 +27,8 @@ import java.lang.annotation.Target;
 public @interface ModuleConfig {
     ScopeConfig[] scopes();
 
+    // get in @Module
+    @Deprecated
     Class<?> ext() default Void.class;
 
     @Target(value = {ElementType.ANNOTATION_TYPE})

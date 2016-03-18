@@ -286,13 +286,13 @@ public class EventBusTest extends BaseTest {
         handler.unregisterAll();
     }
 
-    public static class OddIdFilter implements Filter {
+    public static class OddIdFilter implements Filter<Message> {
         public boolean accepts(Object master, String methodName, Message msg) {
             return msg.getId() % 2 != 0;
         }
     }
 
-    public static class EvenIdFilter implements Filter {
+    public static class EvenIdFilter implements Filter<Message> {
         public boolean accepts(Object master, String methodName, Message msg) {
             return msg.getId() % 2 == 0;
         }

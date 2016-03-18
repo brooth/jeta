@@ -19,6 +19,6 @@ package org.brooth.jeta.eventbus;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface Filter {
-    boolean accepts(Object master, String methodName, Message msg);
+public interface Filter<M extends Message> {
+    boolean accepts(Object master, String methodName, M msg);
 }

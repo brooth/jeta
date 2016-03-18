@@ -21,7 +21,7 @@ import java.util.Objects;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class TopicsFilter implements Filter {
+public class TopicsFilter implements Filter<Message> {
 
     private String[] topics;
 

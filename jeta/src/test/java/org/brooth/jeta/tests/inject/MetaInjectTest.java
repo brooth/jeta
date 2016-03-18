@@ -83,6 +83,47 @@ public class MetaInjectTest extends BaseTest {
         assertFalse(holder.lazy.get() == holder.provider.get());
     }
 
+    public static class StaticMetaEntityHolder {
+        @Meta
+        static MetaEntityOne entity;
+        @Inject
+        static MetaEntityOne aliasEntity;
+        @Meta
+        static Class<? extends MetaEntityOne> clazz;
+        @Meta
+        static Lazy<MetaEntityOne> lazy;
+        @Meta
+        static Provider<MetaEntityOne> provider;
+    }
+
+    @Test
+    public void testStaticInject() {
+        logger.debug("testStaticInject()");
+
+        MetaHelper.injectStaticMeta(StaticMetaEntityHolder.class);
+        assertThat(StaticMetaEntityHolder.entity, notNullValue());
+        assertThat(StaticMetaEntityHolder.entity.value, is("one"));
+
+        assertThat(StaticMetaEntityHolder.aliasEntity, notNullValue());
+        assertThat(StaticMetaEntityHolder.aliasEntity.value, is("one"));
+
+        assertThat(StaticMetaEntityHolder.clazz, notNullValue());
+        assertEquals(StaticMetaEntityHolder.clazz, MetaEntityOne.class);
+
+        assertThat(StaticMetaEntityHolder.lazy, notNullValue());
+        assertThat(StaticMetaEntityHolder.lazy.get().value, is("one"));
+
+        assertThat(StaticMetaEntityHolder.provider, notNullValue());
+        assertThat(StaticMetaEntityHolder.provider.get().value, is("one"));
+
+        assertTrue(StaticMetaEntityHolder.lazy.get() == StaticMetaEntityHolder.lazy.get());
+        assertFalse(StaticMetaEntityHolder.provider.get() == StaticMetaEntityHolder.provider.get());
+
+        assertFalse(StaticMetaEntityHolder.entity == StaticMetaEntityHolder.lazy.get());
+        assertFalse(StaticMetaEntityHolder.entity == StaticMetaEntityHolder.provider.get());
+        assertFalse(StaticMetaEntityHolder.lazy.get() == StaticMetaEntityHolder.provider.get());
+    }
+
     @MetaEntity(singleton = true)
     public static class SingletonEntity {
         String value = "default";
@@ -438,7 +479,9 @@ public class MetaInjectTest extends BaseTest {
         assertThat(holder.extScopeFactory.get(), notNullValue());
         assertThat(holder.defaultScopeFactory, notNullValue());
         assertThat(holder.defaultScopeFactory.get(), notNullValue());
-        assertThat(holder.mixedScopeFactory, nullValue());
+        assertThat(holder.mixedScopeFactory, notNullValue());
+        assertThat(holder.mixedScopeFactory.getDefault(), notNullValue());
+        assertThat(holder.mixedScopeFactory.getExt(), notNullValue());
     }
 
     @MetaEntity
