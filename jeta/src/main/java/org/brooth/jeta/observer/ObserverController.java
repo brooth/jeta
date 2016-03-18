@@ -26,7 +26,7 @@ import org.brooth.jeta.metasitory.Metasitory;
 public class ObserverController<M> extends MasterController<M, ObserverMetacode<M>> {
 
     public ObserverController(Metasitory metasitory, M master) {
-        super(metasitory, master);
+        super(metasitory, master, Observe.class);
     }
 
     public ObserverHandler registerObserver(Object observable) {

@@ -25,7 +25,7 @@ import org.brooth.jeta.metasitory.Metasitory;
 public class SubscriberController<M> extends MasterController<M, SubscriberMetacode<M>> {
 
     public SubscriberController(Metasitory metasitory, M master) {
-        super(metasitory, master);
+        super(metasitory, master, Subscribe.class);
     }
 
     public SubscriptionHandler registerSubscriber(EventBus bus) {

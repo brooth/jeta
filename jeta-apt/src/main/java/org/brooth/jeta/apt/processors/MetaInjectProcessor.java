@@ -90,12 +90,23 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
         TypeElement masterElement = context.metacodeContext().masterElement();
         ClassName masterClassName = ClassName.get(masterElement);
         builder.addSuperinterface(ParameterizedTypeName.get(ClassName.get(InjectMetacode.class), masterClassName));
-        buildInjectMethod(builder, context, masterElement, masterClassName, false);
-        buildInjectMethod(builder, context, masterElement, masterClassName, true);
+
+        ArrayList<Element> unhandledElements = new ArrayList<>(context.elements());
+        buildInjectMethod(builder, context, masterElement, masterClassName, false, unhandledElements);
+        buildInjectMethod(builder, context, masterElement, masterClassName, true, unhandledElements);
+        if (!unhandledElements.isEmpty()) {
+            List<String> elements = new ArrayList<>();
+            for (Element element : unhandledElements)
+                elements.add(element.getEnclosingElement().toString() + "->" + element.toString());
+            throw new ProcessingException("No scope found to provide injection for {" +
+                    Joiner.on(", ").join(elements) + "}");
+        }
+
         return false;
     }
 
-    private void buildInjectMethod(TypeSpec.Builder builder, RoundContext context, TypeElement masterElement, ClassName masterClassName, Boolean staticMeta) {
+    private void buildInjectMethod(TypeSpec.Builder builder, RoundContext context, TypeElement masterElement,
+                                   ClassName masterClassName, Boolean staticMeta, ArrayList<Element> unhandledElements) {
         MethodSpec.Builder methodBuilder;
         if (staticMeta) {
             methodBuilder = MethodSpec.methodBuilder("applyStaticMeta")
@@ -106,6 +117,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                     .addParameter(metaScopeTypeName, "scope", Modifier.FINAL)
                     .addParameter(masterClassName, "master", Modifier.FINAL);
         }
+
         methodBuilder.addAnnotation(Override.class).addModifiers(Modifier.PUBLIC).returns(void.class);
         for (TypeElement scopeElement : moduleScopes) {
             List<StatementSpec> statements = new ArrayList<>();
@@ -126,8 +138,10 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                     continue;
 
                 StatementSpec statement = getResultStatement(scopeElement, element.asType(), fieldStatement, "getInstance()");
-                if (statement != null)
+                if (statement != null) {
                     statements.add(statement);
+                    unhandledElements.remove(element);
+                }
             }
 
             if (!statements.isEmpty()) {

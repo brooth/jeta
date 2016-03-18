@@ -164,4 +164,9 @@ public class MetaModuleProcessor extends AbstractProcessor {
     private boolean isVoid(String str) {
         return str.equals(Void.class.getCanonicalName());
     }
+
+    @Override
+    public boolean ignoreUpToDate() {
+        return true;
+    }
 }
