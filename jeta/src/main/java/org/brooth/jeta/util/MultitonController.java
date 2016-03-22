@@ -29,12 +29,7 @@ import org.brooth.jeta.metasitory.Metasitory;
 public class MultitonController<M> extends MasterClassController<M, IMetacode<?>> {
 
     public MultitonController(Metasitory metasitory, Class<M> masterClass) {
-        super(metasitory, masterClass);
-    }
-
-    @Override
-    protected Criteria criteria() {
-        return new Criteria.Builder().masterEq(masterClass).usesAny(Multiton.class).build();
+        super(metasitory, masterClass, Multiton.class, false);
     }
 
     @SuppressWarnings("unchecked")

@@ -27,14 +27,12 @@ import java.lang.annotation.Target;
 public @interface ModuleConfig {
     ScopeConfig[] scopes();
 
-    // get in @Module
-    @Deprecated
-    Class<?> ext() default Void.class;
-
     @Target(value = {ElementType.ANNOTATION_TYPE})
     @interface ScopeConfig {
         Class<?> scope();
 
-        Class<?>[] entities();
+        Class<?> module() default Void.class;
+
+        Class<?>[] entities() default {};
     }
 }

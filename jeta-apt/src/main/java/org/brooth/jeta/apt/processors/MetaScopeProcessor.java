@@ -78,10 +78,10 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
         TypeElement masterElement = (TypeElement) context.elements().iterator().next();
         Scope scopeAnnotation = masterElement.getAnnotation(Scope.class);
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
-        builder.addSuperinterface(ParameterizedTypeName.get(ClassName.get(MetaScopeMetacode.class), masterClassName));
+        builder.addAnnotation(AnnotationSpec.builder(ScopeConfig.class).addMember("module", "$T.class", module).build())
+                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(MetaScopeMetacode.class), masterClassName));
 
         String metaScopeSimpleNameStr = "MetaScopeImpl";
-
         builder.addMethod(MethodSpec.methodBuilder("getMetaScope")
                 .addAnnotation(Override.class)
                 .addAnnotation(suppressWarningsUnchecked)
@@ -283,8 +283,8 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
 
                 if (isVoid(scope)) {
                     if (defaultScopeStr == null)
-                        throw new ProcessingException(input.getSimpleName().toString() + " has undefined scope. " +
-                                "You need to set the scope to @MetaEntity(scope) or define default one as 'meta.scope.default' property");
+                        throw new ProcessingException("Scope undefined for '" + input.getSimpleName().toString() + "'. " +
+                                "You need to set the scope via @MetaEntity(scope) or define default one as 'meta.scope.default' property");
                     if (isDefaultScope)
                         return true;
                 }

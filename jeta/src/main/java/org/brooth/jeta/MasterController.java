@@ -30,20 +30,25 @@ public abstract class MasterController<M, C> extends MasterClassController<M, C>
     protected M master;
 
     @SuppressWarnings("unchecked")
-    public MasterController(Metasitory metasitory, M master) {
-        super(metasitory, (Class<? extends M>) master.getClass());
-        this.master = master;
-    }
-
-    @SuppressWarnings("unchecked")
     public MasterController(Metasitory metasitory, M master, Class<? extends Annotation> annotation) {
-        super(metasitory, (Class<? extends M>) master.getClass(), annotation);
+        this(metasitory, master, annotation, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public MasterController(Metasitory metasitory, M master, Class<? extends Annotation> annotation, boolean deep) {
+        super(metasitory, (Class<? extends M>) master.getClass(), annotation, deep);
         this.master = master;
     }
 
     @SuppressWarnings("unchecked")
-    public MasterController(Metasitory metasitory, M master, @Nullable Set<Class<? extends Annotation>> annotations) {
-        super(metasitory, (Class<? extends M>) master.getClass(), annotations);
+    public MasterController(Metasitory metasitory, M master, Set<Class<? extends Annotation>> annotations) {
+        super(metasitory, (Class<? extends M>) master.getClass(), annotations, true);
+        this.master = master;
+    }
+
+    @SuppressWarnings("unchecked")
+    public MasterController(Metasitory metasitory, M master, Set<Class<? extends Annotation>> annotations, boolean deep) {
+        super(metasitory, (Class<? extends M>) master.getClass(), annotations, deep);
         this.master = master;
     }
 }

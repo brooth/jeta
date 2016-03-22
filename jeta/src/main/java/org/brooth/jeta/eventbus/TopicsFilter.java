@@ -31,7 +31,7 @@ public class TopicsFilter implements Filter<Message> {
 
     @Override
     public boolean accepts(Object master, String methodName, Message msg) {
-        String topic = msg.getTopic();
+        String topic = msg.topic();
         if (topic == null)
             return false;
 

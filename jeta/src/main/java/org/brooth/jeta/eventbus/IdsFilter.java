@@ -29,7 +29,7 @@ public class IdsFilter implements Filter<Message> {
 
     @Override
     public boolean accepts(Object master, String methodName, Message msg) {
-        int msgId = msg.getId();
+        int msgId = msg.id();
         for (int id : ids)
             if (msgId == id)
                 return true;

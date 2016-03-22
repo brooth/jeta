@@ -27,14 +27,7 @@ import org.brooth.jeta.metasitory.Metasitory;
 public class MetaScopeController<S> extends MasterController<S, MetaScopeMetacode<S>> {
 
     public MetaScopeController(Metasitory metasitory, S scope) {
-        super(metasitory, scope);
-    }
-
-    @Override
-    protected Criteria criteria() {
-        Criteria.Builder builder = new Criteria.Builder().masterEq(masterClass);
-        builder.usesAny(Scope.class);
-        return builder.build();
+        super(metasitory, scope, Scope.class, false);
     }
 
     public MetaScope<S> get() {

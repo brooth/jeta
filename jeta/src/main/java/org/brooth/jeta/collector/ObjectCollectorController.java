@@ -31,7 +31,7 @@ import java.util.List;
 public class ObjectCollectorController extends MasterClassController<Object, ObjectCollectorMetacode> {
 
     public ObjectCollectorController(Metasitory metasitory, Class<?> masterClass) {
-        super(metasitory, masterClass);
+        super(metasitory, masterClass, ObjectCollector.class);
     }
 
     public List<Provider<?>> getObjects(Class<? extends Annotation> annotation) {

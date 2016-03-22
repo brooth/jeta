@@ -30,7 +30,7 @@ import java.util.List;
 public class TypeCollectorController extends MasterClassController<Object, TypeCollectorMetacode> {
 
     public TypeCollectorController(Metasitory metasitory, Class<?> masterClass) {
-        super(metasitory, masterClass);
+        super(metasitory, masterClass, TypeCollector.class);
     }
 
     public List<Class<?>>  getTypes(Class<? extends Annotation> annotation) {

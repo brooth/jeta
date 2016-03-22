@@ -37,21 +37,26 @@ public abstract class MasterClassController<M, C> {
     protected Metasitory metasitory;
     protected Class<? extends M> masterClass;
     protected Collection<C> metacodes;
-    @Nullable
     protected Set<Class<? extends Annotation>> annotations;
-
-    public MasterClassController(Metasitory metasitory, Class<? extends M> masterClass) {
-        this(metasitory, masterClass, (Set<Class<? extends Annotation>>) null);
-    }
+    protected boolean deep;
 
     public MasterClassController(Metasitory metasitory, Class<? extends M> masterClass, Class<? extends Annotation> annotation) {
-        this(metasitory, masterClass, Collections.<Class<? extends Annotation>>singleton(annotation));
+        this(metasitory, masterClass, Collections.<Class<? extends Annotation>>singleton(annotation), true);
     }
 
-    public MasterClassController(Metasitory metasitory, Class<? extends M> masterClass, @Nullable Set<Class<? extends Annotation>> annotations) {
+    public MasterClassController(Metasitory metasitory, Class<? extends M> masterClass, Class<? extends Annotation> annotation, boolean deep) {
+        this(metasitory, masterClass, Collections.<Class<? extends Annotation>>singleton(annotation), deep);
+    }
+
+    public MasterClassController(Metasitory metasitory, Class<? extends M> masterClass, Set<Class<? extends Annotation>> annotations) {
+        this(metasitory, masterClass, annotations, true);
+    }
+
+    public MasterClassController(Metasitory metasitory, Class<? extends M> masterClass, Set<Class<? extends Annotation>> annotations, boolean deep) {
         this.metasitory = metasitory;
         this.masterClass = masterClass;
         this.annotations = annotations;
+        this.deep = deep;
         searchMetacodes(metasitory);
     }
 
@@ -62,10 +67,12 @@ public abstract class MasterClassController<M, C> {
     }
 
     protected Criteria criteria() {
-        Criteria.Builder builder = new Criteria.Builder().masterEqDeep(masterClass);
-        if (annotations != null)
-            builder.usesAny(annotations);
-        return builder.build();
+        Criteria.Builder builder = new Criteria.Builder();
+        if (deep)
+            builder.masterEqDeep(masterClass);
+        else
+            builder.masterEq(masterClass);
+        return builder.usesAny(annotations).build();
     }
 }
 

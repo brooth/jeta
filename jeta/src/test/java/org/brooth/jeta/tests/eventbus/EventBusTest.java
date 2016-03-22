@@ -52,14 +52,14 @@ public class EventBusTest extends BaseTest {
 
         @Subscribe
         void onMessageOne(MessageOne message) {
-            logger.debug("onMessageOne(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOne(id: %d, topic: %s)", message.id(), message.topic());
             onMessageOneInvokes++;
             lastMessageOne = message;
         }
 
         @Subscribe
         void onMessageTwo(MessageTwo message) {
-            logger.debug("onMessageTwo(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageTwo(id: %d, topic: %s)", message.id(), message.topic());
             onMessageTwoInvokes++;
             lastMessageTwo = message;
         }
@@ -74,8 +74,8 @@ public class EventBusTest extends BaseTest {
 
         MetaHelper.getEventBus().publish(new MessageOne(1, "one"));
         assertThat(subscriber.onMessageOneInvokes, is(1));
-        MatcherAssert.assertThat(subscriber.lastMessageOne.getTopic(), is("one"));
-        MatcherAssert.assertThat(subscriber.lastMessageOne.getId(), is(1));
+        MatcherAssert.assertThat(subscriber.lastMessageOne.topic(), is("one"));
+        MatcherAssert.assertThat(subscriber.lastMessageOne.id(), is(1));
 
         handler.unregisterAll();
         MetaHelper.getEventBus().publish(new MessageOne(1, "none"));
@@ -106,7 +106,7 @@ public class EventBusTest extends BaseTest {
 
         assertThat(subscriber.onMessageOneInvokes, is(10));
         assertThat(subscriber.onMessageTwoInvokes, is(10));
-        assertThat(subscriber.lastMessageTwo.getId(), is(2));
+        assertThat(subscriber.lastMessageTwo.id(), is(2));
         handler.unregisterAll();
     }
 
@@ -122,9 +122,9 @@ public class EventBusTest extends BaseTest {
 
         @Subscribe(priority = Integer.MAX_VALUE)
         void onMessageOne(MessageOne message) {
-            logger.debug("onMessageOne(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOne(id: %d, topic: %s)", message.id(), message.topic());
             onMessageOneInvokes++;
-            MatcherAssert.assertThat(message.getId(), is(1));
+            MatcherAssert.assertThat(message.id(), is(1));
             message.incId();
         }
     }
@@ -141,9 +141,9 @@ public class EventBusTest extends BaseTest {
 
         @Subscribe(priority = Integer.MIN_VALUE)
         void onMessageOne(MessageOne message) {
-            logger.debug("onMessageOne(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOne(id: %d, topic: %s)", message.id(), message.topic());
             onMessageOneInvokes++;
-            MatcherAssert.assertThat(message.getId(), is(2));
+            MatcherAssert.assertThat(message.id(), is(2));
         }
     }
 
@@ -179,16 +179,16 @@ public class EventBusTest extends BaseTest {
 
         @Subscribe(id = 1)
         void onMessageOneId1(MessageOne message) {
-            logger.debug("onMessageOneId1(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOneId1(id: %d, topic: %s)", message.id(), message.topic());
             onMessageOneId1Invokes++;
-            MatcherAssert.assertThat(message.getId(), is(1));
+            MatcherAssert.assertThat(message.id(), is(1));
         }
 
         @Subscribe(id = {2, 4})
         void onMessageOneId2(MessageOne message) {
-            logger.debug("onMessageOneId2(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOneId2(id: %d, topic: %s)", message.id(), message.topic());
             onMessageOneId2Invokes++;
-            MatcherAssert.assertThat(message.getId(), anyOf(is(2), is(4)));
+            MatcherAssert.assertThat(message.id(), anyOf(is(2), is(4)));
         }
     }
 
@@ -231,16 +231,16 @@ public class EventBusTest extends BaseTest {
 
         @Subscribe(topic = "one")
         void onMessageOneTopicOne(MessageOne message) {
-            logger.debug("onMessageOneTopicOne(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOneTopicOne(id: %d, topic: %s)", message.id(), message.topic());
             onMessageOneTopicOneInvokes++;
-            MatcherAssert.assertThat(message.getId(), is(1));
+            MatcherAssert.assertThat(message.id(), is(1));
         }
 
         @Subscribe(topic = {"two", "four"})
         void onMessageOneTopicTwo(MessageOne message) {
-            logger.debug("onMessageOneTopicTwo(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOneTopicTwo(id: %d, topic: %s)", message.id(), message.topic());
             onMessageOneTopicTwoInvokes++;
-            MatcherAssert.assertThat(message.getId(), anyOf(is(2), is(4)));
+            MatcherAssert.assertThat(message.id(), anyOf(is(2), is(4)));
         }
     }
 
@@ -288,13 +288,13 @@ public class EventBusTest extends BaseTest {
 
     public static class OddIdFilter implements Filter<Message> {
         public boolean accepts(Object master, String methodName, Message msg) {
-            return msg.getId() % 2 != 0;
+            return msg.id() % 2 != 0;
         }
     }
 
     public static class EvenIdFilter implements Filter<Message> {
         public boolean accepts(Object master, String methodName, Message msg) {
-            return msg.getId() % 2 == 0;
+            return msg.id() % 2 == 0;
         }
     }
 
@@ -311,21 +311,21 @@ public class EventBusTest extends BaseTest {
 
         @Subscribe(filters = OddIdFilter.class)
         void onMessageOneOdd(MessageOne message) {
-            logger.debug("onMessageOneOdd(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOneOdd(id: %d, topic: %s)", message.id(), message.topic());
             onMessageOneOddInvokes++;
-            MatcherAssert.assertThat(message.getId() % 2, is(not(0)));
+            MatcherAssert.assertThat(message.id() % 2, is(not(0)));
         }
 
         @Subscribe(filters = EvenIdFilter.class)
         void onMessageOneEvent(MessageOne message) {
-            logger.debug("onMessageOneEvent(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOneEvent(id: %d, topic: %s)", message.id(), message.topic());
             onMessageOneEventInvokes++;
-            MatcherAssert.assertThat(message.getId() % 2, is(0));
+            MatcherAssert.assertThat(message.id() % 2, is(0));
         }
 
         @Subscribe(filters = {OddIdFilter.class, EvenIdFilter.class})
         void onMessageOneNone(MessageOne message) {
-            logger.debug("onMessageOneNone(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOneNone(id: %d, topic: %s)", message.id(), message.topic());
             assertThat(true, is(false));
         }
     }
@@ -356,11 +356,11 @@ public class EventBusTest extends BaseTest {
         handler.unregisterAll();
     }
 
-    @MetaFilter(emitExpression = "$e.getId() % 2 != 0")
+    @MetaFilter(emitExpression = "$e.id() % 2 != 0")
     public interface OddIdMetaFilter extends Filter {
     }
 
-    @MetaFilter(emitExpression = "$e.getId() % 2 == 0")
+    @MetaFilter(emitExpression = "$e.id() % 2 == 0")
     public interface EvenIdMetaFilter extends Filter {
     }
 
@@ -377,21 +377,21 @@ public class EventBusTest extends BaseTest {
 
         @Subscribe(filters = OddIdMetaFilter.class)
         void onMessageOneOdd(MessageOne message) {
-            logger.debug("onMessageOneOdd(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOneOdd(id: %d, topic: %s)", message.id(), message.topic());
             onMessageOneOddInvokes++;
-            MatcherAssert.assertThat(message.getId() % 2, is(not(0)));
+            MatcherAssert.assertThat(message.id() % 2, is(not(0)));
         }
 
         @Subscribe(filters = EvenIdMetaFilter.class)
         void onMessageOneEvent(MessageOne message) {
-            logger.debug("onMessageOneEvent(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOneEvent(id: %d, topic: %s)", message.id(), message.topic());
             onMessageOneEventInvokes++;
-            MatcherAssert.assertThat(message.getId() % 2, is(0));
+            MatcherAssert.assertThat(message.id() % 2, is(0));
         }
 
         @Subscribe(filters = {OddIdMetaFilter.class, EvenIdMetaFilter.class})
         void onMessageOneNone(MessageOne message) {
-            logger.debug("onMessageOneNone(id: %d, topic: %s)", message.getId(), message.getTopic());
+            logger.debug("onMessageOneNone(id: %d, topic: %s)", message.id(), message.topic());
             assertThat(true, is(false));
         }
     }

@@ -307,13 +307,25 @@ public class JetaProcessor extends AbstractProcessor {
                 // go through annotated elements
                 for (Element element : elements) {
                     // yeah, happens...
-                    if (element.getAnnotation(annotation) == null) {
+                    Annotation _an = null;
+                    Exception _ex = null;
+                    try {
+                        _an = element.getAnnotation(annotation);
+                    } catch (Exception e) {
+                        _ex = e;
+                    }
+
+                    if (_an == null) {
                         String elementStr = element.toString();
                         if (!element.getKind().isClass() && !element.getKind().isInterface())
                             elementStr = element.getEnclosingElement().toString() + "." + elementStr;
 
-                        throw new ProcessingException("Unknown error in element \"" + elementStr + "\". " +
-                                "Please, check it for potential compilation issues.");
+                        String msg = "Failed to process \"" + elementStr + "\". " +
+                                " Check it for potential compilation issues.";
+                        if(_ex != null)
+                            throw new ProcessingException(msg, _ex);
+                        else
+                            throw new ProcessingException(msg);
                     }
 
                     logger.debug("found element: " + element.toString());

@@ -16,15 +16,12 @@
 
 package org.brooth.jeta.eventbus;
 
-import javax.annotation.Nullable;
-
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface Message {
 	
-	int getId();
+	int id();
 
-	@Nullable
-	String getTopic();
+	String topic();
 }

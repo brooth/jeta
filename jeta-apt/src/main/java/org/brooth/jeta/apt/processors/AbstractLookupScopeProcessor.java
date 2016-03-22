@@ -4,6 +4,7 @@ import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.ProcessingException;
 import org.brooth.jeta.inject.ModuleConfig;
 import org.brooth.jeta.inject.Scope;
+import org.brooth.jeta.inject.ScopeConfig;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,9 +19,6 @@ import java.util.List;
  */
 public abstract class AbstractLookupScopeProcessor extends AbstractProcessor {
 
-    // todo: speedup. with respect rootScope
-//    private Map<String, String> entitiesScopesCache;
-
     public AbstractLookupScopeProcessor(Class<? extends Annotation> annotation) {
         super(annotation);
     }
@@ -30,11 +28,6 @@ public abstract class AbstractLookupScopeProcessor extends AbstractProcessor {
         if (isVoid(rootScope))
             return null;
 
-//        if (entitiesScopesCache == null)
-//            entitiesScopesCache = new HashMap<>();
-//        if (entitiesScopesCache.containsKey(entityClassStr))
-//            return entitiesScopesCache.get(entityClassStr);
-
         Elements elementUtils = processingContext.processingEnv().getElementUtils();
         String moduleName = module.getQualifiedName().toString();
         TypeElement metaModuleElement = elementUtils.getTypeElement(MetacodeUtils.toMetacodeName(moduleName));
@@ -42,39 +35,47 @@ public abstract class AbstractLookupScopeProcessor extends AbstractProcessor {
         if (moduleConfig == null)
             throw new ProcessingException("Unknown error. Meta module config for '" + moduleName + "' not found or broken");
 
+        boolean existsInModule = false;
         for (final ModuleConfig.ScopeConfig scopeConfig : moduleConfig.scopes()) {
             String scopeClassStr = getScopeClass(scopeConfig);
             if (rootScope.equals(scopeClassStr)) {
-                List<String> scopeElements = getEntitiesClasses(scopeConfig);
-//                for (String scopeElement : scopeElements)
-//                    entitiesScopesCache.put(scopeElement, scopeClassStr);
-                if (scopeElements.contains(entityClassStr))
-                    return scopeClassStr;
+                String moduleClassStr = getModuleClass(scopeConfig);
+                if (isVoid(moduleClassStr)) {
+                    List<String> scopeElements = getEntitiesClasses(scopeConfig);
+                    if (scopeElements.contains(entityClassStr))
+                        return scopeClassStr;
+
+                } else {
+                    TypeElement extModuleElement = elementUtils.getTypeElement(moduleClassStr);
+                    return lookupEntityScope(extModuleElement, rootScope, entityClassStr);
+                }
+
+                existsInModule = true;
                 break;
             }
         }
 
-        // no in current module, current ext scope. in ext-ext scope?
+        // look up in ext module?
+        if (!existsInModule) {
+            TypeElement rootScopeElement = elementUtils.getTypeElement(MetacodeUtils.toMetacodeName(rootScope));
+            ScopeConfig scopeConfigAnnotation = rootScopeElement != null ? rootScopeElement.getAnnotation(ScopeConfig.class) : null;
+            if (scopeConfigAnnotation == null)
+                throw new ProcessingException(rootScope + " is not a meta scope");
+
+            String moduleClassStr = getModuleClass(scopeConfigAnnotation);
+            TypeElement extModule = elementUtils.getTypeElement(moduleClassStr);
+            if (extModule == null)
+                throw new ProcessingException("Can't find module " + moduleClassStr);
+            return lookupEntityScope(extModule, rootScope, entityClassStr);
+        }
+
+        // look up in ext scope?
         Scope extExtScopeAnnotation = elementUtils.getTypeElement(rootScope).getAnnotation(Scope.class);
         String extExtScopeStr = getExtClass(extExtScopeAnnotation);
         if (!isVoid(extExtScopeStr))
-            extExtScopeStr = lookupEntityScope(module, extExtScopeStr, entityClassStr);
-        else
-            extExtScopeStr = null;
+            return lookupEntityScope(module, extExtScopeStr, entityClassStr);
 
-        // in ext module?
-        if (extExtScopeStr == null) {
-            String extModuleClassStr = getExtClass(moduleConfig);
-            if (!isVoid(extModuleClassStr)) {
-                TypeElement extModuleTypeElement = elementUtils.getTypeElement(extModuleClassStr);
-                if (extModuleTypeElement == null)
-                    throw new ProcessingException(extModuleClassStr + " is not valid module. Can't extend");
-
-                return lookupEntityScope(extModuleTypeElement, rootScope, entityClassStr);
-            }
-        }
-
-        return extExtScopeStr;
+        return null;
     }
 
     protected boolean isVoid(String str) {
@@ -91,20 +92,19 @@ public abstract class AbstractLookupScopeProcessor extends AbstractProcessor {
     }
 
     @Nonnull
-    protected String getExtClass(final ModuleConfig annotation) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            @Override
+    protected List<String> getEntitiesClasses(final ModuleConfig.ScopeConfig scopeConfig) {
+        return MetacodeUtils.extractClassesNames(new Runnable() {
             public void run() {
-                annotation.ext();
+                scopeConfig.entities();
             }
         });
     }
 
     @Nonnull
-    protected List<String> getEntitiesClasses(final ModuleConfig.ScopeConfig scopeConfig) {
-        return MetacodeUtils.extractClassesNames(new Runnable() {
+    protected String getModuleClass(final ModuleConfig.ScopeConfig scopeConfig) {
+        return MetacodeUtils.extractClassName(new Runnable() {
             public void run() {
-                scopeConfig.entities();
+                scopeConfig.module();
             }
         });
     }
@@ -115,6 +115,16 @@ public abstract class AbstractLookupScopeProcessor extends AbstractProcessor {
             @Override
             public void run() {
                 scopeConfig.scope();
+            }
+        });
+    }
+
+    @Nonnull
+    protected String getModuleClass(final ScopeConfig scopeConfig) {
+        return MetacodeUtils.extractClassName(new Runnable() {
+            @Override
+            public void run() {
+                scopeConfig.module();
             }
         });
     }

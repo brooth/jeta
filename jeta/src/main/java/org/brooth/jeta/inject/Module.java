@@ -10,6 +10,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Module {
     Class<?>[] scopes();
-
-    Class<?> ext() default Void.class;
 }

@@ -11,10 +11,7 @@ import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.ProcessingContext;
 import org.brooth.jeta.apt.ProcessingException;
 import org.brooth.jeta.apt.RoundContext;
-import org.brooth.jeta.inject.MetaEntity;
-import org.brooth.jeta.inject.Module;
-import org.brooth.jeta.inject.ModuleConfig;
-import org.brooth.jeta.inject.Scope;
+import org.brooth.jeta.inject.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -71,29 +68,45 @@ public class MetaModuleProcessor extends AbstractProcessor {
         AnnotationSpec.Builder moduleConfigAnnotationBuilder = AnnotationSpec.builder(ModuleConfig.class);
 
         for (TypeElement scopeElement : scopes) {
+            String scopeClassStr = scopeElement.getQualifiedName().toString();
+            TypeElement metaScopeElement = processingContext.processingEnv().getElementUtils().getTypeElement(
+                    MetacodeUtils.toMetacodeName(scopeClassStr));
+            ScopeConfig metaScopeConfigAnnotation = metaScopeElement != null ? metaScopeElement.getAnnotation(ScopeConfig.class) : null;
+            if (metaScopeConfigAnnotation != null) {
+                String scopeModuleStr = getModuleClass(metaScopeConfigAnnotation);
+                if (!moduleElement.getQualifiedName().toString().equals(scopeModuleStr)) {
+                    processingContext.logger().debug(scopeClassStr + " belongs to ext module " + scopeModuleStr);
+                    scopeAnnotationBuilders.add(AnnotationSpec.builder(ModuleConfig.ScopeConfig.class)
+                            .addMember("\nscope", scopeClassStr + ".class")
+                            .addMember("\nmodule", scopeModuleStr + ".class\n")
+                            .build());
+                    continue;
+                }
+            }
+
             Set<? extends Element> scopeEntities = getScopeEntities(scopeElement);
             Iterable<ClassName> entities = Iterables.transform(scopeEntities, new Function<Element, ClassName>() {
                 @Override
                 public ClassName apply(Element input) {
                     MetaEntity metaEntityAnnotation = input.getAnnotation(MetaEntity.class);
-                    String ofTypeStr = getOfClass(metaEntityAnnotation);
-                    if (isVoid(ofTypeStr))
-                        return ClassName.get((TypeElement) input);
-                    return ClassName.bestGuess(ofTypeStr);
+                    try {
+                        String ofTypeStr = getOfClass(metaEntityAnnotation);
+                        if (isVoid(ofTypeStr))
+                            return ClassName.get((TypeElement) input);
+                        return ClassName.bestGuess(ofTypeStr);
+
+                    } catch (Exception e) {
+                        throw new ProcessingException("Failed to get meta entity info of element " + input.toString(), e);
+                    }
                 }
             });
 
             scopeAnnotationBuilders.add(AnnotationSpec.builder(ModuleConfig.ScopeConfig.class)
-                    .addMember("\nscope", scopeElement.getQualifiedName().toString() + ".class")
+                    .addMember("\nscope", scopeClassStr + ".class")
                     .addMember("\nentities", !entities.iterator().hasNext() ? "{}" :
                                     "{\n" + Joiner.on(".class,\n").join(entities) + ".class\n}",
                             entities)
                     .build());
-        }
-
-        String extModuleStr = getExtClass(annotation);
-        if (!isVoid(extModuleStr)) {
-            moduleConfigAnnotationBuilder.addMember("ext", extModuleStr + ".class");
         }
 
         builder.addAnnotation(moduleConfigAnnotationBuilder
@@ -105,11 +118,11 @@ public class MetaModuleProcessor extends AbstractProcessor {
     }
 
     @Nonnull
-    private String getExtClass(final Module annotation) {
+    protected String getModuleClass(final ScopeConfig scopeConfig) {
         return MetacodeUtils.extractClassName(new Runnable() {
             @Override
             public void run() {
-                annotation.ext();
+                scopeConfig.module();
             }
         });
     }
@@ -150,8 +163,8 @@ public class MetaModuleProcessor extends AbstractProcessor {
 
                 if (isVoid(scope)) {
                     if (defaultScopeStr == null)
-                        throw new ProcessingException(input.getSimpleName().toString() + " has undefined scope. " +
-                                "You need to set the scope to @MetaEntity(scope) or define default one as 'meta.scope.default' property");
+                        throw new ProcessingException("Scope undefined for '" + input.getSimpleName().toString() + "'. " +
+                                "You need to set the scope via @MetaEntity(scope) or define default one as 'meta.scope.default' property");
                     if (isDefaultScope)
                         return true;
                 }

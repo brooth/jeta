@@ -29,12 +29,7 @@ import org.brooth.jeta.metasitory.Metasitory;
 public class SingletonController<M> extends MasterClassController<M, IMetacode<?>> {
 
     public SingletonController(Metasitory metasitory, Class<M> masterClass) {
-        super(metasitory, masterClass);
-    }
-
-    @Override
-    protected Criteria criteria() {
-       return new Criteria.Builder().masterEq(masterClass).usesAny(Singleton.class).build();
+        super(metasitory, masterClass, Singleton.class, false);
     }
 
     @SuppressWarnings("unchecked")

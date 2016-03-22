@@ -16,8 +16,6 @@
 
 package org.brooth.jeta.eventbus;
 
-import javax.annotation.Nullable;
-
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
@@ -43,13 +41,12 @@ public class BaseMessage implements Message {
     }
 
     @Override
-    public int getId() {
+    public int id() {
         return id;
     }
 
-    @Nullable
     @Override
-    public String getTopic() {
+    public String topic() {
         return topic;
     }
 }
