@@ -23,10 +23,10 @@ import org.brooth.jeta.eventbus.BaseEventBus;
 import org.brooth.jeta.eventbus.EventBus;
 import org.brooth.jeta.eventbus.SubscriberController;
 import org.brooth.jeta.eventbus.SubscriptionHandler;
-import org.brooth.jeta.inject.MetaController;
+import org.brooth.jeta.inject.InjectController;
 import org.brooth.jeta.inject.MetaScope;
 import org.brooth.jeta.inject.MetaScopeController;
-import org.brooth.jeta.inject.StaticMetaController;
+import org.brooth.jeta.inject.StaticInjectController;
 import org.brooth.jeta.log.LogController;
 import org.brooth.jeta.log.NamedLoggerProvider;
 import org.brooth.jeta.metasitory.MapMetasitory;
@@ -76,19 +76,19 @@ public class MetaHelper {
     }
 
     public static void injectMeta(Object master) {
-        new MetaController(getInstance().metasitory, master, Inject.class).inject(getInstance().defaultScope);
+        new InjectController(getInstance().metasitory, master, Inject.class).inject(getInstance().defaultScope);
     }
 
     public static void injectMeta(MetaScope<?> scope, Object master) {
-        new MetaController(getInstance().metasitory, master, Inject.class).inject(scope);
+        new InjectController(getInstance().metasitory, master, Inject.class).inject(scope);
     }
 
     public static void injectStaticMeta(Class<?> masterClass) {
-        new StaticMetaController(getInstance().metasitory, masterClass, Inject.class).inject(getInstance().defaultScope);
+        new StaticInjectController(getInstance().metasitory, masterClass, Inject.class).inject(getInstance().defaultScope);
     }
 
     public static void injectStaticMeta(MetaScope<?> scope, Class<?> masterClass) {
-        new StaticMetaController(getInstance().metasitory, masterClass, Inject.class).inject(scope);
+        new StaticInjectController(getInstance().metasitory, masterClass, Inject.class).inject(scope);
     }
 
     public static <I> ImplementationController<I> implementationController(Class<I> of) {

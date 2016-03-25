@@ -18,7 +18,7 @@
 package org.brooth.jeta.tests.inject;
 
 import org.brooth.jeta.*;
-import org.brooth.jeta.inject.Meta;
+import org.brooth.jeta.inject.Inject;
 import org.brooth.jeta.inject.MetaEntity;
 import org.brooth.jeta.inject.MetaScope;
 import org.brooth.jeta.log.Log;
@@ -27,7 +27,6 @@ import org.brooth.jeta.metasitory.Criteria;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.inject.Inject;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,13 +46,13 @@ public class MetaInjectTest extends BaseTest {
     }
 
     public static class MetaEntityHolder {
-        @Meta
+        @Inject
         MetaEntityOne entity;
-        @Meta
+        @Inject
         Class<? extends MetaEntityOne> clazz;
-        @Meta
+        @Inject
         Lazy<MetaEntityOne> lazy;
-        @Meta
+        @Inject
         Provider<MetaEntityOne> provider;
     }
 
@@ -84,15 +83,15 @@ public class MetaInjectTest extends BaseTest {
     }
 
     public static class StaticMetaEntityHolder {
-        @Meta
-        static MetaEntityOne entity;
         @Inject
+        static MetaEntityOne entity;
+        @javax.inject.Inject
         static MetaEntityOne aliasEntity;
-        @Meta
+        @Inject
         static Class<? extends MetaEntityOne> clazz;
-        @Meta
+        @Inject
         static Lazy<MetaEntityOne> lazy;
-        @Meta
+        @Inject
         static Provider<MetaEntityOne> provider;
     }
 
@@ -137,7 +136,7 @@ public class MetaInjectTest extends BaseTest {
     }
 
     @MetaEntity(of = MetaInjectTest.SingletonEntity.class, singleton = true, scope = CustomScope.class)
-    public static class SingletonEntityCustomScopProvider {
+    public static class SingletonEntityCustomScopeProvider {
         @Constructor
         public static SingletonEntity get() {
             return new SingletonEntity("provider");
@@ -145,12 +144,12 @@ public class MetaInjectTest extends BaseTest {
     }
 
     public static class SingletonHolder {
-        @Meta
+        @Inject
         SingletonEntity entity;
     }
 
     public static class SingletonHolder2 {
-        @Meta
+        @Inject
         SingletonEntity entity;
     }
 
@@ -189,14 +188,16 @@ public class MetaInjectTest extends BaseTest {
     }
 
     public static class MetaAliasEntityHolder {
-        @Inject
+        @javax.inject.Inject
         MetaEntityOne entity;
-        @Inject
+        @javax.inject.Inject
         Class<? extends MetaEntityOne> clazz;
-        @Inject
+        @javax.inject.Inject
         Lazy<MetaEntityOne> lazy;
-        @Inject
+        @javax.inject.Inject
         Provider<MetaEntityOne> provider;
+        @javax.inject.Inject
+        javax.inject.Provider<MetaEntityOne> javaxProvider;
     }
 
     @Test
@@ -223,7 +224,9 @@ public class MetaInjectTest extends BaseTest {
         assertFalse(holder.entity == holder.lazy.get());
         assertFalse(holder.entity == holder.provider.get());
         assertFalse(holder.lazy.get() == holder.provider.get());
-    }
+
+        assertThat(holder.javaxProvider, notNullValue());
+        assertThat(holder.javaxProvider.get().value, is("one"));    }
 
     public static class MetaEntityTwo {
         String value;
@@ -273,11 +276,11 @@ public class MetaInjectTest extends BaseTest {
     }
 
     public static class MetaProviderHolder {
-        @Meta
+        @Inject
         MetaEntityTwo entityTwo;
-        @Meta
+        @Inject
         MetaEntityThree entityThree;
-        @Meta
+        @Inject
         MetaEntityFour entityFour;
     }
 
@@ -310,7 +313,7 @@ public class MetaInjectTest extends BaseTest {
     }
 
     public static class MetaFactoryHolder {
-        @Meta
+        @Inject
         MetaFactory factory;
 
         @Factory
@@ -385,11 +388,11 @@ public class MetaInjectTest extends BaseTest {
     }
 
     public static class MetaScopeEntityHolder {
-        @Meta
+        @Inject
         MetaDefaultScopeEntity scopeEntity;
-        @Meta
+        @Inject
         MetaExtScopeEntity extScopeEntity;
-        @Meta
+        @Inject
         MetaCustomScopeEntity customScopeEntity;
     }
 
@@ -427,13 +430,13 @@ public class MetaInjectTest extends BaseTest {
     }
 
     public static class MetaFactoryScopeEntityHolder {
-        @Meta
+        @Inject
         DefaultScopeMetaFactory defaultScopeFactory;
-        @Meta
+        @Inject
         ExtScopeMetaFactory extScopeFactory;
-        @Meta
+        @Inject
         CustomScopeMetaFactory customScopeFactory;
-        @Meta
+        @Inject
         MixedScopeMetaFactory mixedScopeFactory;
 
         @Factory
@@ -524,9 +527,9 @@ public class MetaInjectTest extends BaseTest {
     }
 
     public static class ExtMetaHolder {
-        @Meta
+        @Inject
         public MetaEntitySix entitySix;
-        @Meta
+        @Inject
         public MetaEntitySeven entitySeven;
     }
 
@@ -567,7 +570,7 @@ public class MetaInjectTest extends BaseTest {
     }
 
     public static class ExternalMetaHolder {
-        @Meta
+        @Inject
         String stringEntity;
     }
 
@@ -609,7 +612,7 @@ public class MetaInjectTest extends BaseTest {
     }
 
     public static class MetaSchemeHolder {
-        @Meta
+        @Inject
         SchemeEntity entity;
     }
 

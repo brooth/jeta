@@ -18,7 +18,7 @@
 package org.brooth.jeta.inject;
 
 import com.google.common.collect.Sets;
-import org.brooth.jeta.MasterClassController;
+import org.brooth.jeta.MasterController;
 import org.brooth.jeta.metasitory.Metasitory;
 
 import java.lang.annotation.Annotation;
@@ -26,18 +26,18 @@ import java.lang.annotation.Annotation;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class StaticMetaController extends MasterClassController<Object, InjectMetacode<Object>> {
+public class InjectController extends MasterController<Object, InjectMetacode<Object>> {
 
-    public StaticMetaController(Metasitory metasitory, Class masterClass) {
-        super(metasitory, masterClass, Meta.class);
+    public InjectController(Metasitory metasitory, Object master) {
+        super(metasitory, master, Inject.class);
     }
 
-    public StaticMetaController(Metasitory metasitory, Class masterClass, Class<? extends Annotation> alias) {
-        super(metasitory, masterClass, Sets.newHashSet(Meta.class, alias));
+    public InjectController(Metasitory metasitory, Object master, Class<? extends Annotation> alias) {
+        super(metasitory, master, Sets.newHashSet(Inject.class, alias));
     }
 
     public void inject(MetaScope<?> scope) {
         for (InjectMetacode<Object> metacode : metacodes)
-            metacode.applyStaticMeta(scope);
+            metacode.applyMeta(scope, master);
     }
 }

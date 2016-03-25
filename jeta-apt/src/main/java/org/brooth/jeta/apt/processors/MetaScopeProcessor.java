@@ -59,7 +59,7 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
     @Override
     public void init(ProcessingContext processingContext) {
         super.init(processingContext);
-        defaultScopeStr = processingContext.processingProperties().getProperty("meta.scope.default", null);
+        defaultScopeStr = processingContext.processingProperties().getProperty("inject.scope.default", null);
     }
 
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
@@ -284,7 +284,7 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
                 if (isVoid(scope)) {
                     if (defaultScopeStr == null)
                         throw new ProcessingException("Scope undefined for '" + input.getSimpleName().toString() + "'. " +
-                                "You need to set the scope via @MetaEntity(scope) or define default one as 'meta.scope.default' property");
+                                "You need to set the scope via @MetaEntity(scope) or define default one as 'inject.scope.default' property");
                     if (isDefaultScope)
                         return true;
                 }

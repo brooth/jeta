@@ -381,7 +381,7 @@ public class JetaProcessor extends AbstractProcessor {
         if (utdProperties != null)
             utdPropertiesCopy = (Properties) utdProperties.clone();
 
-        boolean debug = properties.getProperty("debug.utd_states", "true").equals("true");
+        boolean debug = properties.getProperty("debug.utd_states", String.valueOf(logger.debug)).equals("true");
 
         Iterator<MetacodeContextImpl> iter = metacodeContextList.iterator();
         while (iter.hasNext()) {

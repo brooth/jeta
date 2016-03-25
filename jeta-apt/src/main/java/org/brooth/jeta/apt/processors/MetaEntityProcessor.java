@@ -45,7 +45,7 @@ public class MetaEntityProcessor extends AbstractProcessor {
     @Override
     public void init(ProcessingContext processingContext) {
         super.init(processingContext);
-        defaultScopeStr = processingContext.processingProperties().getProperty("meta.scope.default", null);
+        defaultScopeStr = processingContext.processingProperties().getProperty("inject.scope.default", null);
     }
 
     public boolean process(TypeSpec.Builder builder, RoundContext context) {

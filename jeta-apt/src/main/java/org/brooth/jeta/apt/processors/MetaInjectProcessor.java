@@ -23,10 +23,11 @@ import com.google.common.collect.Lists;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.Factory;
 import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.ProcessingContext;
 import org.brooth.jeta.apt.ProcessingException;
 import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.inject.InjectMetacode;
-import org.brooth.jeta.inject.Meta;
+import org.brooth.jeta.inject.Inject;
 import org.brooth.jeta.inject.MetaScope;
 import org.brooth.jeta.inject.Module;
 
@@ -48,6 +49,8 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
     private TypeElement module;
     private List<TypeElement> moduleScopes;
 
+    private String providerAlias = null;
+
     private static class StatementSpec {
         String format;
         Object[] args;
@@ -60,7 +63,13 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
     }
 
     public MetaInjectProcessor() {
-        super(Meta.class);
+        super(Inject.class);
+    }
+
+    @Override
+    public void init(ProcessingContext processingContext) {
+        super.init(processingContext);
+        providerAlias = processingContext.processingProperties().getProperty("inject.alias.provider", null);
     }
 
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
@@ -169,7 +178,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
         ProcessingEnvironment env = processingContext.processingEnv();
         String returnTypeStr = env.getTypeUtils().erasure(returnTypeMirror).toString();
 
-        if (returnTypeStr.equals("org.brooth.jeta.Provider")) {
+        if (returnTypeStr.equals("org.brooth.jeta.Provider") || returnTypeStr.equals(providerAlias)) {
             returnTypeStr = getGenericType(returnTypeMirror.toString());
             String scopeStr = lookupEntityScope(module, scopeElement.getQualifiedName().toString(), returnTypeStr);
             if (scopeStr == null)
@@ -324,7 +333,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
 
     @Override
     public Set<Class<? extends Annotation>> collectElementsAnnotatedWith() {
-        String metaAlias = processingContext.processingProperties().getProperty("meta.alias", "");
+        String metaAlias = processingContext.processingProperties().getProperty("inject.alias", "");
         if (!metaAlias.isEmpty()) {
             try {
                 Class<?> aliasClass = Class.forName(metaAlias);

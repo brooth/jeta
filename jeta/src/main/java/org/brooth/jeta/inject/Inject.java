@@ -25,5 +25,5 @@ import java.lang.annotation.Target;
  * @version $Id$
  */
 @Target(ElementType.FIELD)
-public @interface Meta {
+public @interface Inject {
 }
