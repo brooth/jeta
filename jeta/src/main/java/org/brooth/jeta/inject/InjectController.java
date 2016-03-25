@@ -38,6 +38,6 @@ public class InjectController extends MasterController<Object, InjectMetacode<Ob
 
     public void inject(MetaScope<?> scope) {
         for (InjectMetacode<Object> metacode : metacodes)
-            metacode.applyMeta(scope, master);
+            metacode.inject(scope, master);
     }
 }

@@ -22,7 +22,7 @@ package org.brooth.jeta.inject;
  */
 public interface InjectMetacode<M> {
 
-    void applyStaticMeta(MetaScope<?> scope);
+    void injectStatic(MetaScope<?> scope);
 
-    void applyMeta(MetaScope<?> scope, M master);
+    void inject(MetaScope<?> scope, M master);
 }

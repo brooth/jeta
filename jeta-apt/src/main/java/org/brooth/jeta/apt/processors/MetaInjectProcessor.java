@@ -118,11 +118,11 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                                    ClassName masterClassName, Boolean staticMeta, ArrayList<Element> unhandledElements) {
         MethodSpec.Builder methodBuilder;
         if (staticMeta) {
-            methodBuilder = MethodSpec.methodBuilder("applyStaticMeta")
+            methodBuilder = MethodSpec.methodBuilder("injectStatic")
                     .addParameter(metaScopeTypeName, "scope", Modifier.FINAL);
 
         } else {
-            methodBuilder = MethodSpec.methodBuilder("applyMeta")
+            methodBuilder = MethodSpec.methodBuilder("inject")
                     .addParameter(metaScopeTypeName, "scope", Modifier.FINAL)
                     .addParameter(masterClassName, "master", Modifier.FINAL);
         }

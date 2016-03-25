@@ -38,6 +38,6 @@ public class StaticInjectController extends MasterClassController<Object, Inject
 
     public void inject(MetaScope<?> scope) {
         for (InjectMetacode<Object> metacode : metacodes)
-            metacode.applyStaticMeta(scope);
+            metacode.injectStatic(scope);
     }
 }
