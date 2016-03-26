@@ -125,7 +125,7 @@ class Subscriber {
 ```
 See [jeta-samples project][jeta-samples] for additional event bus features.
 
-### @Meta, @MetaEntity
+### @Inject, @MetaEntity
 `Jeta` provides [dependency injection][di-pattern] with some advantages. The dependencies can be extended in sub-modules (e.g. test module). It is possible to inject dependencies with parameters.
 ```java
 @MetaEntity
@@ -135,11 +135,11 @@ class Producer {
 ```
 ```java
 class Consumer {
-    @Meta
+    @Inject
     Producer producer;
 
     public Consumer() {
-        MetaHelper.injectMeta(this);
+        MetaHelper.inject(this);
     }
 }
 ```
@@ -155,7 +155,7 @@ class Producer {
 ```
 ```java
 class Consumer {
-    @Meta
+    @Inject
     MetaFactory factory;
 
     @Factory
@@ -178,12 +178,12 @@ class TestProducer extends Producer {
 }
 ```
 
-You can use `@Inject` instead of `@Meta`. Add the option below to `jeta.properties` (see [Configuration][jeta-configuration]):
+You can use `@javax.inject.Inject` instead of `@org.brooth.jeta.inject.Inject`. Add the option below to `jeta.properties` (see [Configuration][jeta-configuration]):
 ```properties
-meta.alias=javax.inject.Inject
+inject.alias=javax.inject.Inject
 ```
 
-Static injection, providers, class injection and more in [jeta-samples][jeta-samples]
+Scopes, static injection, providers, class injection and more in [jeta-samples][jeta-samples]
 
 ### @TypeCollector, @ObjectCollector
 `Jeta` collectors assemble scattered classes:
@@ -275,8 +275,8 @@ repositories {
 }
 
 dependencies {
-    apt 'org.brooth.jeta:jeta-apt:0.3-beta'
-    compile 'org.brooth.jeta:jeta:0.3-beta'
+    apt 'org.brooth.jeta:jeta-apt:1.0'
+    compile 'org.brooth.jeta:jeta:1.0'
 }
 ```
 
