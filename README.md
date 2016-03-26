@@ -164,7 +164,7 @@ class Consumer {
     }
 
     public Consumer() {
-        MetaHelper.injectMeta(this);
+        MetaHelper.inject(this);
         Producer p = factory.getProducer("abc", 0.75);
     }
 }
