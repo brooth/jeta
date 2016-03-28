@@ -32,7 +32,9 @@ import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -78,7 +80,12 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
         TypeElement masterElement = (TypeElement) context.elements().iterator().next();
         Scope scopeAnnotation = masterElement.getAnnotation(Scope.class);
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
-        builder.addAnnotation(AnnotationSpec.builder(ScopeConfig.class).addMember("module", "$T.class", module).build())
+        String masterClassStr = masterElement.getQualifiedName().toString();
+        List<String> moduleScopes = getScopesClasses();
+
+        builder.addAnnotation(AnnotationSpec.builder(ScopeConfig.class)
+                .addMember("module", "$T.class", moduleScopes.contains(masterClassStr) ? module : ClassName.VOID)
+                .build())
                 .addSuperinterface(ParameterizedTypeName.get(ClassName.get(MetaScopeMetacode.class), masterClassName));
 
         String metaScopeSimpleNameStr = "MetaScopeImpl";
@@ -266,6 +273,15 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
                         .build());
         builder.addType(metaScopeTypeSpecBuilder.build());
         return false;
+    }
+
+    private List<String> getScopesClasses() {
+        return MetacodeUtils.extractClassesNames(new Runnable() {
+            @Override
+            public void run() {
+                module.getAnnotation(Module.class).scopes();
+            }
+        });
     }
 
     private Set<? extends Element> getScopeEntities(final String scopeClassStr, final boolean isDefaultScope) {
