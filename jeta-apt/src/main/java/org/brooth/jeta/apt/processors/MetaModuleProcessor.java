@@ -111,6 +111,9 @@ public class MetaModuleProcessor extends AbstractProcessor {
                         String ofTypeStr = getOfClass(metaEntityAnnotation);
                         if (isVoid(ofTypeStr))
                             return ClassName.get((TypeElement) input);
+                        if (ofTypeStr.equals(getExtClass(metaEntityAnnotation)))
+                            return ClassName.get(Void.class);
+
                         return ClassName.bestGuess(ofTypeStr);
 
                     } catch (Exception e) {
@@ -150,6 +153,15 @@ public class MetaModuleProcessor extends AbstractProcessor {
         return MetacodeUtils.extractClassName(new Runnable() {
             public void run() {
                 annotation.of();
+            }
+        });
+    }
+
+    @Nonnull
+    private String getExtClass(final MetaEntity annotation) {
+        return MetacodeUtils.extractClassName(new Runnable() {
+            public void run() {
+                annotation.ext();
             }
         });
     }

@@ -19,15 +19,17 @@ package org.brooth.jeta.apt.processors;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.Factory;
 import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.ProcessingContext;
 import org.brooth.jeta.apt.ProcessingException;
 import org.brooth.jeta.apt.RoundContext;
-import org.brooth.jeta.inject.InjectMetacode;
 import org.brooth.jeta.inject.Inject;
+import org.brooth.jeta.inject.InjectMetacode;
 import org.brooth.jeta.inject.MetaScope;
 import org.brooth.jeta.inject.Module;
 
@@ -51,16 +53,6 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
 
     private String providerAlias = null;
 
-    private static class StatementSpec {
-        String format;
-        Object[] args;
-        TypeSpec factory;
-
-        public StatementSpec(String format, Object... args) {
-            this.format = format;
-            this.args = args;
-        }
-    }
 
     public MetaInjectProcessor() {
         super(Inject.class);
@@ -128,8 +120,8 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
         }
 
         methodBuilder.addAnnotation(Override.class).addModifiers(Modifier.PUBLIC).returns(void.class);
+        Multimap<String, StatementSpec> statements = HashMultimap.create();
         for (TypeElement scopeElement : moduleScopes) {
-            List<StatementSpec> statements = new ArrayList<>();
             for (Element element : context.elements()) {
                 String fieldNameStr = element.getSimpleName().toString();
                 String fieldStatement = null;
@@ -148,20 +140,26 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
 
                 StatementSpec statement = getResultStatement(scopeElement, element.asType(), fieldStatement, "getInstance()");
                 if (statement != null) {
-                    statements.add(statement);
+                    statement.element = element;
+                    if (!(statements.containsKey(statement.providerScopeStr) &&
+                            statements.get(statement.providerScopeStr).contains(statement)))
+                        statements.put(statement.providerScopeStr, statement);
+
                     unhandledElements.remove(element);
                 }
             }
+        }
 
-            if (!statements.isEmpty()) {
-                ClassName scopeClassName = ClassName.get(scopeElement);
+        if (!statements.isEmpty()) {
+            for (String scopeElement : statements.keySet()) {
+                ClassName scopeClassName = ClassName.bestGuess(scopeElement);
                 ClassName scopeMetacodeClassName = ClassName.get(scopeClassName.packageName(),
                         MetacodeUtils.toSimpleMetacodeName(scopeClassName.toString()), "MetaScopeImpl");
                 methodBuilder
-                        .beginControlFlow("if(scope.isAssignable($T.class))", ClassName.get(scopeElement))
+                        .beginControlFlow("if(scope.isAssignable($T.class))", scopeClassName)
                         .addStatement("final $T s = ($T) scope", scopeMetacodeClassName, scopeMetacodeClassName);
 
-                for (StatementSpec statement : statements) {
+                for (StatementSpec statement : statements.get(scopeElement)) {
                     methodBuilder.addStatement(statement.format, statement.args);
                     if (statement.factory != null)
                         builder.addType(statement.factory);
@@ -170,6 +168,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                 methodBuilder.endControlFlow();
             }
         }
+
         builder.addMethod(methodBuilder.build());
     }
 
@@ -194,7 +193,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                             .addStatement(statement.format, statement.args)
                             .build())
                     .build();
-            return new StatementSpec(statementPrefix + " $L", providerTypeSpec);
+            return new StatementSpec(scopeStr, statementPrefix + " $L", providerTypeSpec);
         }
 
         if (returnTypeStr.equals("org.brooth.jeta.Lazy")) {
@@ -222,7 +221,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                             .addStatement("return instance")
                             .build())
                     .build();
-            return new StatementSpec(statementPrefix + " $L", lazyTypeSpec);
+            return new StatementSpec(scopeStr, statementPrefix + " $L", lazyTypeSpec);
         }
 
         if (returnTypeStr.equals("java.lang.Class")) {
@@ -250,7 +249,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
     }
 
     private StatementSpec getAssignmentStatement(String scopeStr, String elementTypeStr, String statementPrefix, String getInstanceStr) {
-        return new StatementSpec(statementPrefix + "s.$L_$L_MetaEntity().$L",
+        return new StatementSpec(scopeStr, statementPrefix + "s.$L_$L_MetaEntity().$L",
                 elementTypeStr.replaceAll("\\.", "_"), ClassName.bestGuess(scopeStr).simpleName(), getInstanceStr);
     }
 
@@ -263,7 +262,6 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC)
                 .addSuperinterface(ClassName.bestGuess(element.getQualifiedName().toString()));
 
-        StatementSpec statement = new StatementSpec(statementPrefix + "new $L(s)", name);
         for (Element subElement : element.getEnclosedElements())
             if (subElement.getKind() == ElementKind.METHOD) {
                 ExecutableElement method = (ExecutableElement) subElement;
@@ -299,6 +297,8 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
         ClassName scopeMetacodeClassName = ClassName.get(scopeClassName.packageName(),
                 MetacodeUtils.toSimpleMetacodeName(scopeClassName.toString()), "MetaScopeImpl");
 
+        StatementSpec statement = new StatementSpec(scopeElement.getQualifiedName().toString(),
+                statementPrefix + "new $L(s)", name);
         statement.factory = factoryBuilder
                 .addField(scopeMetacodeClassName, "s", Modifier.PRIVATE, Modifier.FINAL)
                 .addMethod(MethodSpec.constructorBuilder()
@@ -353,5 +353,34 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
         }
 
         return super.collectElementsAnnotatedWith();
+    }
+
+    private static class StatementSpec {
+        String providerScopeStr;
+        String format;
+        Object[] args;
+        TypeSpec factory;
+        Element element;
+
+        private StatementSpec(String providerScopeStr, String format, Object... args) {
+            this.providerScopeStr = providerScopeStr;
+            this.format = format;
+            this.args = args;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            StatementSpec that = (StatementSpec) o;
+
+            return element != null ? element.equals(that.element) : that.element == null;
+        }
+
+        @Override
+        public int hashCode() {
+            return element != null ? element.hashCode() : 0;
+        }
     }
 }

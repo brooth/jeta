@@ -79,10 +79,12 @@ public abstract class AbstractLookupScopeProcessor extends AbstractProcessor {
                 throw new ProcessingException(rootScope + " is not a meta scope");
 
             String moduleClassStr = getModuleClass(scopeConfigAnnotation);
-            TypeElement extModule = elementUtils.getTypeElement(moduleClassStr);
-            if (extModule == null)
-                throw new ProcessingException("Can't find module " + moduleClassStr);
-            return lookupEntityScope(extModule, rootScope, entityClassStr);
+            if (!isVoid(moduleClassStr)) {
+                TypeElement extModule = elementUtils.getTypeElement(moduleClassStr);
+                if (extModule == null)
+                    throw new ProcessingException("Can't find module " + moduleClassStr);
+                return lookupEntityScope(extModule, rootScope, entityClassStr);
+            }
         }
 
         // look up in ext scope?
