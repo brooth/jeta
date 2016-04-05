@@ -569,6 +569,14 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
+    @MetaEntity(of = String.class, scope = ExtScope.class)
+    public static class StringProviderExt {
+        @Constructor
+        static String get() {
+            return "ext str";
+        }
+    }
+
     public static class ExternalMetaHolder {
         @Inject
         String stringEntity;
@@ -583,6 +591,12 @@ public class MetaInjectTest extends BaseTest {
 
         assertThat(holder.stringEntity, notNullValue());
         assertThat(holder.stringEntity, is("str"));
+
+        MetaHelper.injectMeta(MetaHelper.getMetaScope(new ExtScope()), holder);
+
+        assertThat(holder.stringEntity, notNullValue());
+        assertThat(holder.stringEntity, is("ext str"));
+
     }
 
     public static class SchemeEntity {
