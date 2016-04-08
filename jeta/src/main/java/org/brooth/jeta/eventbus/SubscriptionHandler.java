@@ -26,20 +26,20 @@ public class SubscriptionHandler {
 
     private final ObserverHandler handler = new ObserverHandler();
 
-    public void add(Class<?> eventClass, Observers.Handler<?> handler) {
-        this.handler.add(EventBus.class, eventClass, handler);
+    public void add(Class<? extends Message> messageClass, Observers.Handler<?> handler) {
+        this.handler.add(EventBus.class, messageClass, handler);
     }
 
     public void add(SubscriptionHandler other) {
         handler.add(other.handler);
     }
 
-    public int unregister(Class<?> eventClass, Class<?> publisherClass) {
-        return handler.unregister(eventClass, publisherClass);
+    public int unregister(Class<? extends Message> messageClass, Class<?> publisherClass) {
+        return handler.unregister(messageClass, publisherClass);
     }
 
-    public int unregister(Class<?> eventClass) {
-        return handler.unregister(eventClass);
+    public int unregister(Class<? extends Message> messageClass) {
+        return handler.unregister(messageClass);
     }
 
     public int unregisterAll() {
