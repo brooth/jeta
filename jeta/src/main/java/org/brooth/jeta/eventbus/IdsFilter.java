@@ -19,7 +19,7 @@ package org.brooth.jeta.eventbus;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class IdsFilter implements Filter<Message> {
+public class IdsFilter implements Filter<Object, Message> {
 
     private int[] ids;
 
