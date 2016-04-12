@@ -19,7 +19,7 @@ package org.brooth.jeta.validate;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class NotNull implements Validator {
+public class NotNull implements Validator<Object, Object> {
 
     private String fieldName;
 

@@ -21,6 +21,6 @@ include ':jeta-apt'
 include ':jeta'
 
 gradle.ext.GROUP_ID = 'org.brooth.jeta'
-gradle.ext.VERSION = '1.1'
-gradle.ext.VERSION_DESC = 'fixes for 1.0'
+gradle.ext.VERSION = '1.2'
+gradle.ext.VERSION_DESC = 'generic validator, validor alias, generic event-bus filters'
 gradle.ext.VERSION_VCS_TAG = gradle.VERSION

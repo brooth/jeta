@@ -43,6 +43,7 @@ import org.brooth.jeta.validate.ValidationException;
 import javax.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -111,8 +112,12 @@ public class MetaHelper {
         return new ObserverController<Object>(getInstance().metasitory, observer).registerObserver(observable);
     }
 
-    public static ValidationController validationController(Object master) throws ValidationException {
+    public static ValidationController validationController(Object master) {
         return new ValidationController(getInstance().metasitory, master);
+    }
+
+    public static ValidationController validationController(Object master, Set<Class<? extends Annotation>> validators) {
+        return new ValidationController(getInstance().metasitory, master, validators);
     }
 
     public static void validate(Object master) throws ValidationException {

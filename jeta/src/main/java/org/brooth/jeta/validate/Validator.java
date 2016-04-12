@@ -19,8 +19,8 @@ package org.brooth.jeta.validate;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface Validator {
-    boolean validate(Object master, Object field, String fieldName);
+public interface Validator<M, F> {
+    boolean validate(M master, F field, String fieldName);
 
     String describeError();
 }

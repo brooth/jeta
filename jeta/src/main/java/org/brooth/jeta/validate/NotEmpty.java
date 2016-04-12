@@ -22,7 +22,7 @@ import java.util.Map;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class NotEmpty implements Validator {
+public class NotEmpty implements Validator<Object, Object> {
 
     private String fieldName;
 

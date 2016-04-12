@@ -16,11 +16,14 @@
 
 package org.brooth.jeta.validate;
 
+import com.google.common.collect.Sets;
 import org.brooth.jeta.MasterController;
 import org.brooth.jeta.metasitory.Metasitory;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -28,7 +31,15 @@ import java.util.List;
 public class ValidationController extends MasterController<Object, ValidatorMetacode<Object>> {
 
     public ValidationController(Metasitory metasitory, Object master) {
-        super(metasitory, master, Validate.class);
+        super(metasitory, master,
+                Sets.newHashSet(Validate.class,
+                        org.brooth.jeta.validate.alias.NotNull.class,
+                        org.brooth.jeta.validate.alias.NotBlank.class,
+                        org.brooth.jeta.validate.alias.NotEmpty.class));
+    }
+
+    public ValidationController(Metasitory metasitory, Object master, Set<Class<? extends Annotation>> validators) {
+        super(metasitory, master, validators);
     }
 
     public void validate() throws ValidationException {

@@ -18,26 +18,70 @@ package org.brooth.jeta.apt.processors;
 
 import com.squareup.javapoet.*;
 import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.ProcessingContext;
+import org.brooth.jeta.apt.ProcessingException;
 import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.validate.MetaValidator;
 import org.brooth.jeta.validate.Validate;
 import org.brooth.jeta.validate.ValidatorMetacode;
+import org.brooth.jeta.validate.alias.NotBlank;
+import org.brooth.jeta.validate.alias.NotEmpty;
+import org.brooth.jeta.validate.alias.NotNull;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.annotation.Annotation;
+import java.util.*;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ValidateProcessor extends AbstractProcessor {
 
+    private Map<Class<? extends Annotation>, String> aliases;
+
     public ValidateProcessor() {
         super(Validate.class);
+    }
+
+    @Override
+    public void init(ProcessingContext processingContext) {
+        super.init(processingContext);
+
+        aliases = new HashMap<>();
+        aliases.put(NotBlank.class, "org.brooth.jeta.validate.NotBlank");
+        aliases.put(NotEmpty.class, "org.brooth.jeta.validate.NotEmpty");
+        aliases.put(NotNull.class, "org.brooth.jeta.validate.NotNull");
+
+        for (String key : processingContext.processingProperties().stringPropertyNames()) {
+            if (key.startsWith("validator.alias.")) {
+                String annStr = key.substring("validator.alias.".length());
+                String valStr = processingContext.processingProperties().getProperty(key);
+                try {
+                    Class<?> aliasClass = Class.forName(annStr);
+                    if (aliasClass.isAssignableFrom(Annotation.class))
+                        throw new IllegalArgumentException(annStr + " is not a annotation type.");
+
+                    @SuppressWarnings("unchecked")
+                    Class<? extends Annotation> aliasAnnotation = (Class<? extends Annotation>) aliasClass;
+                    aliases.put(aliasAnnotation, valStr);
+
+                } catch (Exception e) {
+                    throw new ProcessingException("Failed to load '" + annStr + "' validator alias.", e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Set<Class<? extends Annotation>> collectElementsAnnotatedWith() {
+        Set<Class<? extends Annotation>> result = new HashSet<>();
+        result.add(Validate.class);
+        result.addAll(aliases.keySet());
+        return result;
     }
 
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
@@ -61,14 +105,28 @@ public class ValidateProcessor extends AbstractProcessor {
             String fieldNameStr = element.getSimpleName().toString();
 
             final Validate annotation = element.getAnnotation(Validate.class);
-            List<String> validators = MetacodeUtils.extractClassesNames(new Runnable() {
-                public void run() {
-                    annotation.value();
-                }
-            });
+            List<String> validators;
+            if (annotation != null) {
+                validators = MetacodeUtils.extractClassesNames(new Runnable() {
+                    public void run() {
+                        annotation.value();
+                    }
+                });
+
+            } else {
+                validators = new ArrayList<>();
+            }
+
+            for (Class<? extends Annotation> alias : aliases.keySet()) {
+                if (element.getAnnotation(alias) != null)
+                    validators.add(aliases.get(alias));
+            }
+
             for (String validatorClassNameStr : validators) {
                 String validatorVarName = "validator_" + i++;
                 TypeElement validatorTypeElement = elementUtils.getTypeElement(validatorClassNameStr);
+                if (validatorTypeElement == null)
+                    throw new ProcessingException("Validator '" + validatorClassNameStr + "' not found");
                 TypeName validatorTypeName = TypeName.get(validatorTypeElement.asType());
 
                 // Class Validator

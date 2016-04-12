@@ -19,21 +19,15 @@ package org.brooth.jeta.validate;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class NotBlank implements Validator {
+public class NotBlank implements Validator<Object, CharSequence> {
 
     private String fieldName;
 
     @Override
-    public boolean validate(Object master, Object field, String fieldName) {
+    public boolean validate(Object master, CharSequence field, String fieldName) {
         this.fieldName = fieldName;
 
-        if (field == null)
-            return false;
-
-        if (field instanceof CharSequence)
-            return !field.toString().trim().isEmpty();
-
-        throw new IllegalArgumentException("Can't check '" + fieldName + "' is blank");
+        return field != null && !field.toString().trim().isEmpty();
     }
 
     @Override
