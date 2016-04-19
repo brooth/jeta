@@ -16,8 +16,6 @@
 
 package org.brooth.jeta.eventbus;
 
-import java.util.Objects;
-
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
@@ -36,7 +34,7 @@ public class TopicsFilter implements Filter<Object, Message> {
             return false;
 
         for (String s : topics)
-            if (Objects.equals(topic, s))
+            if (topic.equals(s))
                 return true;
 
         return false;

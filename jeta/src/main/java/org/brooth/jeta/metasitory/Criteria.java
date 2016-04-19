@@ -16,10 +16,11 @@
 
 package org.brooth.jeta.metasitory;
 
+import com.google.common.base.Objects;
+
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -104,21 +105,20 @@ public final class Criteria {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
 
         Criteria criteria = (Criteria) o;
-        return Objects.equals(masterEq, criteria.masterEq)
-                && Objects.equals(masterEqDeep, criteria.masterEqDeep)
-                && Objects.equals(usesAll, criteria.usesAll)
-                && Objects.equals(usesAny, criteria.usesAny);
+        return Objects.equal(masterEq, criteria.masterEq) &&
+                Objects.equal(masterEqDeep, criteria.masterEqDeep) &&
+                Objects.equal(usesAny, criteria.usesAny) &&
+                Objects.equal(usesAll, criteria.usesAll);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(masterEq, masterEqDeep, usesAny, usesAll);
+        return Objects.hashCode(masterEq, masterEqDeep, usesAny, usesAll);
     }
 
     @Override
