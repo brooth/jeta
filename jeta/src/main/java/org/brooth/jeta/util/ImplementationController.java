@@ -16,18 +16,11 @@
 
 package org.brooth.jeta.util;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
 import org.brooth.jeta.IMetacode;
 import org.brooth.jeta.metasitory.Criteria;
 import org.brooth.jeta.metasitory.Metasitory;
 
-import java.util.Collection;
-import java.util.Comparator;
+import java.util.*;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -43,27 +36,22 @@ public class ImplementationController<I> {
     }
 
     protected void searchMetacodes(Metasitory metasitory) {
-        Preconditions.checkNotNull(metasitory, "metasitory");
-        Preconditions.checkNotNull(of, "of");
+        assert metasitory != null;
+        assert of != null;
 
         Collection<IMetacode<?>> allImplementers =
                 metasitory.search(new Criteria.Builder().usesAny(Implementation.class).build());
 
-        metacodes = FluentIterable.from(allImplementers)
-                .transform(new Function<IMetacode<?>, ImplementationMetacode<I>>() {
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    public ImplementationMetacode<I> apply(IMetacode<?> input) {
-                        return (ImplementationMetacode<I>) input;
-                    }
-                })
-                .filter(new Predicate<ImplementationMetacode<?>>() {
-                    @Override
-                    public boolean apply(ImplementationMetacode<?> input) {
-                        return input.getImplementationOf() == of;
-                    }
-                })
-                .toSortedList(new Comparator<ImplementationMetacode<I>>() {
+        metacodes = new ArrayList<>(allImplementers.size());
+        for (IMetacode<?> iMetacode : allImplementers) {
+            @SuppressWarnings("unchecked")
+            ImplementationMetacode<I> metacode = (ImplementationMetacode<I>) iMetacode;
+            if (metacode.getImplementationOf() == of)
+                metacodes.add(metacode);
+        }
+
+        Collections.sort((List<ImplementationMetacode<I>>) metacodes,
+                new Comparator<ImplementationMetacode<I>>() {
                     @Override
                     public int compare(ImplementationMetacode<I> o1, ImplementationMetacode<I> o2) {
                         return o1.getImplementationPriority() == o2.getImplementationPriority() ? 0 :
@@ -73,23 +61,22 @@ public class ImplementationController<I> {
     }
 
     public I getImplementation() {
-        ImplementationMetacode<I> first = Iterables.getFirst(metacodes, null);
-        if (first == null)
+        if (metacodes.isEmpty())
             return null;
 
-        if (metacodes.size() > 1 && first.getImplementationPriority() == Iterables.get(metacodes, 1).getImplementationPriority())
+        ImplementationMetacode<I> first = ((List<ImplementationMetacode<I>>) metacodes).get(0);
+        if (metacodes.size() > 1 && first.getImplementationPriority() ==
+                ((List<ImplementationMetacode<I>>) metacodes).get(1).getImplementationPriority())
             throw new IllegalStateException("More that one implementation with highest priority " + first.getImplementationPriority());
 
         return first.getImplementation();
     }
 
     public Collection<I> getImplementations() {
-        return Collections2.transform(metacodes, new Function<ImplementationMetacode<I>, I>() {
-            @Override
-            public I apply(ImplementationMetacode<I> input) {
-                return input.getImplementation();
-            }
-        });
+        List<I> result = new ArrayList<>(metacodes.size());
+        for (ImplementationMetacode<I> metacode : metacodes)
+            result.add(metacode.getImplementation());
+        return result;
     }
 
     public boolean hasImplementation() {

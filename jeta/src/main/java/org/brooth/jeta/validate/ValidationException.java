@@ -16,8 +16,6 @@
 
 package org.brooth.jeta.validate;
 
-import com.google.common.base.Joiner;
-
 import java.util.List;
 
 /**
@@ -25,14 +23,23 @@ import java.util.List;
  */
 public class ValidationException extends RuntimeException {
 
-	private static final long serialVersionUID = -4597845405692712462L;
+    private static final long serialVersionUID = -4597845405692712462L;
 
-	public ValidationException(String msg) {
+    public ValidationException(String msg) {
         super(msg);
     }
 
     public ValidationException(List<String> errors) {
-		super(Joiner.on("; ").join(errors));
+        super(join(errors));
+    }
+
+    private static String join(List<String> errors) {
+        StringBuilder sb = new StringBuilder();
+        for (String s : errors) {
+            sb.append(s).append(',');
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        return sb.toString();
     }
 }
 

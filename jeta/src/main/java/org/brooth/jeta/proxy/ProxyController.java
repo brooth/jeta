@@ -16,7 +16,6 @@
 
 package org.brooth.jeta.proxy;
 
-import com.google.common.base.Preconditions;
 import org.brooth.jeta.IMetacode;
 import org.brooth.jeta.metasitory.Criteria;
 import org.brooth.jeta.metasitory.Metasitory;
@@ -27,7 +26,7 @@ import java.util.Collection;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class ProxyController {
-    
+
     private ProxyMetacode<Object> metacode;
     private Object master;
 
@@ -38,27 +37,27 @@ public class ProxyController {
 
     @SuppressWarnings("unchecked")
     private void search(Metasitory metasitory) {
-        Preconditions.checkNotNull(metasitory, "metasitory");
+        assert metasitory != null;
 
         Criteria criteria = new Criteria.Builder()
-            .masterEq(master.getClass())
-            .usesAny(Proxy.class)
-            .build();
+                .masterEq(master.getClass())
+                .usesAny(Proxy.class)
+                .build();
 
         Collection<IMetacode<?>> metacodes = metasitory.search(criteria);
-        if(metacodes.size() > 1)
+        if (metacodes.size() > 1)
             throw new IllegalStateException("Metasitory returned more than one masterEq result");
-        if(metacodes.size() == 1)
+        if (metacodes.size() == 1)
             metacode = (ProxyMetacode<Object>) metacodes.iterator().next();
     }
 
     public void createProxy(Object real) {
-        Preconditions.checkNotNull(real, "real");
+        assert real != null;
 
-        if(metacode == null)
+        if (metacode == null)
             throw new IllegalStateException("No metacode found to create proxy");
 
-        if(!metacode.applyProxy(master, real))
+        if (!metacode.applyProxy(master, real))
             throw new IllegalArgumentException(real.getClass() + " not valid object for proxy wrapping. Is its field annotated with @Proxy?");
     }
 }

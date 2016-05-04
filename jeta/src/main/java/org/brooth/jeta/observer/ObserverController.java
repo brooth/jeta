@@ -16,7 +16,6 @@
 
 package org.brooth.jeta.observer;
 
-import com.google.common.base.Preconditions;
 import org.brooth.jeta.MasterController;
 import org.brooth.jeta.metasitory.Metasitory;
 
@@ -30,13 +29,13 @@ public class ObserverController<M> extends MasterController<M, ObserverMetacode<
     }
 
     public ObserverHandler registerObserver(Object observable) {
-        Preconditions.checkNotNull(observable, "observable");
+        assert observable != null;
         return registerObserver(observable, observable.getClass());
     }
 
     public ObserverHandler registerObserver(Object observable, Class<?> observableClass) {
-        Preconditions.checkNotNull(observable, "observable");
-        Preconditions.checkNotNull(observableClass, "observableClass");
+        assert observable != null;
+        assert observableClass != null;
 
         ObserverHandler handler = new ObserverHandler();
         for (ObserverMetacode<M> observer : metacodes) {

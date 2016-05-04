@@ -17,11 +17,12 @@
 
 package org.brooth.jeta.inject;
 
-import com.google.common.collect.Sets;
 import org.brooth.jeta.MasterClassController;
 import org.brooth.jeta.metasitory.Metasitory;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -33,7 +34,7 @@ public class StaticInjectController extends MasterClassController<Object, Inject
     }
 
     public StaticInjectController(Metasitory metasitory, Class masterClass, Class<? extends Annotation> alias) {
-        super(metasitory, masterClass, Sets.newHashSet(Inject.class, alias));
+        super(metasitory, masterClass, new HashSet<>(Arrays.asList(Inject.class, alias)));
     }
 
     public void inject(MetaScope<?> scope) {

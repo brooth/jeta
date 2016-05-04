@@ -16,12 +16,9 @@
 
 package org.brooth.jeta;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
 import org.brooth.jeta.metasitory.Criteria;
 import org.brooth.jeta.metasitory.Metasitory;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
@@ -62,7 +59,7 @@ public abstract class MasterClassController<M, C> {
 
     @SuppressWarnings("unchecked")
     protected void searchMetacodes(Metasitory metasitory) {
-        Preconditions.checkNotNull(metasitory, "metasitory");
+        assert metasitory != null;
         this.metacodes = (Collection<C>) metasitory.search(criteria());
     }
 

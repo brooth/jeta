@@ -16,7 +16,6 @@
 
 package org.brooth.jeta.log;
 
-import com.google.common.base.Preconditions;
 import org.brooth.jeta.MasterController;
 import org.brooth.jeta.metasitory.Metasitory;
 
@@ -30,7 +29,7 @@ public class LogController extends MasterController<Object, LogMetacode<Object>>
     }
 
     public void createLoggers(NamedLoggerProvider<?> loggerProvider) {
-        Preconditions.checkNotNull(loggerProvider, "loggerProvider");
+        assert loggerProvider != null;
 
         for (LogMetacode<Object> metacode : metacodes)
             metacode.applyLogger(master, loggerProvider);

@@ -16,7 +16,6 @@
 
 package org.brooth.jeta.collector;
 
-import com.google.common.base.Preconditions;
 import org.brooth.jeta.MasterClassController;
 import org.brooth.jeta.metasitory.Metasitory;
 
@@ -34,7 +33,7 @@ public class TypeCollectorController extends MasterClassController<Object, TypeC
     }
 
     public List<Class<?>>  getTypes(Class<? extends Annotation> annotation) {
-        Preconditions.checkNotNull(annotation, "annotation");
+        assert annotation!=null;
 
         List<Class<?>>  result = new ArrayList<Class<?>>();
         for (TypeCollectorMetacode collector : metacodes) {

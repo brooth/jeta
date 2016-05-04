@@ -16,11 +16,8 @@
 
 package org.brooth.jeta.util;
 
-import com.google.common.collect.Iterables;
-
 import org.brooth.jeta.IMetacode;
 import org.brooth.jeta.MasterClassController;
-import org.brooth.jeta.metasitory.Criteria;
 import org.brooth.jeta.metasitory.Metasitory;
 
 /**
@@ -37,7 +34,7 @@ public class MultitonController<M> extends MasterClassController<M, IMetacode<?>
         if (metacodes.size() > 1)
             throw new IllegalStateException("More than one metacode returned fot Criteria.masterEq");
 
-        IMetacode<?> multiton = Iterables.getFirst(metacodes, null);
+        IMetacode<?> multiton = metacodes.iterator().next();
         if (multiton == null)
             throw new IllegalStateException(masterClass.getCanonicalName() + " has not multiton meta code. No @Multiton annotation on it?");
 

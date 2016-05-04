@@ -43,7 +43,6 @@ compileTestJava {
 }
 
 dependencies {
-    compile 'com.google.guava:guava:18.0'
     compile 'com.google.code.findbugs:jsr305:3.0.0'
 
     testApt project(':jeta-apt')

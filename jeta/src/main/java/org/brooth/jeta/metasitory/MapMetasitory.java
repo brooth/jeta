@@ -16,16 +16,9 @@
 
 package org.brooth.jeta.metasitory;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Maps;
 import org.brooth.jeta.IMetacode;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -111,29 +104,33 @@ public class MapMetasitory implements Metasitory {
         if (selection.isEmpty())
             return Collections.emptyList();
 
-        return Collections2.transform(selection.values(), new Function<MapMetasitoryContainer.Context, IMetacode<?>>() {
-            public IMetacode<?> apply(MapMetasitoryContainer.Context input) {
-                return input.metacodeProvider.get();
-            }
-        });
+        List<IMetacode<?>> result = new ArrayList<>(selection.values().size());
+        for (MapMetasitoryContainer.Context context : selection.values())
+            result.add(context.metacodeProvider.get());
+        return result;
     }
 
     private Map<Class<?>, MapMetasitoryContainer.Context> usesAny(Map<Class<?>, MapMetasitoryContainer.Context> selection, final Criteria criteria) {
         if (criteria.getUsesAny() == null)
             return selection;
 
-        return Maps.filterValues(selection, new Predicate<MapMetasitoryContainer.Context>() {
-            public boolean apply(MapMetasitoryContainer.Context input) {
-                for (Class<?> annotation : input.annotations) {
-                    for (Class<?> uses : criteria.getUsesAny()) {
-                        if (annotation == uses) {
-                            return true;
-                        }
+        Map<Class<?>, MapMetasitoryContainer.Context> result = new HashMap<>();
+        for (Map.Entry<Class<?>, MapMetasitoryContainer.Context> item : selection.entrySet()) {
+            boolean add = false;
+            for (Class<?> annotation : item.getValue().annotations) {
+                for (Class<?> uses : criteria.getUsesAny()) {
+                    if (annotation == uses) {
+                        add = true;
+                        break;
                     }
                 }
-                return false;
+                if (add)
+                    break;
             }
-        });
+            if (add)
+                result.put(item.getKey(), item.getValue());
+        }
+        return result;
     }
 
     private Map<Class<?>, MapMetasitoryContainer.Context> usesAll(Map<Class<?>, MapMetasitoryContainer.Context> selection, final Criteria criteria) {
@@ -142,29 +139,34 @@ public class MapMetasitory implements Metasitory {
         if (criteria.getUsesAll().isEmpty())
             throw new IllegalArgumentException("criteria.useAll is empty");
 
-        return Maps.filterValues(selection, new Predicate<MapMetasitoryContainer.Context>() {
-            public boolean apply(MapMetasitoryContainer.Context input) {
-                for (Class<?> need : criteria.getUsesAll()) {
-                    boolean used = false;
-                    for (Class<?> annotation : input.annotations) {
-                        if (annotation == need) {
-                            used = true;
-                            break;
-                        }
+        Map<Class<?>, MapMetasitoryContainer.Context> result = new HashMap<>();
+        for (Map.Entry<Class<?>, MapMetasitoryContainer.Context> item : selection.entrySet()) {
+            boolean add = true;
+            for (Class<?> annotation : item.getValue().annotations) {
+                boolean used = false;
+                for (Class<?> uses : criteria.getUsesAll()) {
+                    if (annotation == uses) {
+                        used = true;
+                        break;
                     }
-                    if (!used)
-                        return false;
                 }
-                return true;
+                if (!used) {
+                    add = false;
+                    break;
+                }
+
             }
-        });
+            if (add)
+                result.put(item.getKey(), item.getValue());
+        }
+        return result;
     }
 
     private Map<Class<?>, MapMetasitoryContainer.Context> masterEqDeep(Map<Class<?>, MapMetasitoryContainer.Context> selection, Criteria criteria) {
         if (criteria.getMasterEqDeep() == null)
             return selection;
 
-        Map<Class<?>, MapMetasitoryContainer.Context> result = new HashMap<Class<?>, MapMetasitoryContainer.Context>();
+        Map<Class<?>, MapMetasitoryContainer.Context> result = new HashMap<>();
         Class<?> clazz = criteria.getMasterEqDeep();
         while (clazz != Object.class) {
             MapMetasitoryContainer.Context context = selection.get(clazz);

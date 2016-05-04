@@ -16,7 +16,6 @@
 
 package org.brooth.jeta.eventbus;
 
-import com.google.common.base.Preconditions;
 import org.brooth.jeta.observer.EventObserver;
 import org.brooth.jeta.observer.Observers;
 
@@ -30,8 +29,8 @@ public class BaseEventBus implements EventBus {
     protected ConcurrentHashMap<Class<?>, Subscribers<?>> subscribersMap = new ConcurrentHashMap<Class<?>, Subscribers<?>>();
 
     public <E extends Message> Observers.Handler<E> register(Class<E> eventClass, EventObserver<E> observer, int priority) {
-        Preconditions.checkNotNull(eventClass, "eventClass");
-        Preconditions.checkNotNull(eventClass, "observer");
+        assert eventClass != null;
+        assert observer != null;
 
         @SuppressWarnings("unchecked")
         Subscribers<E> subscribers = (Subscribers<E>) subscribersMap.get(eventClass);
@@ -47,7 +46,7 @@ public class BaseEventBus implements EventBus {
     }
 
     public <E extends Message> void publish(E event) {
-        Preconditions.checkNotNull(event, "event");
+        assert event != null;
 
         @SuppressWarnings("unchecked")
         Subscribers<E> subscribers = (Subscribers<E>) subscribersMap.get(event.getClass());

@@ -16,10 +16,9 @@
 
 package org.brooth.jeta.collector;
 
-import com.google.common.base.Preconditions;
 import org.brooth.jeta.MasterClassController;
-import org.brooth.jeta.metasitory.Metasitory;
 import org.brooth.jeta.Provider;
+import org.brooth.jeta.metasitory.Metasitory;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public class ObjectCollectorController extends MasterClassController<Object, Obj
     }
 
     public List<Provider<?>> getObjects(Class<? extends Annotation> annotation) {
-        Preconditions.checkNotNull(annotation, "annotation");
+        assert annotation != null;
 
         List<Provider<?>> result = new ArrayList<Provider<?>>();
         for (ObjectCollectorMetacode collector : metacodes) {

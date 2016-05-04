@@ -16,8 +16,6 @@
 
 package org.brooth.jeta.metasitory;
 
-import com.google.common.base.Objects;
-
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -72,7 +70,7 @@ public final class Criteria {
 
         public Builder usesAny(Class<? extends Annotation> value) {
             if (criteria.usesAny == null)
-                criteria.usesAny = new HashSet<Class<? extends Annotation>>();
+                criteria.usesAny = new HashSet<>();
             criteria.usesAny.add(value);
             return this;
         }
@@ -105,20 +103,29 @@ public final class Criteria {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
 
         Criteria criteria = (Criteria) o;
-        return Objects.equal(masterEq, criteria.masterEq) &&
-                Objects.equal(masterEqDeep, criteria.masterEqDeep) &&
-                Objects.equal(usesAny, criteria.usesAny) &&
-                Objects.equal(usesAll, criteria.usesAll);
+
+        if (masterEq != null ? !masterEq.equals(criteria.masterEq) : criteria.masterEq != null)
+            return false;
+        if (masterEqDeep != null ? !masterEqDeep.equals(criteria.masterEqDeep) : criteria.masterEqDeep != null)
+            return false;
+        if (usesAny != null ? !usesAny.equals(criteria.usesAny) : criteria.usesAny != null)
+            return false;
+        return usesAll != null ? usesAll.equals(criteria.usesAll) : criteria.usesAll == null;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(masterEq, masterEqDeep, usesAny, usesAll);
+        int result = masterEq != null ? masterEq.hashCode() : 0;
+        result = 31 * result + (masterEqDeep != null ? masterEqDeep.hashCode() : 0);
+        result = 31 * result + (usesAny != null ? usesAny.hashCode() : 0);
+        result = 31 * result + (usesAll != null ? usesAll.hashCode() : 0);
+        return result;
     }
 
     @Override

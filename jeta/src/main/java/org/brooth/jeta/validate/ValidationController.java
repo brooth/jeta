@@ -16,14 +16,11 @@
 
 package org.brooth.jeta.validate;
 
-import com.google.common.collect.Sets;
 import org.brooth.jeta.MasterController;
 import org.brooth.jeta.metasitory.Metasitory;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
@@ -31,11 +28,11 @@ import java.util.Set;
 public class ValidationController extends MasterController<Object, ValidatorMetacode<Object>> {
 
     public ValidationController(Metasitory metasitory, Object master) {
-        super(metasitory, master,
-                Sets.newHashSet(Validate.class,
-                        org.brooth.jeta.validate.alias.NotNull.class,
-                        org.brooth.jeta.validate.alias.NotBlank.class,
-                        org.brooth.jeta.validate.alias.NotEmpty.class));
+        super(metasitory, master, new HashSet<>(Arrays.asList(
+                Validate.class,
+                org.brooth.jeta.validate.alias.NotNull.class,
+                org.brooth.jeta.validate.alias.NotBlank.class,
+                org.brooth.jeta.validate.alias.NotEmpty.class)));
     }
 
     public ValidationController(Metasitory metasitory, Object master, Set<Class<? extends Annotation>> validators) {
@@ -49,7 +46,7 @@ public class ValidationController extends MasterController<Object, ValidatorMeta
     }
 
     public List<String> validateSafe() {
-        List<String> errors = new ArrayList<String>();
+        List<String> errors = new ArrayList<>();
         for (ValidatorMetacode<Object> metacode : metacodes)
             errors.addAll(metacode.applyValidation(master));
 
