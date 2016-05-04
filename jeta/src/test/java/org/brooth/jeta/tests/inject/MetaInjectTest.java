@@ -569,7 +569,7 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
-    @MetaEntity(of = String.class, scope = ExtScope.class)
+    @MetaEntity(of = String.class, ext = String.class, scope = ExtScope.class)
     public static class StringProviderExt {
         @Constructor
         static String get() {
