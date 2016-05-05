@@ -6,6 +6,10 @@ Documentation:
 --------------
 Please, read the docs on [jeta.brooth.org](http://jeta.brooth.org).
 
+Samples:
+-------
+[jeta-samples](https://github.com/brooth/jeta-samples)
+
 Installation (gradle):
 ----------------------
 
