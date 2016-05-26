@@ -151,7 +151,6 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                             Collection<StatementSpec> scopeVarStatements = varStatements.get(varScope);
                             List<String> paramFormats = new ArrayList<>(paramElements.size());
                             List<Object> paramArgs = new ArrayList<>(paramElements.size());
-                            List<TypeSpec> paramFactories = new ArrayList<>();
                             for (final VariableElement paramElement : paramElements) {
                                 StatementSpec varStatement = Iterables.find(scopeVarStatements, new Predicate<StatementSpec>() {
                                     @Override
@@ -163,7 +162,6 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                                 if (varStatement != null) {
                                     paramFormats.add(varStatement.format);
                                     paramArgs.addAll(Arrays.asList(varStatement.args));
-                                    paramFactories.addAll(varStatement.factories);
 
                                 } else {
                                     paramFormats.add("$L");
@@ -174,7 +172,6 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                             StatementSpec methodStatementSpec = new StatementSpec(varScope,
                                     (methodStatement + '(' + Joiner.on(", ").join(paramFormats) + ')'),
                                     paramArgs.toArray(new Object[paramArgs.size()]));
-                            methodStatementSpec.factories = paramFactories;
 
                             if (!statements.containsEntry(varScope, methodStatementSpec)) {
                                 statements.put(varScope, methodStatementSpec);
@@ -221,12 +218,8 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                         .beginControlFlow("if(scope.isAssignable($T.class))", scopeClassName)
                         .addStatement("final $T s = ($T) scope", scopeMetacodeClassName, scopeMetacodeClassName);
 
-                for (StatementSpec statement : statements.get(scopeElement)) {
+                for (StatementSpec statement : statements.get(scopeElement))
                     methodBuilder.addStatement(statement.format, statement.args);
-                    for (TypeSpec factory : statement.factories) {
-                        builder.addType(factory);
-                    }
-                }
 
                 methodBuilder.endControlFlow();
             }
@@ -316,15 +309,11 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                 elementTypeStr.replaceAll("\\.", "_"), ClassName.bestGuess(scopeStr).simpleName(), getInstanceStr);
     }
 
-    private int factoryIndex = 0;
-
     private StatementSpec getFactoryStatement(TypeElement scopeElement, TypeElement element, String statementPrefix) {
-        String name = element.getSimpleName().toString() + "Impl" + factoryIndex++;
-
-        TypeSpec.Builder factoryBuilder = TypeSpec.classBuilder(name)
-                .addModifiers(Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC)
+        TypeSpec.Builder factoryBuilder = TypeSpec.anonymousClassBuilder("")
                 .addSuperinterface(ClassName.bestGuess(element.getQualifiedName().toString()));
 
+        String scope = scopeElement.getQualifiedName().toString();
         for (Element subElement : element.getEnclosedElements())
             if (subElement.getKind() == ElementKind.METHOD) {
                 ExecutableElement method = (ExecutableElement) subElement;
@@ -343,6 +332,8 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                 if (subStatement == null)
                     return null;
 
+                // todo: lookup lowest scope
+
                 MethodSpec.Builder methodSpec = MethodSpec.methodBuilder(method.getSimpleName().toString())
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
@@ -356,20 +347,10 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                 factoryBuilder.addMethod(methodSpec.build());
             }
 
-        ClassName scopeClassName = ClassName.get(scopeElement);
-        ClassName scopeMetacodeClassName = ClassName.get(scopeClassName.packageName(),
-                MetacodeUtils.toSimpleMetacodeName(scopeClassName.toString()), "MetaScopeImpl");
+        if(scope == null)
+            return null;
 
-        StatementSpec statement = new StatementSpec(scopeElement.getQualifiedName().toString(),
-                statementPrefix + "new $L(s)", name);
-        statement.factories.add(factoryBuilder
-                .addField(scopeMetacodeClassName, "s", Modifier.PRIVATE, Modifier.FINAL)
-                .addMethod(MethodSpec.constructorBuilder()
-                        .addParameter(scopeMetacodeClassName, "s")
-                        .addStatement("this.s = s")
-                        .build())
-                .build());
-        return statement;
+        return new StatementSpec(scope, statementPrefix + "$L", factoryBuilder.build());
     }
 
     private String getGenericType(String type) {
@@ -422,7 +403,6 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
         String providerScopeStr;
         String format;
         Object[] args;
-        List<TypeSpec> factories = new ArrayList<>();
         Element element;
 
         private StatementSpec(String providerScopeStr, String format, Object... args) {
@@ -433,8 +413,11 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+
             StatementSpec that = (StatementSpec) o;
             if (com.google.common.base.Objects.equal(providerScopeStr, that.providerScopeStr) &&
                     Objects.equal(format, that.format) &&
