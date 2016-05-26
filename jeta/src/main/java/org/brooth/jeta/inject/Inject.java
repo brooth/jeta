@@ -23,6 +23,6 @@ import java.lang.annotation.Target;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.METHOD})
 public @interface Inject {
 }

@@ -21,6 +21,6 @@ include ':jeta-apt'
 include ':jeta'
 
 gradle.ext.GROUP_ID = 'org.brooth.jeta'
-gradle.ext.VERSION = '1.3'
-gradle.ext.VERSION_DESC = 'remove google-guava from runtime dependencies'
+gradle.ext.VERSION = '1.4'
+gradle.ext.VERSION_DESC = 'inject methods'
 gradle.ext.VERSION_VCS_TAG = gradle.VERSION

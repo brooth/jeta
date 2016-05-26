@@ -19,9 +19,9 @@ package org.brooth.jeta.apt.processors;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import com.google.common.base.Objects;
+import com.google.common.base.Predicate;
+import com.google.common.collect.*;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.Factory;
 import org.brooth.jeta.apt.MetacodeUtils;
@@ -50,9 +50,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
 
     private TypeElement module;
     private List<TypeElement> moduleScopes;
-
     private String providerAlias = null;
-
 
     public MetaInjectProcessor() {
         super(Inject.class);
@@ -95,6 +93,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
         ArrayList<Element> unhandledElements = new ArrayList<>(context.elements());
         buildInjectMethod(builder, context, masterElement, masterClassName, false, unhandledElements);
         buildInjectMethod(builder, context, masterElement, masterClassName, true, unhandledElements);
+
         if (!unhandledElements.isEmpty()) {
             List<String> elements = new ArrayList<>();
             for (Element element : unhandledElements)
@@ -120,32 +119,95 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
         }
 
         methodBuilder.addAnnotation(Override.class).addModifiers(Modifier.PUBLIC).returns(void.class);
-        Multimap<String, StatementSpec> statements = HashMultimap.create();
+        Multimap<String, StatementSpec> statements = ArrayListMultimap.create();
         for (TypeElement scopeElement : moduleScopes) {
             for (Element element : context.elements()) {
-                String fieldNameStr = element.getSimpleName().toString();
-                String fieldStatement = null;
+                if (element.getKind() == ElementKind.METHOD) {
+                    String methodStatement = null;
+                    if (staticMeta) {
+                        if (element.getModifiers().contains(Modifier.STATIC))
+                            methodStatement = String.format("%1$s.%2$s",
+                                    masterElement.getQualifiedName().toString(), element.getSimpleName().toString());
+                    } else {
+                        if (!element.getModifiers().contains(Modifier.STATIC))
+                            methodStatement = String.format("master.%1$s", element.getSimpleName().toString());
+                    }
+                    if (methodStatement == null)
+                        continue;
 
-                if (staticMeta) {
-                    if (element.getModifiers().contains(Modifier.STATIC))
-                        fieldStatement = String.format("%1$s.%2$s =\n",
-                                masterElement.getQualifiedName().toString(), fieldNameStr);
+                    ExecutableElement methodElement = (ExecutableElement) element;
+                    List<? extends VariableElement> paramElements = methodElement.getParameters();
+                    Multimap<String, StatementSpec> varStatements = HashMultimap.create();
+                    for (VariableElement paramElement : paramElements) {
+                        StatementSpec statement = getResultStatement(scopeElement, paramElement.asType(), "", "getInstance()");
+                        if (statement != null) {
+                            statement.element = paramElement;
+                            varStatements.put(statement.providerScopeStr, statement);
+                        }
+                    }
+
+                    if (!varStatements.isEmpty()) {
+                        for (String varScope : varStatements.keySet()) {
+                            Collection<StatementSpec> scopeVarStatements = varStatements.get(varScope);
+                            List<String> paramFormats = new ArrayList<>(paramElements.size());
+                            List<Object> paramArgs = new ArrayList<>(paramElements.size());
+                            List<TypeSpec> paramFactories = new ArrayList<>();
+                            for (final VariableElement paramElement : paramElements) {
+                                StatementSpec varStatement = Iterables.find(scopeVarStatements, new Predicate<StatementSpec>() {
+                                    @Override
+                                    public boolean apply(StatementSpec input) {
+                                        return input.element == paramElement;
+                                    }
+                                }, null);
+
+                                if (varStatement != null) {
+                                    paramFormats.add(varStatement.format);
+                                    paramArgs.addAll(Arrays.asList(varStatement.args));
+                                    paramFactories.addAll(varStatement.factories);
+
+                                } else {
+                                    paramFormats.add("$L");
+                                    paramArgs.add("null");
+                                }
+                            }
+
+                            StatementSpec methodStatementSpec = new StatementSpec(varScope,
+                                    (methodStatement + '(' + Joiner.on(", ").join(paramFormats) + ')'),
+                                    paramArgs.toArray(new Object[paramArgs.size()]));
+                            methodStatementSpec.factories = paramFactories;
+
+                            if (!statements.containsEntry(varScope, methodStatementSpec)) {
+                                statements.put(varScope, methodStatementSpec);
+                                unhandledElements.remove(element);
+                            }
+                        }
+                    }
+
+                } else if (element.getKind() == ElementKind.FIELD) {
+                    String fieldStatement = null;
+
+                    if (staticMeta) {
+                        if (element.getModifiers().contains(Modifier.STATIC))
+                            fieldStatement = String.format("%1$s.%2$s =\n",
+                                    masterElement.getQualifiedName().toString(), element.getSimpleName().toString());
+                    } else {
+                        if (!element.getModifiers().contains(Modifier.STATIC))
+                            fieldStatement = String.format("master.%1$s = ", element.getSimpleName().toString());
+                    }
+                    if (fieldStatement == null)
+                        continue;
+
+                    StatementSpec statement = getResultStatement(scopeElement, element.asType(), fieldStatement, "getInstance()");
+                    if (statement != null) {
+                        statement.element = element;
+                        if (!statements.containsEntry(statement.providerScopeStr, statement)) {
+                            statements.put(statement.providerScopeStr, statement);
+                            unhandledElements.remove(element);
+                        }
+                    }
 
                 } else {
-                    if (!element.getModifiers().contains(Modifier.STATIC))
-                        fieldStatement = String.format("master.%1$s = ", fieldNameStr);
-                }
-                if (fieldStatement == null)
-                    continue;
-
-                StatementSpec statement = getResultStatement(scopeElement, element.asType(), fieldStatement, "getInstance()");
-                if (statement != null) {
-                    statement.element = element;
-                    if (!(statements.containsKey(statement.providerScopeStr) &&
-                            statements.get(statement.providerScopeStr).contains(statement)))
-                        statements.put(statement.providerScopeStr, statement);
-
-                    unhandledElements.remove(element);
+                    throw new ProcessingException("Unhandled injection element type " + element.getKind());
                 }
             }
         }
@@ -161,8 +223,9 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
 
                 for (StatementSpec statement : statements.get(scopeElement)) {
                     methodBuilder.addStatement(statement.format, statement.args);
-                    if (statement.factory != null)
-                        builder.addType(statement.factory);
+                    for (TypeSpec factory : statement.factories) {
+                        builder.addType(factory);
+                    }
                 }
 
                 methodBuilder.endControlFlow();
@@ -193,7 +256,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                             .addStatement(statement.format, statement.args)
                             .build())
                     .build();
-            return new StatementSpec(scopeStr, statementPrefix + " $L", providerTypeSpec);
+            return new StatementSpec(scopeStr, statementPrefix + "$L", providerTypeSpec);
         }
 
         if (returnTypeStr.equals("org.brooth.jeta.Lazy")) {
@@ -221,7 +284,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                             .addStatement("return instance")
                             .build())
                     .build();
-            return new StatementSpec(scopeStr, statementPrefix + " $L", lazyTypeSpec);
+            return new StatementSpec(scopeStr, statementPrefix + "$L", lazyTypeSpec);
         }
 
         if (returnTypeStr.equals("java.lang.Class")) {
@@ -299,13 +362,13 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
 
         StatementSpec statement = new StatementSpec(scopeElement.getQualifiedName().toString(),
                 statementPrefix + "new $L(s)", name);
-        statement.factory = factoryBuilder
+        statement.factories.add(factoryBuilder
                 .addField(scopeMetacodeClassName, "s", Modifier.PRIVATE, Modifier.FINAL)
                 .addMethod(MethodSpec.constructorBuilder()
                         .addParameter(scopeMetacodeClassName, "s")
                         .addStatement("this.s = s")
                         .build())
-                .build();
+                .build());
         return statement;
     }
 
@@ -359,7 +422,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
         String providerScopeStr;
         String format;
         Object[] args;
-        TypeSpec factory;
+        List<TypeSpec> factories = new ArrayList<>();
         Element element;
 
         private StatementSpec(String providerScopeStr, String format, Object... args) {
@@ -372,15 +435,25 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-
             StatementSpec that = (StatementSpec) o;
+            if (com.google.common.base.Objects.equal(providerScopeStr, that.providerScopeStr) &&
+                    Objects.equal(format, that.format) &&
+                    Objects.equal(element, that.element) &&
+                    args != null && that.args != null &&
+                    args.length == that.args.length) {
+                for (int i = 0; i < args.length; i++) {
+                    if (!args[i].toString().equals(that.args[i].toString()))
+                        return false;
+                }
+                return true;
+            }
 
-            return element != null ? element.equals(that.element) : that.element == null;
+            return false;
         }
 
         @Override
         public int hashCode() {
-            return element != null ? element.hashCode() : 0;
+            return Objects.hashCode(providerScopeStr, format, element);
         }
     }
 }

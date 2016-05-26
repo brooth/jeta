@@ -226,7 +226,8 @@ public class MetaInjectTest extends BaseTest {
         assertFalse(holder.lazy.get() == holder.provider.get());
 
         assertThat(holder.javaxProvider, notNullValue());
-        assertThat(holder.javaxProvider.get().value, is("one"));    }
+        assertThat(holder.javaxProvider.get().value, is("one"));
+    }
 
     public static class MetaEntityTwo {
         String value;
@@ -662,5 +663,126 @@ public class MetaInjectTest extends BaseTest {
         assertTrue(items.get(0).getMasterClass() == MetaEntitySixExtExt.class);
         assertTrue(items.get(1).getMasterClass() == MetaEntitySixExt.class);
         assertTrue(items.get(2).getMasterClass() == MetaEntitySix.class);
+    }
+
+    public static class MetaMethodEntityHolder {
+        MetaEntityOne entity;
+        Lazy<MetaEntityOne> lazy;
+        Provider<MetaEntityOne> provider;
+
+        static Class<? extends MetaEntityOne> clazz;
+
+        @Inject
+        MetaEntityOne entity2;
+
+        MetaEntityOne factoryEntity1;
+        MetaEntityOne factoryEntity2;
+        MetaEntityOne factoryEntity3;
+
+        MetaEntityOne scopeEntity1;
+        MetaCustomScopeEntity scopeEntity2;
+
+        MetaEntitySix extEntity;
+
+        @Inject
+        void inject(MetaEntitySix entity1) {
+            this.extEntity = entity1;
+        }
+
+        @Factory
+        public interface MetaFactory {
+            MetaEntityOne get();
+        }
+
+        @Factory
+        public interface MetaFactory2 {
+            MetaEntityOne get();
+        }
+
+        @Inject
+        void inject(MetaFactory factory) {
+            this.factoryEntity1 = factory.get();
+        }
+
+        @Inject
+        void inject(MetaFactory factory, MetaFactory2 factory2) {
+            this.factoryEntity2 = factory.get();
+            this.factoryEntity3 = factory2.get();
+        }
+
+        @Inject
+        void inject(MetaEntityOne param1) {
+            this.entity = param1;
+        }
+
+        @Inject
+        void inject(Lazy<MetaEntityOne> param1, Provider<MetaEntityOne> provider) {
+            this.lazy = param1;
+            this.provider = provider;
+        }
+
+        @Inject
+        static void inject(Class<? extends MetaEntityOne> clazz) {
+            MetaMethodEntityHolder.clazz = clazz;
+        }
+
+        @Inject
+        void inject(MetaEntityOne entity1, MetaCustomScopeEntity entity2) {
+            this.scopeEntity1 = entity1;
+            this.scopeEntity2 = entity2;
+        }
+    }
+
+    @Test
+    public void testMethodInject() {
+        logger.debug("testMethodInject()");
+
+        MetaMethodEntityHolder holder = new MetaMethodEntityHolder();
+        MetaHelper.injectMeta(holder);
+        assertThat(holder.entity, notNullValue());
+        assertThat(holder.entity.value, is("one"));
+
+        assertThat(holder.lazy, notNullValue());
+        assertThat(holder.lazy.get().value, is("one"));
+
+        assertThat(holder.provider, notNullValue());
+        assertThat(holder.provider.get().value, is("one"));
+
+        assertTrue(holder.lazy.get() == holder.lazy.get());
+        assertFalse(holder.provider.get() == holder.provider.get());
+
+        assertFalse(holder.entity == holder.lazy.get());
+        assertFalse(holder.entity == holder.provider.get());
+        assertFalse(holder.lazy.get() == holder.provider.get());
+
+        assertThat(holder.entity2, notNullValue());
+        assertThat(holder.entity2.value, is("one"));
+
+        assertThat(holder.extEntity, notNullValue());
+        assertThat(holder.extEntity.getValue(), is("six"));
+
+        assertThat(holder.factoryEntity1, notNullValue());
+        assertThat(holder.factoryEntity1.value, is("one"));
+        assertThat(holder.factoryEntity2, notNullValue());
+        assertThat(holder.factoryEntity2.value, is("one"));
+        assertThat(holder.factoryEntity3, notNullValue());
+        assertThat(holder.factoryEntity3.value, is("one"));
+
+        assertThat(holder.scopeEntity1, notNullValue());
+        assertThat(holder.scopeEntity1.value, is("one"));
+        assertThat(holder.scopeEntity2, nullValue());
+
+        MetaHelper.injectMeta(MetaHelper.getMetaScope(new CustomScope()), holder);
+        assertThat(holder.scopeEntity1, nullValue());
+        assertThat(holder.scopeEntity2, notNullValue());
+
+        holder.extEntity = null;
+        MetaHelper.injectMeta(MetaHelper.getMetaScope(new ExtScope()), holder);
+        assertThat(holder.extEntity, notNullValue());
+        assertThat(holder.extEntity.getValue(), is("six ext"));
+
+        MetaHelper.injectStaticMeta(MetaMethodEntityHolder.clazz);
+        assertThat(MetaMethodEntityHolder.clazz, notNullValue());
+        assertEquals(MetaMethodEntityHolder.clazz, MetaEntityOne.class);
     }
 }
