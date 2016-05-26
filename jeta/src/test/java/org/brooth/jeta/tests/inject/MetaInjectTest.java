@@ -460,6 +460,8 @@ public class MetaInjectTest extends BaseTest {
             MetaDefaultScopeEntity getDefault();
 
             MetaExtScopeEntity getExt();
+
+            MetaCustomScopeEntity getCustom();
         }
     }
 
@@ -474,7 +476,11 @@ public class MetaInjectTest extends BaseTest {
         assertThat(holder.customScopeFactory.get(), notNullValue());
         assertThat(holder.defaultScopeFactory, nullValue());
         assertThat(holder.extScopeFactory, nullValue());
-        assertThat(holder.mixedScopeFactory, nullValue());
+
+        assertThat(holder.mixedScopeFactory, notNullValue());
+        assertThat(holder.mixedScopeFactory.getCustom(), notNullValue());
+        assertThat(holder.mixedScopeFactory.getDefault(), nullValue());
+        assertThat(holder.mixedScopeFactory.getExt(), nullValue());
 
         MetaHelper.injectMeta(MetaHelper.getMetaScope(new ExtScope()), holder);
         assertThat(holder.customScopeFactory, notNullValue());
@@ -486,6 +492,7 @@ public class MetaInjectTest extends BaseTest {
         assertThat(holder.mixedScopeFactory, notNullValue());
         assertThat(holder.mixedScopeFactory.getDefault(), notNullValue());
         assertThat(holder.mixedScopeFactory.getExt(), notNullValue());
+        assertThat(holder.mixedScopeFactory.getCustom(), nullValue());
     }
 
     @MetaEntity

@@ -96,6 +96,19 @@ public abstract class AbstractLookupScopeProcessor extends AbstractProcessor {
         return null;
     }
 
+    protected boolean isAssignableScope(String scope, String scope2) {
+        if (scope.equals(scope2))
+            return true;
+
+        Elements elements = processingContext.processingEnv().getElementUtils();
+        final TypeElement scopeElement = elements.getTypeElement(scope);
+        Scope annotation = scopeElement.getAnnotation(Scope.class);
+        if (annotation == null)
+            throw new ProcessingException(scope + "is not a scope");
+        String ext = getExtClass(annotation);
+        return !isVoid(ext) && (ext.equals(scope2) || isAssignableScope(ext, scope2));
+    }
+
     protected boolean isVoid(String str) {
         return str.equals(Void.class.getCanonicalName());
     }

@@ -210,7 +210,15 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
         }
 
         if (!statements.isEmpty()) {
-            for (String scopeElement : statements.keySet()) {
+            List<String> scopes = new ArrayList<>(statements.keySet());
+            Collections.sort(scopes, new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    return isAssignableScope(o1, o2) ? 1 : -1;
+                }
+            });
+
+            for (String scopeElement : scopes) {
                 ClassName scopeClassName = ClassName.bestGuess(scopeElement);
                 ClassName scopeMetacodeClassName = ClassName.get(scopeClassName.packageName(),
                         MetacodeUtils.toSimpleMetacodeName(scopeClassName.toString()), "MetaScopeImpl");
@@ -313,10 +321,13 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
         TypeSpec.Builder factoryBuilder = TypeSpec.anonymousClassBuilder("")
                 .addSuperinterface(ClassName.bestGuess(element.getQualifiedName().toString()));
 
-        String scope = scopeElement.getQualifiedName().toString();
+        String scope = null;
+        List<SubStatementContext> subStatements = new ArrayList<>();
         for (Element subElement : element.getEnclosedElements())
             if (subElement.getKind() == ElementKind.METHOD) {
                 ExecutableElement method = (ExecutableElement) subElement;
+                String methodName = method.getSimpleName().toString();
+
                 // name -> type
                 List<String> paramNames = new ArrayList<>();
                 Map<String, TypeMirror> params = new LinkedHashMap<String, TypeMirror>();
@@ -329,28 +340,52 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
                 TypeMirror methodReturnType = method.getReturnType();
                 StatementSpec subStatement = getResultStatement(scopeElement, methodReturnType, "return ",
                         "getInstance(" + Joiner.on(',').join(paramNames) + ")");
-                if (subStatement == null)
-                    return null;
-
-                // todo: lookup lowest scope
-
-                MethodSpec.Builder methodSpec = MethodSpec.methodBuilder(method.getSimpleName().toString())
-                        .addAnnotation(Override.class)
-                        .addModifiers(Modifier.PUBLIC)
-                        .returns(TypeName.get(methodReturnType));
-
-                for (String paramName : params.keySet()) {
-                    methodSpec.addParameter(TypeName.get(params.get(paramName)), paramName, Modifier.FINAL);
+                if (subStatement == null) {
+                    subStatements.add(new SubStatementContext(new StatementSpec(null, "return null"),
+                            methodName, params, methodReturnType));
+                    continue;
                 }
 
-                methodSpec.addStatement(subStatement.format, subStatement.args);
-                factoryBuilder.addMethod(methodSpec.build());
+                if (scope == null)
+                    scope = subStatement.providerScopeStr;
+                else if (!isAssignableScope(scope, subStatement.providerScopeStr))
+                    scope = subStatement.providerScopeStr;
+
+                subStatements.add(new SubStatementContext(subStatement, methodName, params, methodReturnType));
             }
 
-        if(scope == null)
+        if (scope == null)
             return null;
 
+        for (SubStatementContext subStatement : subStatements) {
+            MethodSpec.Builder methodSpec = MethodSpec.methodBuilder(subStatement.methodName)
+                    .addAnnotation(Override.class)
+                    .addModifiers(Modifier.PUBLIC)
+                    .returns(TypeName.get(subStatement.returnType));
+
+            for (String paramName : subStatement.params.keySet()) {
+                methodSpec.addParameter(TypeName.get(subStatement.params.get(paramName)), paramName, Modifier.FINAL);
+            }
+
+            methodSpec.addStatement(subStatement.spec.format, subStatement.spec.args);
+            factoryBuilder.addMethod(methodSpec.build());
+        }
+
         return new StatementSpec(scope, statementPrefix + "$L", factoryBuilder.build());
+    }
+
+    private static class SubStatementContext {
+        private StatementSpec spec;
+        private String methodName;
+        private Map<String, TypeMirror> params;
+        private TypeMirror returnType;
+
+        public SubStatementContext(StatementSpec spec, String methodName, Map<String, TypeMirror> params, TypeMirror returnType) {
+            this.spec = spec;
+            this.methodName = methodName;
+            this.params = params;
+            this.returnType = returnType;
+        }
     }
 
     private String getGenericType(String type) {
