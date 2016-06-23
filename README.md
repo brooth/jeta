@@ -2,7 +2,7 @@ Jeta
 ====
 `Jeta` - is an Open Source library, built on the top of `javax.annotation.processing`.
 
-Documentation:
+Tutorials:
 --------------
 Please, read the docs on [jeta.brooth.org](http://jeta.brooth.org).
 
@@ -19,8 +19,8 @@ repositories {
 }
 
 dependencies {
-    apt 'org.brooth.jeta:jeta-apt:1.3'
-    compile 'org.brooth.jeta:jeta:1.3'
+    apt 'org.brooth.jeta:jeta-apt:1.4'
+    compile 'org.brooth.jeta:jeta:1.4'
 }
 ```
 
