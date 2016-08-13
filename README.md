@@ -4,7 +4,7 @@ Jeta
 
 Tutorials:
 --------------
-Please, read the docs on [jeta.brooth.org](http://jeta.brooth.org).
+Read the docs on [jeta.brooth.org](http://jeta.brooth.org).
 
 Samples:
 -------
@@ -19,15 +19,16 @@ repositories {
 }
 
 dependencies {
-    apt 'org.brooth.jeta:jeta-apt:1.4'
-    compile 'org.brooth.jeta:jeta:1.4'
+    apt 'org.brooth.jeta:jeta-apt:2.0'
+    compile 'org.brooth.jeta:jeta:2.0'
 }
 ```
+[Here](https://plugins.gradle.org/search?term=apt) to can find `apt` plugins.
 
 License
 -------
 
-    Copyright 2015 Oleg Khalidov
+    Copyright 2016 Oleg Khalidov
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
