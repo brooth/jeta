@@ -16,7 +16,7 @@
 
 package org.brooth.jeta.util;
 
-import org.brooth.jeta.IMetacode;
+import org.brooth.jeta.Metacode;
 import org.brooth.jeta.metasitory.Criteria;
 import org.brooth.jeta.metasitory.Metasitory;
 
@@ -39,11 +39,11 @@ public class ImplementationController<I> {
         assert metasitory != null;
         assert of != null;
 
-        Collection<IMetacode<?>> allImplementers =
+        Collection<Metacode<?>> allImplementers =
                 metasitory.search(new Criteria.Builder().usesAny(Implementation.class).build());
 
         metacodes = new ArrayList<>(allImplementers.size());
-        for (IMetacode<?> iMetacode : allImplementers) {
+        for (Metacode<?> iMetacode : allImplementers) {
             @SuppressWarnings("unchecked")
             ImplementationMetacode<I> metacode = (ImplementationMetacode<I>) iMetacode;
             if (metacode.getImplementationOf() == of)

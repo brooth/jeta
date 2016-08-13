@@ -25,5 +25,5 @@ public interface MetaScope<S> {
 
     S getScope();
 
-    <E> IMetaEntity<? extends E> getMetaEntity(Class<E> entityClass);
+    <E> MetaProducer<? extends E> getMetaProducer(Class<E> entityClass);
 }

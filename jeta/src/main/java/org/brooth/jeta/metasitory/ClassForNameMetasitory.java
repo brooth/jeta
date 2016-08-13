@@ -16,7 +16,7 @@
 
 package org.brooth.jeta.metasitory;
 
-import org.brooth.jeta.IMetacode;
+import org.brooth.jeta.Metacode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.List;
 public class ClassForNameMetasitory implements Metasitory {
 
     @Override
-    public List<IMetacode<?>> search(Criteria c) {
+    public List<Metacode<?>> search(Criteria c) {
         if (c.getUsesAny() != null)
             throw new UnsupportedOperationException("Criteria.usesAny not supported.");
         if (c.getUsesAll() != null)
@@ -35,7 +35,7 @@ public class ClassForNameMetasitory implements Metasitory {
 
         Class<?> masterClass = c.getMasterEq() != null ? c.getMasterEq() : c.getMasterEqDeep();
         Class<?> metacodeClass;
-        List<IMetacode<?>> result = new ArrayList<IMetacode<?>>();
+        List<Metacode<?>> result = new ArrayList<Metacode<?>>();
         while (masterClass != null) {
             try {
                 metacodeClass = Class.forName(masterClass.getName().replaceAll("\\$", "_") + "_Metacode");
@@ -45,7 +45,7 @@ public class ClassForNameMetasitory implements Metasitory {
             }
 
             try {
-                result.add((IMetacode<?>) metacodeClass.newInstance());
+                result.add((Metacode<?>) metacodeClass.newInstance());
 
             } catch (Exception e) {
                 throw new IllegalArgumentException("Failed to initiate class " + metacodeClass, e);

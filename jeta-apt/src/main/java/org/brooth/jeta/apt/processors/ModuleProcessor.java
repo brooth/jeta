@@ -37,6 +37,7 @@ import javax.annotation.Nullable;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,14 +45,14 @@ import java.util.Set;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 
-public class MetaModuleProcessor extends AbstractProcessor {
+public class ModuleProcessor extends AbstractProcessor {
 
-    private Set<? extends Element> allMetaEntities;
+    private Set<Element> allProducers;
 
     @Nullable
     private String defaultScopeStr;
 
-    public MetaModuleProcessor() {
+    public ModuleProcessor() {
         super(Module.class);
     }
 
@@ -63,7 +64,7 @@ public class MetaModuleProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
-        if (allMetaEntities != null)
+        if (allProducers != null)
             throw new ProcessingException("Multiple modules defined");
 
         TypeElement moduleElement = (TypeElement) context.elements().iterator().next();
@@ -81,7 +82,9 @@ public class MetaModuleProcessor extends AbstractProcessor {
             }
         });
 
-        allMetaEntities = context.roundEnv().getElementsAnnotatedWith(MetaEntity.class);
+        allProducers = new HashSet<>();
+        allProducers.addAll(context.roundEnv().getElementsAnnotatedWith(Producer.class));
+
         List<AnnotationSpec> scopeAnnotationBuilders = new ArrayList<>(scopes.size());
         AnnotationSpec.Builder moduleConfigAnnotationBuilder = AnnotationSpec.builder(ModuleConfig.class);
 
@@ -106,12 +109,12 @@ public class MetaModuleProcessor extends AbstractProcessor {
             Iterable<ClassName> entities = Iterables.transform(scopeEntities, new Function<Element, ClassName>() {
                 @Override
                 public ClassName apply(Element input) {
-                    MetaEntity metaEntityAnnotation = input.getAnnotation(MetaEntity.class);
                     try {
-                        String ofTypeStr = getOfClass(metaEntityAnnotation);
+                        final Producer producerAnnotation = input.getAnnotation(Producer.class);
+                        String ofTypeStr = getOfClass(producerAnnotation);
                         if (isVoid(ofTypeStr))
                             return ClassName.get((TypeElement) input);
-                        if (ofTypeStr.equals(getExtClass(metaEntityAnnotation)))
+                        if (ofTypeStr.equals(getExtClass(producerAnnotation)))
                             return ClassName.get(Void.class);
 
                         return ClassName.bestGuess(ofTypeStr);
@@ -149,7 +152,7 @@ public class MetaModuleProcessor extends AbstractProcessor {
     }
 
     @Nonnull
-    private String getOfClass(final MetaEntity annotation) {
+    private String getOfClass(final Producer annotation) {
         return MetacodeUtils.extractClassName(new Runnable() {
             public void run() {
                 annotation.of();
@@ -158,7 +161,7 @@ public class MetaModuleProcessor extends AbstractProcessor {
     }
 
     @Nonnull
-    private String getExtClass(final MetaEntity annotation) {
+    private String getExtClass(final Producer annotation) {
         return MetacodeUtils.extractClassName(new Runnable() {
             public void run() {
                 annotation.ext();
@@ -179,12 +182,12 @@ public class MetaModuleProcessor extends AbstractProcessor {
         final String scopeClassStr = scopeElement.getQualifiedName().toString();
         final boolean isDefaultScope = defaultScopeStr != null && defaultScopeStr.equals(scopeClassStr);
 
-        return Sets.filter(allMetaEntities, new Predicate<Element>() {
+        return Sets.filter(allProducers, new Predicate<Element>() {
             public boolean apply(Element input) {
-                final MetaEntity a = input.getAnnotation(MetaEntity.class);
+                final Producer producerAnnotation = input.getAnnotation(Producer.class);
                 String scope = MetacodeUtils.extractClassName(new Runnable() {
                     public void run() {
-                        a.scope();
+                        producerAnnotation.scope();
                     }
                 });
 
@@ -194,7 +197,7 @@ public class MetaModuleProcessor extends AbstractProcessor {
                 if (isVoid(scope)) {
                     if (defaultScopeStr == null)
                         throw new ProcessingException("Scope undefined for '" + input.getSimpleName().toString() + "'. " +
-                                "You need to set the scope via @MetaEntity(scope) or define default one as 'inject.scope.default' property");
+                                "You need to set the scope via @Producer(scope) or define default one as 'inject.scope.default' property");
                     if (isDefaultScope)
                         return true;
                 }

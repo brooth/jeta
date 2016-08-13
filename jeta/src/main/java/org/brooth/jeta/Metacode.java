@@ -21,6 +21,6 @@ package org.brooth.jeta;
  *
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface IMetacode<M> {
+public interface Metacode<M> {
 	Class<M> getMasterClass(); 
 }

@@ -16,7 +16,7 @@
 
 package org.brooth.jeta.metasitory;
 
-import org.brooth.jeta.IMetacode;
+import org.brooth.jeta.Metacode;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -85,7 +85,7 @@ public class MapMetasitory implements Metasitory {
         }
     }
 
-    public Collection<IMetacode<?>> search(Criteria criteria) {
+    public Collection<Metacode<?>> search(Criteria criteria) {
         if (Criteria.VERSION > SUPPORTED_CRITERIA_VERSION)
             throw new IllegalArgumentException("Criteria version " + Criteria.VERSION + " not supported");
 
@@ -104,7 +104,7 @@ public class MapMetasitory implements Metasitory {
         if (selection.isEmpty())
             return Collections.emptyList();
 
-        List<IMetacode<?>> result = new ArrayList<>(selection.values().size());
+        List<Metacode<?>> result = new ArrayList<>(selection.values().size());
         for (MapMetasitoryContainer.Context context : selection.values())
             result.add(context.metacodeProvider.get());
         return result;

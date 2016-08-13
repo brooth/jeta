@@ -16,7 +16,7 @@
 
 package org.brooth.jeta.proxy;
 
-import org.brooth.jeta.IMetacode;
+import org.brooth.jeta.Metacode;
 import org.brooth.jeta.metasitory.Criteria;
 import org.brooth.jeta.metasitory.Metasitory;
 
@@ -44,7 +44,7 @@ public class ProxyController {
                 .usesAny(Proxy.class)
                 .build();
 
-        Collection<IMetacode<?>> metacodes = metasitory.search(criteria);
+        Collection<Metacode<?>> metacodes = metasitory.search(criteria);
         if (metacodes.size() > 1)
             throw new IllegalStateException("Metasitory returned more than one masterEq result");
         if (metacodes.size() == 1)

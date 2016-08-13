@@ -16,14 +16,14 @@
 
 package org.brooth.jeta.util;
 
-import org.brooth.jeta.IMetacode;
+import org.brooth.jeta.Metacode;
 import org.brooth.jeta.MasterClassController;
 import org.brooth.jeta.metasitory.Metasitory;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class SingletonController<M> extends MasterClassController<M, IMetacode<?>> {
+public class SingletonController<M> extends MasterClassController<M, Metacode<?>> {
 
     public SingletonController(Metasitory metasitory, Class<M> masterClass) {
         super(metasitory, masterClass, Singleton.class, false);
@@ -34,7 +34,7 @@ public class SingletonController<M> extends MasterClassController<M, IMetacode<?
         if (metacodes.size() > 1)
             throw new IllegalStateException("More than one metacode returned fot Criteria.masterEq");
 
-        IMetacode<?> singleton = metacodes.iterator().next();
+        Metacode<?> singleton = metacodes.iterator().next();
         if (singleton == null)
             throw new IllegalStateException(masterClass.getCanonicalName() +
                     " has not singleton meta code. No @Singleton annotation on it?");

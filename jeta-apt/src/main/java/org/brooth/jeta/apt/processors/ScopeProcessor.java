@@ -33,13 +33,14 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
+public class ScopeProcessor extends AbstractLookupScopeProcessor {
 
     @Nullable
     private String defaultScopeStr;
@@ -47,13 +48,13 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
     private static final String assignableStatement = "return scopeClass == $T.class";
     private static final String assignableExtStatement = assignableStatement + " || super.isAssignable(scopeClass)";
 
-    private final ClassName iMetaEntityClassName = ClassName.get(IMetaEntity.class);
+    private final ClassName metaProducerClassName = ClassName.get(MetaProducer.class);
     private final AnnotationSpec suppressWarningsUnchecked;
 
     private TypeElement module;
-    private Set<? extends Element> allMetaEntities;
+    private Set<Element> allProducers;
 
-    public MetaScopeProcessor() {
+    public ScopeProcessor() {
         super(Scope.class);
         suppressWarningsUnchecked = AnnotationSpec.builder(SuppressWarnings.class).addMember("value", "\"unchecked\"").build();
     }
@@ -67,7 +68,9 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
         if (context.round() == 1) {
             if (module == null) {
-                allMetaEntities = context.roundEnv().getElementsAnnotatedWith(MetaEntity.class);
+                allProducers = new HashSet<>();
+                allProducers.addAll(context.roundEnv().getElementsAnnotatedWith(Producer.class));
+
                 Set<? extends Element> modules = context.roundEnv().getElementsAnnotatedWith(Module.class);
                 if (modules.isEmpty())
                     throw new ProcessingException("No module defined. Create one and put @Module on it.");
@@ -148,60 +151,61 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
         metaScopeConstructorBuilder.addStatement("this.scope = scope");
 
         TypeVariableName eTypeVariableName = TypeVariableName.get("E", ClassName.OBJECT);
-        MethodSpec.Builder getMetaEntityMethodBuilder = MethodSpec.methodBuilder("getMetaEntity")
+        MethodSpec.Builder getMetaProducerMethodBuilder = MethodSpec.methodBuilder("getMetaProducer")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
                 .addAnnotation(suppressWarningsUnchecked)
                 .addTypeVariable(eTypeVariableName)
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Class.class), eTypeVariableName), "entityClass")
-                .returns(ParameterizedTypeName.get(ClassName.get(IMetaEntity.class),
+                .returns(ParameterizedTypeName.get(ClassName.get(MetaProducer.class),
                         WildcardTypeName.subtypeOf(eTypeVariableName)));
 
         String masterPackageStr = env.getElementUtils().getPackageOf(masterElement).getQualifiedName().toString();
         int entityImplFieldIndex = 0;
         for (Element entityElement : scopeEntities) {
-            TypeElement metaEntityElement = (TypeElement) entityElement;
-            MetaEntity metaEntityAnnotation = entityElement.getAnnotation(MetaEntity.class);
-            String metaEntityClassStr = metaEntityElement.getQualifiedName().toString();
+            TypeElement metaProducerElement = (TypeElement) entityElement;
+            String metaProducerClassStr = metaProducerElement.getQualifiedName().toString();
 
-            String ofTypeStr = getOfClass(metaEntityAnnotation);
+            final Producer producerAnnotation = entityElement.getAnnotation(Producer.class);
+            String ofTypeStr = getOfClass(producerAnnotation);
+            String extTypeStr = getExtClass(producerAnnotation);
+
             if (isVoid(ofTypeStr))
-                ofTypeStr = metaEntityClassStr;
+                ofTypeStr = metaProducerClassStr;
 
             ClassName ofClassName = ClassName.bestGuess(ofTypeStr);
 
-            String metaEntityNameStr = ofClassName.packageName().replace('.', '_') + '_' +
-                    MetacodeUtils.toSimpleMetaName(ofTypeStr, "_MetaEntity");
-            ClassName metaEntityClassName = ClassName.get(masterPackageStr,
-                    masterElement.getSimpleName() + "_Metacode." + metaEntityNameStr);
+            String metaProducerNameStr = ofClassName.packageName().replace('.', '_') + '_' +
+                    MetacodeUtils.toSimpleMetaName(ofTypeStr, "_MetaProducer");
+            ClassName producerMetacodeClassName = ClassName.get(masterPackageStr,
+                    masterElement.getSimpleName() + "_Metacode." + metaProducerNameStr);
 
             String entityImplNameStr = "entity" + entityImplFieldIndex++;
 
-            ClassName metaEntityImplClassName = ClassName.bestGuess(metaEntityClassStr);
-            ClassName metaEntityImplMetacodeClassName = ClassName.get(metaEntityImplClassName.packageName(),
-                    MetacodeUtils.toSimpleMetacodeName(metaEntityImplClassName.toString()), "MetaEntityImpl");
-            String metaEntityImplMethodName = ofClassName.packageName().replace('.', '_') + '_' +
-                    MetacodeUtils.toSimpleMetaName(ofTypeStr, '_' + masterClassName.simpleName() + "_MetaEntity");
+            ClassName metaProducerImplClassName = ClassName.bestGuess(metaProducerClassStr);
+            ClassName metaProducerImplMetacodeClassName = ClassName.get(metaProducerImplClassName.packageName(),
+                    MetacodeUtils.toSimpleMetacodeName(metaProducerImplClassName.toString()), "MetaProducerImpl");
+            String metaProducerImplMethodName = ofClassName.packageName().replace('.', '_') + '_' +
+                    MetacodeUtils.toSimpleMetaName(ofTypeStr, '_' + masterClassName.simpleName() + "_MetaProducer");
 
             metaScopeTypeSpecBuilder
-                    .addField(metaEntityClassName, entityImplNameStr, Modifier.PRIVATE)
-                    .addMethod(MethodSpec.methodBuilder(metaEntityImplMethodName)
+                    .addField(producerMetacodeClassName, entityImplNameStr, Modifier.PRIVATE)
+                    .addMethod(MethodSpec.methodBuilder(metaProducerImplMethodName)
                             .addModifiers(Modifier.PUBLIC)
-                            .returns(metaEntityClassName)
+                            .returns(producerMetacodeClassName)
                             .beginControlFlow("if ($L == null)", entityImplNameStr)
-                            .beginControlFlow("synchronized($T.class)", metaEntityClassName)
+                            .beginControlFlow("synchronized($T.class)", producerMetacodeClassName)
                             .beginControlFlow("if ($L == null)", entityImplNameStr)
-                            .addStatement("$L = new $T(getScope())", entityImplNameStr, metaEntityImplMetacodeClassName)
+                            .addStatement("$L = new $T(getScope())", entityImplNameStr, metaProducerImplMetacodeClassName)
                             .endControlFlow()
                             .endControlFlow()
                             .endControlFlow()
                             .addStatement("return $L", entityImplNameStr)
                             .build());
 
-            TypeSpec.Builder interfaceBuilder = TypeSpec.interfaceBuilder(metaEntityNameStr)
-                    .addJavadoc("emitted by " + metaEntityClassStr + '\n').addModifiers(Modifier.PUBLIC);
+            TypeSpec.Builder interfaceBuilder = TypeSpec.interfaceBuilder(metaProducerNameStr)
+                    .addJavadoc("emitted by " + metaProducerClassStr + '\n').addModifiers(Modifier.PUBLIC);
 
-            String extTypeStr = getExtClass(metaEntityAnnotation);
             if (isVoid(extTypeStr))
                 extTypeStr = null;
 
@@ -212,29 +216,29 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
                             "entities from super scopes only");
 
                 ClassName extScopeClassName = ClassName.bestGuess(extScopeClassStr);
-                ClassName extMetaEntityClassName = ClassName.get(extScopeClassName.packageName(),
+                ClassName extMetaProducerClassName = ClassName.get(extScopeClassName.packageName(),
                         MetacodeUtils.toSimpleMetacodeName(extScopeClassName.simpleName()),
-                        extTypeStr.replace('.', '_') + "_MetaEntity");
-                interfaceBuilder.addSuperinterface(extMetaEntityClassName);
+                        extTypeStr.replace('.', '_') + "_MetaProducer");
+                interfaceBuilder.addSuperinterface(extMetaProducerClassName);
 
                 ClassName extTypeClassName = ClassName.bestGuess(extTypeStr);
                 String extScopeProverMethodStr = extTypeClassName.packageName().replace('.', '_') + '_' +
-                        MetacodeUtils.toSimpleMetaName(extTypeStr, '_' + extScopeClassName.simpleName() + "_MetaEntity");
+                        MetacodeUtils.toSimpleMetaName(extTypeStr, '_' + extScopeClassName.simpleName() + "_MetaProducer");
 
                 metaScopeTypeSpecBuilder
                         .addMethod(MethodSpec.methodBuilder(extScopeProverMethodStr)
                                 .addAnnotation(Override.class)
                                 .addModifiers(Modifier.PUBLIC)
-                                .returns(extMetaEntityClassName)
-                                .addStatement("return $L()", metaEntityImplMethodName)
+                                .returns(extMetaProducerClassName)
+                                .addStatement("return $L()", metaProducerImplMethodName)
                                 .build());
             } else {
-                interfaceBuilder.addSuperinterface(ParameterizedTypeName.get(iMetaEntityClassName, ofClassName));
+                interfaceBuilder.addSuperinterface(ParameterizedTypeName.get(metaProducerClassName, ofClassName));
             }
 
-            boolean isSelfProvider = metaEntityClassStr.equals(ofTypeStr);
+            boolean isSelfProvider = metaProducerClassStr.equals(ofTypeStr);
             List<ExecutableElement> constructors = new ArrayList<ExecutableElement>();
-            for (Element subElement : metaEntityElement.getEnclosedElements()) {
+            for (Element subElement : metaProducerElement.getEnclosedElements()) {
                 boolean validInitConstructor = !subElement.getModifiers().contains(Modifier.PRIVATE)
                         && ((isSelfProvider && subElement.getSimpleName().contentEquals("<init>")) ||
                         subElement.getAnnotation(Constructor.class) != null);
@@ -258,9 +262,9 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
                         .returns(ofClassName).addParameters(params).build());
             }
 
-            getMetaEntityMethodBuilder
+            getMetaProducerMethodBuilder
                     .beginControlFlow("if (entityClass == $T.class)", ofClassName)
-                    .addStatement("return (IMetaEntity<? extends E>) $L()", metaEntityImplMethodName)
+                    .addStatement("return (MetaProducer<? extends E>) $L()", metaProducerImplMethodName)
                     .endControlFlow();
 
             builder.addType(interfaceBuilder.build());
@@ -268,8 +272,8 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
 
         metaScopeTypeSpecBuilder
                 .addMethod(metaScopeConstructorBuilder.build())
-                .addMethod(getMetaEntityMethodBuilder
-                        .addStatement("return " + (isVoid(scopeExtClassStr) ? "null" : "super.getMetaEntity(entityClass)"))
+                .addMethod(getMetaProducerMethodBuilder
+                        .addStatement("return " + (isVoid(scopeExtClassStr) ? "null" : "super.getMetaProducer(entityClass)"))
                         .build());
         builder.addType(metaScopeTypeSpecBuilder.build());
         return false;
@@ -285,12 +289,12 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
     }
 
     private Set<? extends Element> getScopeEntities(final String scopeClassStr, final boolean isDefaultScope) {
-        return Sets.filter(allMetaEntities, new Predicate<Element>() {
+        return Sets.filter(allProducers, new Predicate<Element>() {
             public boolean apply(Element input) {
-                final MetaEntity a = input.getAnnotation(MetaEntity.class);
+                final Producer producerAnnotation = input.getAnnotation(Producer.class);
                 String scope = MetacodeUtils.extractClassName(new Runnable() {
                     public void run() {
-                        a.scope();
+                        producerAnnotation.scope();
                     }
                 });
 
@@ -300,7 +304,7 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
                 if (isVoid(scope)) {
                     if (defaultScopeStr == null)
                         throw new ProcessingException("Scope undefined for '" + input.getSimpleName().toString() + "'. " +
-                                "You need to set the scope via @MetaEntity(scope) or define default one as 'inject.scope.default' property");
+                                "You need to set the scope via @Producer(scope) or define default one as 'inject.scope.default' property");
                     if (isDefaultScope)
                         return true;
                 }
@@ -311,7 +315,7 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
     }
 
     @Nonnull
-    private String getOfClass(final MetaEntity annotation) {
+    private String getOfClass(final Producer annotation) {
         return MetacodeUtils.extractClassName(new Runnable() {
             public void run() {
                 annotation.of();
@@ -320,7 +324,7 @@ public class MetaScopeProcessor extends AbstractLookupScopeProcessor {
     }
 
     @Nonnull
-    private String getExtClass(final MetaEntity annotation) {
+    private String getExtClass(final Producer annotation) {
         return MetacodeUtils.extractClassName(new Runnable() {
             public void run() {
                 annotation.ext();

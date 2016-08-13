@@ -16,7 +16,7 @@
 
 package org.brooth.jeta.metasitory;
 
-import org.brooth.jeta.IMetacode;
+import org.brooth.jeta.Metacode;
 
 import java.util.Collection;
 
@@ -27,7 +27,7 @@ import java.util.Collection;
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public interface Metasitory {
-    Collection<IMetacode<?>> search(Criteria criteria);
+    Collection<Metacode<?>> search(Criteria criteria);
 
     void add(Metasitory other);
 }

@@ -16,14 +16,14 @@
 
 package org.brooth.jeta.util;
 
-import org.brooth.jeta.IMetacode;
+import org.brooth.jeta.Metacode;
 import org.brooth.jeta.MasterClassController;
 import org.brooth.jeta.metasitory.Metasitory;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MultitonController<M> extends MasterClassController<M, IMetacode<?>> {
+public class MultitonController<M> extends MasterClassController<M, Metacode<?>> {
 
     public MultitonController(Metasitory metasitory, Class<M> masterClass) {
         super(metasitory, masterClass, Multiton.class, false);
@@ -34,7 +34,7 @@ public class MultitonController<M> extends MasterClassController<M, IMetacode<?>
         if (metacodes.size() > 1)
             throw new IllegalStateException("More than one metacode returned fot Criteria.masterEq");
 
-        IMetacode<?> multiton = metacodes.iterator().next();
+        Metacode<?> multiton = metacodes.iterator().next();
         if (multiton == null)
             throw new IllegalStateException(masterClass.getCanonicalName() + " has not multiton meta code. No @Multiton annotation on it?");
 

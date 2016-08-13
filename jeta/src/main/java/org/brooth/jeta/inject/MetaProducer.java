@@ -20,7 +20,7 @@ package org.brooth.jeta.inject;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public interface IMetaEntity<E> {
+public interface MetaProducer<E> {
     Class<? extends E> getEntityClass();
     boolean isImplemented();
 }

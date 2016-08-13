@@ -43,7 +43,7 @@ import java.util.*;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
+public class InjectProcessor extends AbstractLookupScopeProcessor {
 
     private final TypeName metaScopeTypeName = ParameterizedTypeName.get(
             ClassName.get(MetaScope.class), WildcardTypeName.subtypeOf(TypeName.OBJECT));
@@ -52,7 +52,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
     private List<TypeElement> moduleScopes;
     private String providerAlias = null;
 
-    public MetaInjectProcessor() {
+    public InjectProcessor() {
         super(Inject.class);
     }
 
@@ -313,7 +313,7 @@ public class MetaInjectProcessor extends AbstractLookupScopeProcessor {
     }
 
     private StatementSpec getAssignmentStatement(String scopeStr, String elementTypeStr, String statementPrefix, String getInstanceStr) {
-        return new StatementSpec(scopeStr, statementPrefix + "s.$L_$L_MetaEntity().$L",
+        return new StatementSpec(scopeStr, statementPrefix + "s.$L_$L_MetaProducer().$L",
                 elementTypeStr.replaceAll("\\.", "_"), ClassName.bestGuess(scopeStr).simpleName(), getInstanceStr);
     }
 

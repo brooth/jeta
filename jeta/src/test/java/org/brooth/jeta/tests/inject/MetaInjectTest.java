@@ -19,7 +19,7 @@ package org.brooth.jeta.tests.inject;
 
 import org.brooth.jeta.*;
 import org.brooth.jeta.inject.Inject;
-import org.brooth.jeta.inject.MetaEntity;
+import org.brooth.jeta.inject.Producer;
 import org.brooth.jeta.inject.MetaScope;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.metasitory.ClassForNameMetasitory;
@@ -40,33 +40,33 @@ public class MetaInjectTest extends BaseTest {
     @Log
     Logger logger;
 
-    @MetaEntity
-    public static class MetaEntityOne {
+    @Producer
+    public static class EntityOne {
         String value = "one";
     }
 
-    public static class MetaEntityHolder {
+    public static class EntityHolder {
         @Inject
-        MetaEntityOne entity;
+        EntityOne entity;
         @Inject
-        Class<? extends MetaEntityOne> clazz;
+        Class<? extends EntityOne> clazz;
         @Inject
-        Lazy<MetaEntityOne> lazy;
+        Lazy<EntityOne> lazy;
         @Inject
-        Provider<MetaEntityOne> provider;
+        Provider<EntityOne> provider;
     }
 
     @Test
     public void testSimpleInject() {
         logger.debug("testSimpleInject()");
 
-        MetaEntityHolder holder = new MetaEntityHolder();
+        EntityHolder holder = new EntityHolder();
         MetaHelper.injectMeta(holder);
         assertThat(holder.entity, notNullValue());
         assertThat(holder.entity.value, is("one"));
 
         assertThat(holder.clazz, notNullValue());
-        assertEquals(holder.clazz, MetaEntityOne.class);
+        assertEquals(holder.clazz, EntityOne.class);
 
         assertThat(holder.lazy, notNullValue());
         assertThat(holder.lazy.get().value, is("one"));
@@ -82,48 +82,48 @@ public class MetaInjectTest extends BaseTest {
         assertFalse(holder.lazy.get() == holder.provider.get());
     }
 
-    public static class StaticMetaEntityHolder {
+    public static class StaticEntityHolder {
         @Inject
-        static MetaEntityOne entity;
+        static EntityOne entity;
         @javax.inject.Inject
-        static MetaEntityOne aliasEntity;
+        static EntityOne aliasEntity;
         @Inject
-        static Class<? extends MetaEntityOne> clazz;
+        static Class<? extends EntityOne> clazz;
         @Inject
-        static Lazy<MetaEntityOne> lazy;
+        static Lazy<EntityOne> lazy;
         @Inject
-        static Provider<MetaEntityOne> provider;
+        static Provider<EntityOne> provider;
     }
 
     @Test
     public void testStaticInject() {
         logger.debug("testStaticInject()");
 
-        MetaHelper.injectStaticMeta(StaticMetaEntityHolder.class);
-        assertThat(StaticMetaEntityHolder.entity, notNullValue());
-        assertThat(StaticMetaEntityHolder.entity.value, is("one"));
+        MetaHelper.injectStaticMeta(StaticEntityHolder.class);
+        assertThat(StaticEntityHolder.entity, notNullValue());
+        assertThat(StaticEntityHolder.entity.value, is("one"));
 
-        assertThat(StaticMetaEntityHolder.aliasEntity, notNullValue());
-        assertThat(StaticMetaEntityHolder.aliasEntity.value, is("one"));
+        assertThat(StaticEntityHolder.aliasEntity, notNullValue());
+        assertThat(StaticEntityHolder.aliasEntity.value, is("one"));
 
-        assertThat(StaticMetaEntityHolder.clazz, notNullValue());
-        assertEquals(StaticMetaEntityHolder.clazz, MetaEntityOne.class);
+        assertThat(StaticEntityHolder.clazz, notNullValue());
+        assertEquals(StaticEntityHolder.clazz, EntityOne.class);
 
-        assertThat(StaticMetaEntityHolder.lazy, notNullValue());
-        assertThat(StaticMetaEntityHolder.lazy.get().value, is("one"));
+        assertThat(StaticEntityHolder.lazy, notNullValue());
+        assertThat(StaticEntityHolder.lazy.get().value, is("one"));
 
-        assertThat(StaticMetaEntityHolder.provider, notNullValue());
-        assertThat(StaticMetaEntityHolder.provider.get().value, is("one"));
+        assertThat(StaticEntityHolder.provider, notNullValue());
+        assertThat(StaticEntityHolder.provider.get().value, is("one"));
 
-        assertTrue(StaticMetaEntityHolder.lazy.get() == StaticMetaEntityHolder.lazy.get());
-        assertFalse(StaticMetaEntityHolder.provider.get() == StaticMetaEntityHolder.provider.get());
+        assertTrue(StaticEntityHolder.lazy.get() == StaticEntityHolder.lazy.get());
+        assertFalse(StaticEntityHolder.provider.get() == StaticEntityHolder.provider.get());
 
-        assertFalse(StaticMetaEntityHolder.entity == StaticMetaEntityHolder.lazy.get());
-        assertFalse(StaticMetaEntityHolder.entity == StaticMetaEntityHolder.provider.get());
-        assertFalse(StaticMetaEntityHolder.lazy.get() == StaticMetaEntityHolder.provider.get());
+        assertFalse(StaticEntityHolder.entity == StaticEntityHolder.lazy.get());
+        assertFalse(StaticEntityHolder.entity == StaticEntityHolder.provider.get());
+        assertFalse(StaticEntityHolder.lazy.get() == StaticEntityHolder.provider.get());
     }
 
-    @MetaEntity(singleton = true)
+    @Producer(singleton = true)
     public static class SingletonEntity {
         String value = "default";
 
@@ -135,7 +135,7 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
-    @MetaEntity(of = MetaInjectTest.SingletonEntity.class, singleton = true, scope = CustomScope.class)
+    @Producer(of = MetaInjectTest.SingletonEntity.class, singleton = true, scope = CustomScope.class)
     public static class SingletonEntityCustomScopeProvider {
         @Constructor
         public static SingletonEntity get() {
@@ -189,15 +189,15 @@ public class MetaInjectTest extends BaseTest {
 
     public static class MetaAliasEntityHolder {
         @javax.inject.Inject
-        MetaEntityOne entity;
+        EntityOne entity;
         @javax.inject.Inject
-        Class<? extends MetaEntityOne> clazz;
+        Class<? extends EntityOne> clazz;
         @javax.inject.Inject
-        Lazy<MetaEntityOne> lazy;
+        Lazy<EntityOne> lazy;
         @javax.inject.Inject
-        Provider<MetaEntityOne> provider;
+        Provider<EntityOne> provider;
         @javax.inject.Inject
-        javax.inject.Provider<MetaEntityOne> javaxProvider;
+        javax.inject.Provider<EntityOne> javaxProvider;
     }
 
     @Test
@@ -210,7 +210,7 @@ public class MetaInjectTest extends BaseTest {
         assertThat(holder.entity.value, is("one"));
 
         assertThat(holder.clazz, notNullValue());
-        assertEquals(holder.clazz, MetaEntityOne.class);
+        assertEquals(holder.clazz, EntityOne.class);
 
         assertThat(holder.lazy, notNullValue());
         assertThat(holder.lazy.get().value, is("one"));
@@ -229,48 +229,48 @@ public class MetaInjectTest extends BaseTest {
         assertThat(holder.javaxProvider.get().value, is("one"));
     }
 
-    public static class MetaEntityTwo {
+    public static class EntityTwo {
         String value;
     }
 
-    @MetaEntity(of = MetaEntityTwo.class)
-    public static class MetaEntityTwoProvider {
+    @Producer(of = EntityTwo.class)
+    public static class EntityTwoProvider {
         @Constructor
-        public MetaEntityTwo get() {
-            MetaEntityTwo e = new MetaEntityTwo();
+        public EntityTwo get() {
+            EntityTwo e = new EntityTwo();
             e.value = "two";
             return e;
         }
     }
 
-    public static class MetaEntityThree {
+    public static class EntityThree {
         String value;
     }
 
-    @MetaEntity(of = MetaEntityThree.class)
-    public static class MetaEntityThreeProvider {
+    @Producer(of = EntityThree.class)
+    public static class EntityThreeProvider {
         @Constructor
-        public static MetaEntityThree get() {
-            MetaEntityThree e = new MetaEntityThree();
+        public static EntityThree get() {
+            EntityThree e = new EntityThree();
             e.value = "three";
             return e;
         }
     }
 
-    public static class MetaEntityFour {
+    public static class EntityFour {
         String value;
     }
 
-    @MetaEntity(of = MetaEntityFour.class, staticConstructor = "getInstance")
-    public static class MetaEntityFourProvider {
+    @Producer(of = EntityFour.class, staticConstructor = "getInstance")
+    public static class EntityFourProvider {
 
-        public static MetaEntityFourProvider getInstance() {
-            return new MetaEntityFourProvider();
+        public static EntityFourProvider getInstance() {
+            return new EntityFourProvider();
         }
 
         @Constructor
-        public MetaEntityFour get() {
-            MetaEntityFour e = new MetaEntityFour();
+        public EntityFour get() {
+            EntityFour e = new EntityFour();
             e.value = "four";
             return e;
         }
@@ -278,11 +278,11 @@ public class MetaInjectTest extends BaseTest {
 
     public static class MetaProviderHolder {
         @Inject
-        MetaEntityTwo entityTwo;
+        EntityTwo entityTwo;
         @Inject
-        MetaEntityThree entityThree;
+        EntityThree entityThree;
         @Inject
-        MetaEntityFour entityFour;
+        EntityFour entityFour;
     }
 
     @Test
@@ -304,11 +304,11 @@ public class MetaInjectTest extends BaseTest {
         logger.debug("entityFour.value: %s", holder.entityFour.value);
     }
 
-    @MetaEntity
-    public static class MetaEntityFive {
+    @Producer
+    public static class EntityFive {
         String value;
 
-        public MetaEntityFive(String value) {
+        public EntityFive(String value) {
             this.value = value;
         }
     }
@@ -319,13 +319,13 @@ public class MetaInjectTest extends BaseTest {
 
         @Factory
         public interface MetaFactory {
-            MetaEntityFive get(String value);
+            EntityFive get(String value);
 
-            Class<? extends MetaEntityFive> getClazz();
+            Class<? extends EntityFive> getClazz();
 
-            Lazy<MetaEntityFive> getLazy(String value);
+            Lazy<EntityFive> getLazy(String value);
 
-            Provider<MetaEntityFive> getProvider(String value);
+            Provider<EntityFive> getProvider(String value);
         }
     }
 
@@ -340,7 +340,7 @@ public class MetaInjectTest extends BaseTest {
         assertThat(holder.factory.get("five").value, is("five"));
 
         assertThat(holder.factory.getClazz(), notNullValue());
-        assertEquals(holder.factory.getClazz(), MetaEntityFive.class);
+        assertEquals(holder.factory.getClazz(), EntityFive.class);
 
         assertThat(holder.factory.getLazy(null), notNullValue());
         assertThat(holder.factory.getLazy("lazyFive").get().value, is("lazyFive"));
@@ -349,7 +349,7 @@ public class MetaInjectTest extends BaseTest {
         assertThat(holder.factory.getProvider("fiveProvider").get().value, is("fiveProvider"));
     }
 
-    @MetaEntity
+    @Producer
     public static class MetaDefaultScopeEntity {
         String value = "scope";
         String scopeData = null;
@@ -368,7 +368,7 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
-    @MetaEntity(scope = ExtScope.class)
+    @Producer(scope = ExtScope.class)
     public static class MetaExtScopeEntity {
         String value = "ext scope";
         String scopeData = null;
@@ -378,7 +378,7 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
-    @MetaEntity(scope = CustomScope.class)
+    @Producer(scope = CustomScope.class)
     public static class MetaCustomScopeEntity {
         String value = "custom scope";
         String scopeData = null;
@@ -495,8 +495,8 @@ public class MetaInjectTest extends BaseTest {
         assertThat(holder.mixedScopeFactory.getCustom(), nullValue());
     }
 
-    @MetaEntity
-    public static class MetaEntitySix {
+    @Producer
+    public static class EntitySix {
         String value = "six";
 
         public String getValue() {
@@ -504,22 +504,22 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
-    @MetaEntity(ext = MetaEntitySix.class, scope = ExtScope.class)
-    public static class MetaEntitySixExt extends MetaEntitySix {
+    @Producer(ext = EntitySix.class, scope = ExtScope.class)
+    public static class EntitySixExt extends EntitySix {
         public String getValue() {
             return super.getValue() + " ext";
         }
     }
 
-    @MetaEntity(ext = MetaEntitySixExt.class, scope = ExtExtScope.class)
-    public static class MetaEntitySixExtExt extends MetaEntitySixExt {
+    @Producer(ext = EntitySixExt.class, scope = ExtExtScope.class)
+    public static class EntitySixExtExt extends EntitySixExt {
         public String getValue() {
             return super.getValue() + " ext";
         }
     }
 
-    @MetaEntity
-    public static class MetaEntitySeven {
+    @Producer
+    public static class EntitySeven {
         String value = "seven";
 
         public String getValue() {
@@ -527,8 +527,8 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
-    @MetaEntity(ext = MetaEntitySeven.class, scope = ExtExtScope.class)
-    public static class MetaEntitySevenExtExt extends MetaEntitySeven {
+    @Producer(ext = EntitySeven.class, scope = ExtExtScope.class)
+    public static class EntitySevenExtExt extends EntitySeven {
         public String getValue() {
             return super.getValue() + " ext ext";
         }
@@ -536,9 +536,9 @@ public class MetaInjectTest extends BaseTest {
 
     public static class ExtMetaHolder {
         @Inject
-        public MetaEntitySix entitySix;
+        public EntitySix entitySix;
         @Inject
-        public MetaEntitySeven entitySeven;
+        public EntitySeven entitySeven;
     }
 
     @Test
@@ -569,7 +569,7 @@ public class MetaInjectTest extends BaseTest {
         assertThat(holder.entitySeven.getValue(), is("seven ext ext"));
     }
 
-    @MetaEntity(of = String.class)
+    @Producer(of = String.class)
     public static class StringProvider {
         @Constructor
         static String get() {
@@ -577,7 +577,7 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
-    @MetaEntity(of = String.class, ext = String.class, scope = ExtScope.class)
+    @Producer(of = String.class, ext = String.class, scope = ExtScope.class)
     public static class StringProviderExt {
         @Constructor
         static String get() {
@@ -611,13 +611,13 @@ public class MetaInjectTest extends BaseTest {
 
     }
 
-    @MetaEntity(of = SchemeEntity.class)
+    @Producer(of = SchemeEntity.class)
     public interface MetaScheme {
         @Constructor
         SchemeEntity get();
     }
 
-    @MetaEntity(of = SchemeEntity.class, ext = SchemeEntity.class, scope = ExtScope.class)
+    @Producer(of = SchemeEntity.class, ext = SchemeEntity.class, scope = ExtScope.class)
     public static class SchemeEntityProvider {
         @Constructor
         public static SchemeEntity get() {
@@ -625,7 +625,7 @@ public class MetaInjectTest extends BaseTest {
         }
     }
 
-    @MetaEntity(of = SchemeEntity.class, ext = SchemeEntity.class, scope = ExtExtScope.class)
+    @Producer(of = SchemeEntity.class, ext = SchemeEntity.class, scope = ExtExtScope.class)
     public static class ExtSchemeEntityProvider {
         @Constructor
         public static SchemeEntity get() {
@@ -657,53 +657,53 @@ public class MetaInjectTest extends BaseTest {
 
         ClassForNameMetasitory metasitory = new ClassForNameMetasitory();
 
-        Criteria criteria = new Criteria.Builder().masterEq(MetaEntitySixExt.class).build();
-        List<IMetacode<?>> items = metasitory.search(criteria);
+        Criteria criteria = new Criteria.Builder().masterEq(EntitySixExt.class).build();
+        List<Metacode<?>> items = metasitory.search(criteria);
         assertThat(items, notNullValue());
         assertThat(items.size(), is(1));
-        assertTrue(items.get(0).getMasterClass() == MetaEntitySixExt.class);
+        assertTrue(items.get(0).getMasterClass() == EntitySixExt.class);
 
-        criteria = new Criteria.Builder().masterEqDeep(MetaEntitySixExtExt.class).build();
+        criteria = new Criteria.Builder().masterEqDeep(EntitySixExtExt.class).build();
         items = metasitory.search(criteria);
         assertThat(items, notNullValue());
         assertThat(items.size(), is(3));
-        assertTrue(items.get(0).getMasterClass() == MetaEntitySixExtExt.class);
-        assertTrue(items.get(1).getMasterClass() == MetaEntitySixExt.class);
-        assertTrue(items.get(2).getMasterClass() == MetaEntitySix.class);
+        assertTrue(items.get(0).getMasterClass() == EntitySixExtExt.class);
+        assertTrue(items.get(1).getMasterClass() == EntitySixExt.class);
+        assertTrue(items.get(2).getMasterClass() == EntitySix.class);
     }
 
     public static class MetaMethodEntityHolder {
-        MetaEntityOne entity;
-        Lazy<MetaEntityOne> lazy;
-        Provider<MetaEntityOne> provider;
+        EntityOne entity;
+        Lazy<EntityOne> lazy;
+        Provider<EntityOne> provider;
 
-        static Class<? extends MetaEntityOne> clazz;
+        static Class<? extends EntityOne> clazz;
 
         @Inject
-        MetaEntityOne entity2;
+        EntityOne entity2;
 
-        MetaEntityOne factoryEntity1;
-        MetaEntityOne factoryEntity2;
-        MetaEntityOne factoryEntity3;
+        EntityOne factoryEntity1;
+        EntityOne factoryEntity2;
+        EntityOne factoryEntity3;
 
-        MetaEntityOne scopeEntity1;
+        EntityOne scopeEntity1;
         MetaCustomScopeEntity scopeEntity2;
 
-        MetaEntitySix extEntity;
+        EntitySix extEntity;
 
         @Inject
-        void inject(MetaEntitySix entity1) {
+        void inject(EntitySix entity1) {
             this.extEntity = entity1;
         }
 
         @Factory
         public interface MetaFactory {
-            MetaEntityOne get();
+            EntityOne get();
         }
 
         @Factory
         public interface MetaFactory2 {
-            MetaEntityOne get();
+            EntityOne get();
         }
 
         @Inject
@@ -718,23 +718,23 @@ public class MetaInjectTest extends BaseTest {
         }
 
         @Inject
-        void inject(MetaEntityOne param1) {
+        void inject(EntityOne param1) {
             this.entity = param1;
         }
 
         @Inject
-        void inject(Lazy<MetaEntityOne> param1, Provider<MetaEntityOne> provider) {
+        void inject(Lazy<EntityOne> param1, Provider<EntityOne> provider) {
             this.lazy = param1;
             this.provider = provider;
         }
 
         @Inject
-        static void inject(Class<? extends MetaEntityOne> clazz) {
+        static void inject(Class<? extends EntityOne> clazz) {
             MetaMethodEntityHolder.clazz = clazz;
         }
 
         @Inject
-        void inject(MetaEntityOne entity1, MetaCustomScopeEntity entity2) {
+        void inject(EntityOne entity1, MetaCustomScopeEntity entity2) {
             this.scopeEntity1 = entity1;
             this.scopeEntity2 = entity2;
         }
@@ -790,6 +790,6 @@ public class MetaInjectTest extends BaseTest {
 
         MetaHelper.injectStaticMeta(MetaMethodEntityHolder.clazz);
         assertThat(MetaMethodEntityHolder.clazz, notNullValue());
-        assertEquals(MetaMethodEntityHolder.clazz, MetaEntityOne.class);
+        assertEquals(MetaMethodEntityHolder.clazz, EntityOne.class);
     }
 }

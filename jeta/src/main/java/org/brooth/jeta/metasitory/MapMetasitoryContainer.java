@@ -16,7 +16,7 @@
 
 package org.brooth.jeta.metasitory;
 
-import org.brooth.jeta.IMetacode;
+import org.brooth.jeta.Metacode;
 import org.brooth.jeta.Provider;
 
 import java.util.Map;
@@ -30,10 +30,10 @@ public interface MapMetasitoryContainer {
 
     public final class Context {
         public final Class<?> masterClass;
-        public final Provider<? extends IMetacode<?>> metacodeProvider;
+        public final Provider<? extends Metacode<?>> metacodeProvider;
         public final Class<?>[] annotations;
 
-        public Context(Class<?> masterClass, Provider<? extends IMetacode<?>> metacodeProvider, Class<?>[] annotations) {
+        public Context(Class<?> masterClass, Provider<? extends Metacode<?>> metacodeProvider, Class<?>[] annotations) {
             this.masterClass = masterClass;
             this.metacodeProvider = metacodeProvider;
             this.annotations = annotations;

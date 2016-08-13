@@ -21,6 +21,6 @@ include ':jeta-apt'
 include ':jeta'
 
 gradle.ext.GROUP_ID = 'org.brooth.jeta'
-gradle.ext.VERSION = '1.4'
-gradle.ext.VERSION_DESC = 'inject methods'
+gradle.ext.VERSION = '2.0'
+gradle.ext.VERSION_DES = '@Producer'
 gradle.ext.VERSION_VCS_TAG = gradle.VERSION

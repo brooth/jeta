@@ -21,7 +21,7 @@ import com.google.common.base.Joiner;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.Constructor;
 import org.brooth.jeta.apt.*;
-import org.brooth.jeta.inject.MetaEntity;
+import org.brooth.jeta.inject.Producer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -33,13 +33,13 @@ import java.util.List;
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
-public class MetaEntityProcessor extends AbstractProcessor {
+public class ProducerProcessor extends AbstractProcessor {
 
     @Nullable
     private String defaultScopeStr;
 
-    public MetaEntityProcessor() {
-        super(MetaEntity.class);
+    public ProducerProcessor() {
+        super(Producer.class);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class MetaEntityProcessor extends AbstractProcessor {
 
         TypeElement element = (TypeElement) context.elements().iterator().next();
         ClassName elementClassName = ClassName.get(element);
-        final MetaEntity annotation = element.getAnnotation(MetaEntity.class);
+        final Producer annotation = element.getAnnotation(Producer.class);
         String masterTypeStr = context.metacodeContext().masterElement().toString();
 
         String ofTypeStr = getOfClass(annotation);
@@ -87,9 +87,9 @@ public class MetaEntityProcessor extends AbstractProcessor {
         ClassName metaScopeClassName = ClassName.get(entityScopeClassName.packageName(),
                 entityScopeClassName.simpleName() + JetaProcessor.METACODE_CLASS_POSTFIX);
         ClassName implOfClassName = ClassName.get(metaScopeClassName.packageName() + '.' + metaScopeClassName.simpleName(),
-                (ofTypeStr.replaceAll("\\.", "_") + "_MetaEntity"));
+                (ofTypeStr.replaceAll("\\.", "_") + "_MetaProducer"));
 
-        TypeSpec.Builder implBuilder = TypeSpec.classBuilder("MetaEntityImpl")
+        TypeSpec.Builder implBuilder = TypeSpec.classBuilder("MetaProducerImpl")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addSuperinterface(implOfClassName)
                 .addField(FieldSpec.builder(entityScopeClassName, "__scope__", Modifier.PUBLIC).build())
@@ -186,7 +186,7 @@ public class MetaEntityProcessor extends AbstractProcessor {
     }
 
     @Nonnull
-    private String getScopeClass(final MetaEntity annotation) {
+    private String getScopeClass(final Producer annotation) {
         return MetacodeUtils.extractClassName(new Runnable() {
             public void run() {
                 annotation.scope();
@@ -195,7 +195,7 @@ public class MetaEntityProcessor extends AbstractProcessor {
     }
 
     @Nonnull
-    private String getOfClass(final MetaEntity annotation) {
+    private String getOfClass(final Producer annotation) {
         return MetacodeUtils.extractClassName(new Runnable() {
             public void run() {
                 annotation.of();
