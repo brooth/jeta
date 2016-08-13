@@ -63,10 +63,12 @@ public class ValidateProcessor extends AbstractProcessor {
                 String annStr = key.substring("validator.alias.".length());
                 String valStr = processingContext.processingProperties().getProperty(key);
                 try {
-                    Class<?> aliasClass = Class.forName(annStr);
-                    if (aliasClass.isAssignableFrom(Annotation.class))
+                    TypeElement typeElement = processingContext.processingEnv().getElementUtils().getTypeElement(annStr);
+                    if (typeElement == null)
+                        throw new IllegalArgumentException("Validator alias " + annStr + " not found");
+                    if (typeElement.getKind() != ElementKind.ANNOTATION_TYPE)
                         throw new IllegalArgumentException(annStr + " is not a annotation type.");
-                    aliases.put(processingContext.processingEnv().getElementUtils().getTypeElement(annStr), valStr);
+                    aliases.put(typeElement, valStr);
                 } catch (Exception e) {
                     throw new ProcessingException("Failed to load '" + annStr + "' validator alias.", e);
                 }
