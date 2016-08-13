@@ -33,6 +33,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -41,7 +42,6 @@ import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 import java.io.*;
-import java.lang.annotation.Annotation;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,8 +59,8 @@ public class JetaProcessor extends AbstractProcessor {
 
     private Messager logger;
 
-    private List<Processor> processors = new ArrayList<Processor>();
-    private List<MetacodeContextImpl> metacodeContextList = new ArrayList<MetacodeContextImpl>(500);
+    private List<Processor> processors = new ArrayList<>();
+    private List<MetacodeContextImpl> metacodeContextList = new ArrayList<>(500);
 
     private MetasitoryWriter metasitoryWriter;
 
@@ -265,10 +265,10 @@ public class JetaProcessor extends AbstractProcessor {
             boolean enabled = processor.isEnabled();
 
             if (enabled && disabled.length > 0) {
-                Set<Class<? extends Annotation>> annotations = processor.collectElementsAnnotatedWith();
+                Set<TypeElement> annotations = processor.collectElementsAnnotatedWith();
                 for (String disable : disabled)
-                    for (Class<? extends Annotation> annotation : annotations)
-                        if (annotation.getSimpleName().matches(disable.trim())) {
+                    for (TypeElement annotation : annotations)
+                        if (annotation.getSimpleName().toString().matches(disable.trim())) {
                             enabled = false;
                             break;
                         }
@@ -285,7 +285,7 @@ public class JetaProcessor extends AbstractProcessor {
         logger.debug("assemble metacode context list");
 
         for (final Processor processor : processors) {
-            Set<Class<? extends Annotation>> annotations = processor.collectElementsAnnotatedWith();
+            Set<TypeElement> annotations = processor.collectElementsAnnotatedWith();
             if (annotations.isEmpty()) {
                 logger.warn("Processor " + processor.getClass().getCanonicalName()
                         + " without annotations. Nothing to collect");
@@ -293,7 +293,7 @@ public class JetaProcessor extends AbstractProcessor {
             }
 
             // go through processor's annotations
-            for (Class<? extends Annotation> annotation : annotations) {
+            for (TypeElement annotation : annotations) {
                 logger.debug("collecting elements with @" + annotation.getSimpleName());
 
                 Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(annotation);
@@ -305,25 +305,15 @@ public class JetaProcessor extends AbstractProcessor {
                 // go through annotated elements
                 for (Element element : elements) {
                     // yeah, happens...
-                    Annotation _an = null;
-                    Exception _ex = null;
-                    try {
-                        _an = element.getAnnotation(annotation);
-                    } catch (Exception e) {
-                        _ex = e;
-                    }
-
+                    AnnotationMirror _an = MetacodeUtils.getAnnotation(element, annotation);
                     if (_an == null) {
                         String elementStr = element.toString();
                         if (!element.getKind().isClass() && !element.getKind().isInterface())
                             elementStr = element.getEnclosingElement().toString() + "." + elementStr;
 
                         String msg = "Failed to process \"" + elementStr + "\". " +
-                                " Check it for potential compilation issues.";
-                        if(_ex != null)
-                            throw new ProcessingException(msg, _ex);
-                        else
-                            throw new ProcessingException(msg);
+                                " Check it for potential compilation errors.";
+                        throw new ProcessingException(msg);
                     }
 
                     logger.debug("found element: " + element.toString());
@@ -677,14 +667,14 @@ public class JetaProcessor extends AbstractProcessor {
 
         private final String metacodeSimpleName;
         private final String metacodeCanonicalName;
-        private final Set<Class<? extends Annotation>> metacodeAnnotations;
+        private final Set<TypeElement> metacodeAnnotations;
 
         private boolean utd = false;
 
         public MetacodeContextImpl(TypeElement masterElement) {
             this.processors = HashMultimap.create();
             this.masterElement = masterElement;
-            this.metacodeAnnotations = new HashSet<Class<? extends Annotation>>();
+            this.metacodeAnnotations = new HashSet<>();
 
             metacodeCanonicalName = MetacodeUtils.toMetacodeName(masterElement.toString());
             int i = metacodeCanonicalName.lastIndexOf('.');
@@ -695,7 +685,7 @@ public class JetaProcessor extends AbstractProcessor {
             return masterElement;
         }
 
-        public Set<Class<? extends Annotation>> metacodeAnnotations() {
+        public Set<TypeElement> metacodeAnnotations() {
             return metacodeAnnotations;
         }
 

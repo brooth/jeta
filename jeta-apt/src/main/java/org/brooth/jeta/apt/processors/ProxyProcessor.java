@@ -21,6 +21,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.ProcessingException;
 import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.proxy.Proxy;
 import org.brooth.jeta.proxy.ProxyMetacode;
@@ -54,14 +55,11 @@ public class ProxyProcessor extends AbstractProcessor {
         for (Element element : context.elements()) {
             String realFieldName = element.getSimpleName().toString();
             ClassName realClassName = ClassName.bestGuess(element.asType().toString());
-            final Proxy annotation = element.getAnnotation(Proxy.class);
-            String proxyClassNameStr = MetacodeUtils.extractClassName(new Runnable() {
-                public void run() {
-                    annotation.value();
-                }
-            });
-            TypeElement proxyTypeElement = processingContext.processingEnv().getElementUtils().getTypeElement(proxyClassNameStr);
+            String proxyClassNameStr = String.valueOf(MetacodeUtils.getAnnotationValue(element, annotationElement, "value"));
+            if (proxyClassNameStr == null)
+                throw new ProcessingException("Failed to process " + element.toString() + ", check its source code for compilation errors");
             ClassName proxyClassName = ClassName.bestGuess(proxyClassNameStr);
+            TypeElement proxyTypeElement = processingContext.processingEnv().getElementUtils().getTypeElement(proxyClassNameStr);
 
             TypeSpec.Builder proxyTypeSpecBuilder = TypeSpec.anonymousClassBuilder("")
                     .addSuperinterface(proxyClassName)
@@ -73,7 +71,7 @@ public class ProxyProcessor extends AbstractProcessor {
                             .build());
 
             TypeElement realTypeElement = (TypeElement) processingContext.processingEnv().getTypeUtils().asElement(element.asType());
-            Set<ExecutableElement> toImplementMethods = new HashSet<ExecutableElement>();
+            Set<ExecutableElement> toImplementMethods = new HashSet<>();
             for (Element subElement : ((TypeElement) realTypeElement).getEnclosedElements()) {
                 if (subElement.getKind() == ElementKind.METHOD)
                     toImplementMethods.add((ExecutableElement) subElement);

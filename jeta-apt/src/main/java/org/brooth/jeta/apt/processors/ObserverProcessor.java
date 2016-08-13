@@ -19,6 +19,7 @@ package org.brooth.jeta.apt.processors;
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.ProcessingException;
 import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.observer.EventObserver;
 import org.brooth.jeta.observer.Observe;
@@ -55,45 +56,46 @@ import java.util.List;
                 .addStatement("$T handler = new $T()", handlerClassName, handlerClassName);
 
         for (Element element : context.elements()) {
-            final Observe annotation = element.getAnnotation(Observe.class);
-            String observableClass = MetacodeUtils.extractClassName(new Runnable() {
-                public void run() {
-                    annotation.value();
-                }
-            });
-            ClassName observableTypeName = ClassName.bestGuess(observableClass);
-            ClassName metacodeTypeName = ClassName.bestGuess(MetacodeUtils.toMetacodeName(observableClass));
+            List observableClasses = (List) MetacodeUtils.getAnnotationValue(element, annotationElement, "value");
+            if (observableClasses == null)
+                throw new ProcessingException("Failed to process " + element.toString() + ", check its source code for compilation errors");
 
-            List<? extends VariableElement> params = ((ExecutableElement) element).getParameters();
-            if (params.size() != 1)
-                throw new IllegalArgumentException("Observer method must have one parameter (event)");
-            TypeName eventTypeName = TypeName.get(params.get(0).asType());
-            if (eventTypeName instanceof ParameterizedTypeName)
-                eventTypeName = ((ParameterizedTypeName) eventTypeName).rawType;
+            for (Object observableClass : observableClasses) {
+                String observableClassName = observableClass.toString().replace(".class", "");
+                ClassName observableTypeName = ClassName.bestGuess(observableClassName);
+                ClassName metacodeTypeName = ClassName.bestGuess(MetacodeUtils.toMetacodeName(observableClassName));
 
-            String methodHashName = "get" +
-                    CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL,
-                            CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, eventTypeName.toString())
-                                    .replaceAll("\\.", "_")) + "Observers";
+                List<? extends VariableElement> params = ((ExecutableElement) element).getParameters();
+                if (params.size() != 1)
+                    throw new IllegalArgumentException("Observer method must have one parameter (event)");
+                TypeName eventTypeName = TypeName.get(params.get(0).asType());
+                if (eventTypeName instanceof ParameterizedTypeName)
+                    eventTypeName = ((ParameterizedTypeName) eventTypeName).rawType;
 
-            TypeSpec eventObserverTypeSpec = TypeSpec.anonymousClassBuilder("")
-                    .addSuperinterface(ParameterizedTypeName.get(
-                            ClassName.get(EventObserver.class), eventTypeName))
-                    .addMethod(MethodSpec.methodBuilder("onEvent")
-                            .addAnnotation(Override.class)
-                            .addModifiers(Modifier.PUBLIC)
-                            .addParameter(eventTypeName, "event")
-                            .returns(void.class)
-                            .addStatement("master.$N(event)", element.getSimpleName().toString())
-                            .build())
-                    .build();
+                String methodHashName = "get" +
+                        CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL,
+                                CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, eventTypeName.toString())
+                                        .replaceAll("\\.", "_")) + "Observers";
 
-            methodBuilder
-                    .beginControlFlow("if ($T.class == observableClass)", observableTypeName)
-                    .addStatement("handler.add($T.class, $T.class,\n$T.$L(($T) observable).\nregister($L))",
-                            observableTypeName, eventTypeName, metacodeTypeName, methodHashName,
-                            observableTypeName, eventObserverTypeSpec)
-                    .endControlFlow();
+                TypeSpec eventObserverTypeSpec = TypeSpec.anonymousClassBuilder("")
+                        .addSuperinterface(ParameterizedTypeName.get(
+                                ClassName.get(EventObserver.class), eventTypeName))
+                        .addMethod(MethodSpec.methodBuilder("onEvent")
+                                .addAnnotation(Override.class)
+                                .addModifiers(Modifier.PUBLIC)
+                                .addParameter(eventTypeName, "event")
+                                .returns(void.class)
+                                .addStatement("master.$N(event)", element.getSimpleName().toString())
+                                .build())
+                        .build();
+
+                methodBuilder
+                        .beginControlFlow("if ($T.class == observableClass)", observableTypeName)
+                        .addStatement("handler.add($T.class, $T.class,\n$T.$L(($T) observable).\nregister($L))",
+                                observableTypeName, eventTypeName, metacodeTypeName, methodHashName,
+                                observableTypeName, eventObserverTypeSpec)
+                        .endControlFlow();
+            }
         }
         methodBuilder.addStatement("return handler");
         builder.addMethod(methodBuilder.build());

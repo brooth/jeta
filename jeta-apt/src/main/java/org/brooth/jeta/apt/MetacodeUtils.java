@@ -21,16 +21,73 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.squareup.javapoet.ClassName;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)
  */
 public class MetacodeUtils {
+
+    public static AnnotationMirror getAnnotation(Element element, Class annotationClass, Elements utils) {
+        TypeElement annotationElement = utils.getTypeElement(annotationClass.getCanonicalName());
+        return getAnnotation(element, annotationElement);
+    }
+
+    public static AnnotationMirror getAnnotation(Element element, TypeElement annotation) {
+        List<? extends AnnotationMirror> annotations = element.getAnnotationMirrors();
+        for (AnnotationMirror mirror : annotations) {
+            if (((TypeElement)mirror.getAnnotationType().asElement()).getQualifiedName().equals(annotation.getQualifiedName())) {
+                return mirror;
+            }
+        }
+        return null;
+    }
+
+    public static Object getAnnotationValue(Element element, TypeElement annotation, String name) {
+        AnnotationMirror mirror = getAnnotation(element, annotation);
+        if (mirror != null) {
+            return getAnnotationValue(mirror, name);
+        }
+        return null;
+    }
+
+    public static String getAnnotationValueAsString(Element element, Class annotationClass, String name, Elements utils) {
+        TypeElement annotationElement = utils.getTypeElement(annotationClass.getCanonicalName());
+        return getAnnotationValueAsString(element, annotationElement, name);
+    }
+
+    public static Object getAnnotationValue(Element element, Class annotationClass, String name, Elements utils) {
+        TypeElement annotationElement = utils.getTypeElement(annotationClass.getCanonicalName());
+        return getAnnotationValue(element, annotationElement, name);
+    }
+
+    public static Object getAnnotationValue(AnnotationMirror mirror, String name) {
+        Map<? extends ExecutableElement, ? extends AnnotationValue> properties = mirror.getElementValues();
+        for (ExecutableElement property : properties.keySet()) {
+            if (property.getSimpleName().toString().equals(name))
+                return properties.get(property).getValue();
+        }
+        return null;
+    }
+
+    public static String getAnnotationValueAsString(AnnotationMirror mirror, String name) {
+        Object value = getAnnotationValue(mirror, name);
+        if (value != null)
+            return String.valueOf(value);
+        return null;
+    }
+
+    public static String getAnnotationValueAsString(Element element, TypeElement annotation, String name) {
+        Object value = getAnnotationValue(element, annotation, name);
+        if (value != null)
+            return String.valueOf(value);
+        return null;
+    }
 
     public static String toMetacodeName(String canonicalName) {
         return toMetaName(canonicalName, JetaProcessor.METACODE_CLASS_POSTFIX);

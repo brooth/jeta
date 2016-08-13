@@ -25,6 +25,7 @@ import org.brooth.jeta.inject.ScopeConfig;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
@@ -74,12 +75,13 @@ public abstract class AbstractLookupScopeProcessor extends AbstractProcessor {
         // look up in ext module?
         if (!existsInModule) {
             TypeElement rootScopeElement = elementUtils.getTypeElement(MetacodeUtils.toMetacodeName(rootScope));
-            ScopeConfig scopeConfigAnnotation = rootScopeElement != null ? rootScopeElement.getAnnotation(ScopeConfig.class) : null;
-            if (scopeConfigAnnotation == null)
+            AnnotationMirror scopeConfigMirror = rootScopeElement == null ? null :
+                MetacodeUtils.getAnnotation(rootScopeElement, ScopeConfig.class, elementUtils);
+            if (scopeConfigMirror == null)
                 throw new ProcessingException(rootScope + " is not a meta scope");
 
-            String moduleClassStr = getModuleClass(scopeConfigAnnotation);
-            if (!isVoid(moduleClassStr)) {
+            String moduleClassStr = MetacodeUtils.getAnnotationValueAsString(scopeConfigMirror, "module");
+            if (moduleClassStr != null) {
                 TypeElement extModule = elementUtils.getTypeElement(moduleClassStr);
                 if (extModule == null)
                     throw new ProcessingException("Can't find module " + moduleClassStr);
@@ -88,9 +90,9 @@ public abstract class AbstractLookupScopeProcessor extends AbstractProcessor {
         }
 
         // look up in ext scope?
-        Scope extExtScopeAnnotation = elementUtils.getTypeElement(rootScope).getAnnotation(Scope.class);
-        String extExtScopeStr = getExtClass(extExtScopeAnnotation);
-        if (!isVoid(extExtScopeStr))
+        String extExtScopeStr = MetacodeUtils.getAnnotationValueAsString(
+                elementUtils.getTypeElement(rootScope), Scope.class, "ext", elementUtils);
+        if (extExtScopeStr != null)
             return lookupEntityScope(module, extExtScopeStr, entityClassStr);
 
         return null;
@@ -102,24 +104,17 @@ public abstract class AbstractLookupScopeProcessor extends AbstractProcessor {
 
         Elements elements = processingContext.processingEnv().getElementUtils();
         final TypeElement scopeElement = elements.getTypeElement(scope);
-        Scope annotation = scopeElement.getAnnotation(Scope.class);
-        if (annotation == null)
-            throw new ProcessingException(scope + "is not a scope");
-        String ext = getExtClass(annotation);
-        return !isVoid(ext) && (ext.equals(scope2) || isAssignableScope(ext, scope2));
+        AnnotationMirror scopeAnnotation = MetacodeUtils.getAnnotation(
+                scopeElement, Scope.class, processingContext.processingEnv().getElementUtils());
+        if (scopeAnnotation == null)
+            throw new ProcessingException(scope + " is not a scope");
+
+        String ext = MetacodeUtils.getAnnotationValueAsString(scopeAnnotation, "ext");
+        return ext != null && (ext.equals(scope2) || isAssignableScope(ext, scope2));
     }
 
     protected boolean isVoid(String str) {
         return str.equals(Void.class.getCanonicalName());
-    }
-
-    @Nonnull
-    protected String getExtClass(final Scope annotation) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            public void run() {
-                annotation.ext();
-            }
-        });
     }
 
     @Nonnull
@@ -146,16 +141,6 @@ public abstract class AbstractLookupScopeProcessor extends AbstractProcessor {
             @Override
             public void run() {
                 scopeConfig.scope();
-            }
-        });
-    }
-
-    @Nonnull
-    protected String getModuleClass(final ScopeConfig scopeConfig) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            @Override
-            public void run() {
-                scopeConfig.module();
             }
         });
     }

@@ -21,7 +21,6 @@ import com.squareup.javapoet.TypeSpec;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.lang.annotation.Annotation;
 import java.util.Set;
 
 /**
@@ -45,7 +44,7 @@ public interface Processor {
      * Tell to MetacodeProcessor the annotations, it should collect elements with.
      * All the elements will passed to this processor in generating metacode stage.
      */
-    Set<Class<? extends Annotation>> collectElementsAnnotatedWith();
+    Set<TypeElement> collectElementsAnnotatedWith();
 
     /**
      * Ensure type elements (masters elements) associated with @param element

@@ -23,7 +23,6 @@ import org.brooth.jeta.Constructor;
 import org.brooth.jeta.apt.*;
 import org.brooth.jeta.inject.Producer;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
@@ -54,17 +53,18 @@ public class ProducerProcessor extends AbstractProcessor {
 
         TypeElement element = (TypeElement) context.elements().iterator().next();
         ClassName elementClassName = ClassName.get(element);
-        final Producer annotation = element.getAnnotation(Producer.class);
         String masterTypeStr = context.metacodeContext().masterElement().toString();
+        Producer annotation = element.getAnnotation(Producer.class);
+        AnnotationMirror annotationMirror = MetacodeUtils.getAnnotation(element, annotationElement);
 
-        String ofTypeStr = getOfClass(annotation);
-        if (isVoid(ofTypeStr))
+        String ofTypeStr = MetacodeUtils.getAnnotationValueAsString(annotationMirror, "of");
+        if (ofTypeStr == null)
             ofTypeStr = masterTypeStr;
 
         ClassName ofClassName = ClassName.bestGuess(ofTypeStr);
         boolean isSelfProvider = masterTypeStr.equals(ofTypeStr);
 
-        List<ExecutableElement> constructors = new ArrayList<ExecutableElement>();
+        List<ExecutableElement> constructors = new ArrayList<>();
         for (Element subElement : ((TypeElement) element).getEnclosedElements()) {
             boolean validInitConstructor = !subElement.getModifiers().contains(Modifier.PRIVATE)
                     && ((isSelfProvider && subElement.getSimpleName().contentEquals("<init>")) ||
@@ -74,8 +74,8 @@ public class ProducerProcessor extends AbstractProcessor {
         }
 
         ClassName entityScopeClassName;
-        String scopeClassStr = getScopeClass(annotation);
-        if (!isVoid(scopeClassStr)) {
+        String scopeClassStr = MetacodeUtils.getAnnotationValueAsString(annotationMirror, "scope");
+        if (scopeClassStr != null) {
             entityScopeClassName = ClassName.bestGuess(scopeClassStr);
         } else {
             if (defaultScopeStr == null)
@@ -115,8 +115,8 @@ public class ProducerProcessor extends AbstractProcessor {
             implBuilder.addField(ofClassName, "instance", Modifier.PRIVATE, Modifier.VOLATILE);
 
         for (ExecutableElement constructor : constructors) {
-            List<ParameterSpec> params = new ArrayList<ParameterSpec>(constructor.getParameters().size());
-            List<String> paramValues = new ArrayList<String>(params.size());
+            List<ParameterSpec> params = new ArrayList<>(constructor.getParameters().size());
+            List<String> paramValues = new ArrayList<>(params.size());
             for (VariableElement param : constructor.getParameters()) {
                 TypeMirror paramType = param.asType();
                 String paramName = param.getSimpleName().toString();
@@ -179,27 +179,5 @@ public class ProducerProcessor extends AbstractProcessor {
 
         builder.addType(implBuilder.build());
         return false;
-    }
-
-    private boolean isVoid(String str) {
-        return str.equals(Void.class.getCanonicalName());
-    }
-
-    @Nonnull
-    private String getScopeClass(final Producer annotation) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            public void run() {
-                annotation.scope();
-            }
-        });
-    }
-
-    @Nonnull
-    private String getOfClass(final Producer annotation) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            public void run() {
-                annotation.of();
-            }
-        });
     }
 }

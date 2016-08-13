@@ -27,10 +27,10 @@ import org.brooth.jeta.apt.ProcessingContext;
 import org.brooth.jeta.metasitory.MapMetasitoryContainer;
 
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.annotation.Annotation;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
@@ -73,10 +73,10 @@ public class MapMetasitoryWriter implements MetasitoryWriter {
         String master = context.masterElement().toString();
         String metacode = MetacodeUtils.toMetacodeName(master);
         String annotations = Joiner.on(",").join(
-                Iterables.transform(context.metacodeAnnotations(), new Function<Class<? extends Annotation>, String>() {
+                Iterables.transform(context.metacodeAnnotations(), new Function<TypeElement, String>() {
                     @Override
-                    public String apply(Class<? extends Annotation> input) {
-                        return "\n\t\t\t" + input.getCanonicalName() + ".class";
+                    public String apply(TypeElement input) {
+                        return "\n\t\t\t" + input.getQualifiedName().toString() + ".class";
                     }
                 }));
         methodBuilder.addCode("result.put($L.class,\n" +

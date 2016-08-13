@@ -16,9 +16,8 @@
 
 package org.brooth.jeta.apt;
 
-import java.util.Properties;
-
 import javax.annotation.processing.ProcessingEnvironment;
+import java.util.Properties;
 
 /**
  * @author Oleg Khalidov (brooth@gmail.com)

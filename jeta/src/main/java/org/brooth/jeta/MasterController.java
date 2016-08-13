@@ -18,7 +18,6 @@ package org.brooth.jeta;
 
 import org.brooth.jeta.metasitory.Metasitory;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 

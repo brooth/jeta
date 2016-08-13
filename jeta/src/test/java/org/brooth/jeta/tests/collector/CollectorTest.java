@@ -19,10 +19,10 @@ package org.brooth.jeta.tests.collector;
 import org.brooth.jeta.BaseTest;
 import org.brooth.jeta.Logger;
 import org.brooth.jeta.MetaHelper;
+import org.brooth.jeta.Provider;
 import org.brooth.jeta.collector.ObjectCollector;
 import org.brooth.jeta.collector.TypeCollector;
 import org.brooth.jeta.log.Log;
-import org.brooth.jeta.Provider;
 import org.junit.Test;
 
 import java.util.List;

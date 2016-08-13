@@ -19,8 +19,8 @@ package org.brooth.jeta.tests.inject;
 
 import org.brooth.jeta.*;
 import org.brooth.jeta.inject.Inject;
-import org.brooth.jeta.inject.Producer;
 import org.brooth.jeta.inject.MetaScope;
+import org.brooth.jeta.inject.Producer;
 import org.brooth.jeta.log.Log;
 import org.brooth.jeta.metasitory.ClassForNameMetasitory;
 import org.brooth.jeta.metasitory.Criteria;

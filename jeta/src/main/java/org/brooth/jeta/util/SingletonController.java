@@ -16,8 +16,8 @@
 
 package org.brooth.jeta.util;
 
-import org.brooth.jeta.Metacode;
 import org.brooth.jeta.MasterClassController;
+import org.brooth.jeta.Metacode;
 import org.brooth.jeta.metasitory.Metasitory;
 
 /**

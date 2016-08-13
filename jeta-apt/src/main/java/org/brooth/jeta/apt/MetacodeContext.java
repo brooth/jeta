@@ -18,7 +18,6 @@
 package org.brooth.jeta.apt;
 
 import javax.lang.model.element.TypeElement;
-import java.lang.annotation.Annotation;
 import java.util.Set;
 
 /**
@@ -34,7 +33,7 @@ public interface MetacodeContext {
     /**
      * All the metacode annotations used by masters type
      */
-    Set<Class<? extends Annotation>> metacodeAnnotations();
+    Set<TypeElement> metacodeAnnotations();
 
     /**
      * true if masters source code hasn't been changed since metacode generated

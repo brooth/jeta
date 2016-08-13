@@ -27,7 +27,6 @@ import org.brooth.jeta.apt.ProcessingException;
 import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.inject.*;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
@@ -81,13 +80,22 @@ public class ScopeProcessor extends AbstractLookupScopeProcessor {
 
         ProcessingEnvironment env = processingContext.processingEnv();
         TypeElement masterElement = (TypeElement) context.elements().iterator().next();
-        Scope scopeAnnotation = masterElement.getAnnotation(Scope.class);
         ClassName masterClassName = ClassName.get(context.metacodeContext().masterElement());
         String masterClassStr = masterElement.getQualifiedName().toString();
-        List<String> moduleScopes = getScopesClasses();
+        List<?> scopeList = (List<?>) MetacodeUtils.getAnnotationValue(module, Module.class, "scopes", env.getElementUtils());
+        if (scopeList == null)
+            throw new ProcessingException("Failed to process " + masterElement.toString() +
+                    ", check its source code for compilation errors");
+
+        boolean contains = false;
+        for (Object scope : scopeList)
+            if (scope.toString().equals(masterClassStr + ".class")) {
+                contains = true;
+                break;
+            }
 
         builder.addAnnotation(AnnotationSpec.builder(ScopeConfig.class)
-                .addMember("module", "$T.class", moduleScopes.contains(masterClassStr) ? module : ClassName.VOID)
+                .addMember("module", "$T.class", contains ? module : ClassName.VOID)
                 .build())
                 .addSuperinterface(ParameterizedTypeName.get(ClassName.get(MetaScopeMetacode.class), masterClassName));
 
@@ -131,8 +139,8 @@ public class ScopeProcessor extends AbstractLookupScopeProcessor {
                 .addParameter(ClassName.get(Class.class), "scopeClass")
                 .returns(boolean.class);
 
-        String scopeExtClassStr = getExtClass(scopeAnnotation);
-        if (isVoid(scopeExtClassStr)) {
+        String scopeExtClassStr = MetacodeUtils.getAnnotationValueAsString(masterElement, annotationElement, "ext");
+        if (scopeExtClassStr == null) {
             metaScopeTypeSpecBuilder.addSuperinterface(metaScopeTypeName);
             assignableMethodBuilder.addStatement(assignableStatement,
                     TypeName.get(context.metacodeContext().masterElement().asType()));
@@ -165,12 +173,11 @@ public class ScopeProcessor extends AbstractLookupScopeProcessor {
         for (Element entityElement : scopeEntities) {
             TypeElement metaProducerElement = (TypeElement) entityElement;
             String metaProducerClassStr = metaProducerElement.getQualifiedName().toString();
+            AnnotationMirror mirror = MetacodeUtils.getAnnotation(entityElement, Producer.class,
+                    processingContext.processingEnv().getElementUtils());
+            String ofTypeStr = MetacodeUtils.getAnnotationValueAsString(mirror, "of");
 
-            final Producer producerAnnotation = entityElement.getAnnotation(Producer.class);
-            String ofTypeStr = getOfClass(producerAnnotation);
-            String extTypeStr = getExtClass(producerAnnotation);
-
-            if (isVoid(ofTypeStr))
+            if (ofTypeStr == null)
                 ofTypeStr = metaProducerClassStr;
 
             ClassName ofClassName = ClassName.bestGuess(ofTypeStr);
@@ -206,9 +213,7 @@ public class ScopeProcessor extends AbstractLookupScopeProcessor {
             TypeSpec.Builder interfaceBuilder = TypeSpec.interfaceBuilder(metaProducerNameStr)
                     .addJavadoc("emitted by " + metaProducerClassStr + '\n').addModifiers(Modifier.PUBLIC);
 
-            if (isVoid(extTypeStr))
-                extTypeStr = null;
-
+            String extTypeStr = MetacodeUtils.getAnnotationValueAsString(mirror, "ext");
             if (extTypeStr != null) {
                 String extScopeClassStr = lookupEntityScope(module, scopeExtClassStr, extTypeStr);
                 if (extScopeClassStr == null)
@@ -237,7 +242,7 @@ public class ScopeProcessor extends AbstractLookupScopeProcessor {
             }
 
             boolean isSelfProvider = metaProducerClassStr.equals(ofTypeStr);
-            List<ExecutableElement> constructors = new ArrayList<ExecutableElement>();
+            List<ExecutableElement> constructors = new ArrayList<>();
             for (Element subElement : metaProducerElement.getEnclosedElements()) {
                 boolean validInitConstructor = !subElement.getModifiers().contains(Modifier.PRIVATE)
                         && ((isSelfProvider && subElement.getSimpleName().contentEquals("<init>")) ||
@@ -248,7 +253,7 @@ public class ScopeProcessor extends AbstractLookupScopeProcessor {
             }
 
             for (ExecutableElement constructor : constructors) {
-                List<ParameterSpec> params = new ArrayList<ParameterSpec>();
+                List<ParameterSpec> params = new ArrayList<>();
                 for (VariableElement input : constructor.getParameters()) {
                     TypeMirror paramType = input.asType();
                     String paramName = input.getSimpleName().toString();
@@ -273,61 +278,25 @@ public class ScopeProcessor extends AbstractLookupScopeProcessor {
         metaScopeTypeSpecBuilder
                 .addMethod(metaScopeConstructorBuilder.build())
                 .addMethod(getMetaProducerMethodBuilder
-                        .addStatement("return " + (isVoid(scopeExtClassStr) ? "null" : "super.getMetaProducer(entityClass)"))
+                        .addStatement("return " + (scopeExtClassStr == null ? "null" : "super.getMetaProducer(entityClass)"))
                         .build());
         builder.addType(metaScopeTypeSpecBuilder.build());
         return false;
     }
 
-    private List<String> getScopesClasses() {
-        return MetacodeUtils.extractClassesNames(new Runnable() {
-            @Override
-            public void run() {
-                module.getAnnotation(Module.class).scopes();
-            }
-        });
-    }
-
     private Set<? extends Element> getScopeEntities(final String scopeClassStr, final boolean isDefaultScope) {
         return Sets.filter(allProducers, new Predicate<Element>() {
             public boolean apply(Element input) {
-                final Producer producerAnnotation = input.getAnnotation(Producer.class);
-                String scope = MetacodeUtils.extractClassName(new Runnable() {
-                    public void run() {
-                        producerAnnotation.scope();
-                    }
-                });
-
-                if (scopeClassStr.equals(scope))
-                    return true;
-
-                if (isVoid(scope)) {
+                String scope = MetacodeUtils.getAnnotationValueAsString(input, Producer.class, "scope",
+                        processingContext.processingEnv().getElementUtils());
+                if (scope == null) {
                     if (defaultScopeStr == null)
                         throw new ProcessingException("Scope undefined for '" + input.getSimpleName().toString() + "'. " +
                                 "You need to set the scope via @Producer(scope) or define default one as 'inject.scope.default' property");
                     if (isDefaultScope)
                         return true;
                 }
-
-                return false;
-            }
-        });
-    }
-
-    @Nonnull
-    private String getOfClass(final Producer annotation) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            public void run() {
-                annotation.of();
-            }
-        });
-    }
-
-    @Nonnull
-    private String getExtClass(final Producer annotation) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            public void run() {
-                annotation.ext();
+                return scopeClassStr.equals(scope);
             }
         });
     }

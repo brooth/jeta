@@ -70,16 +70,16 @@ public class InjectProcessor extends AbstractLookupScopeProcessor {
                     throw new ProcessingException("No module defined. Create one and put @Module on it.");
                 module = (TypeElement) modules.iterator().next();
 
-                List<String> scopes = MetacodeUtils.extractClassesNames(new Runnable() {
+                Object scopes = MetacodeUtils.getAnnotationValue(module, Module.class, "scopes",
+                        processingContext.processingEnv().getElementUtils());
+                if(scopes == null)
+                    throw new ProcessingException("Check " + module.toString() + " for compilation errors");
+                List<?> scopeList = (List<?>) scopes;
+                moduleScopes = Lists.transform(scopeList, new Function<Object, TypeElement>() {
                     @Override
-                    public void run() {
-                        module.getAnnotation(Module.class).scopes();
-                    }
-                });
-                moduleScopes = Lists.transform(scopes, new Function<String, TypeElement>() {
-                    @Override
-                    public TypeElement apply(String input) {
-                        return processingContext.processingEnv().getElementUtils().getTypeElement(input);
+                    public TypeElement apply(Object input) {
+                        return processingContext.processingEnv().getElementUtils().getTypeElement(
+                                input.toString().replace(".class", ""));
                     }
                 });
             }
@@ -330,7 +330,7 @@ public class InjectProcessor extends AbstractLookupScopeProcessor {
 
                 // name -> type
                 List<String> paramNames = new ArrayList<>();
-                Map<String, TypeMirror> params = new LinkedHashMap<String, TypeMirror>();
+                Map<String, TypeMirror> params = new LinkedHashMap<>();
                 for (VariableElement param : method.getParameters()) {
                     String paramName = param.getSimpleName().toString();
                     paramNames.add(paramName);
@@ -411,27 +411,22 @@ public class InjectProcessor extends AbstractLookupScopeProcessor {
     }
 
     @Override
-    public Set<Class<? extends Annotation>> collectElementsAnnotatedWith() {
+    public Set<TypeElement> collectElementsAnnotatedWith() {
+        Set<TypeElement> elements = super.collectElementsAnnotatedWith();
         String metaAlias = processingContext.processingProperties().getProperty("inject.alias", "");
         if (!metaAlias.isEmpty()) {
             try {
                 Class<?> aliasClass = Class.forName(metaAlias);
                 if (aliasClass.isAssignableFrom(Annotation.class))
-                    throw new IllegalArgumentException(metaAlias + " is not a annotation type.");
+                    throw new IllegalArgumentException(metaAlias + " is not an annotation type.");
 
-                HashSet<Class<? extends Annotation>> set = new HashSet<Class<? extends Annotation>>();
-                set.add(annotation);
-                @SuppressWarnings("unchecked")
-                Class<? extends Annotation> aliasAnnotation = (Class<? extends Annotation>) aliasClass;
-                set.add(aliasAnnotation);
-                return set;
-
+                elements = new HashSet<>(elements);
+                elements.add(processingContext.processingEnv().getElementUtils().getTypeElement(metaAlias));
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("Failed to load meta alias annotation " + metaAlias, e);
             }
         }
-
-        return super.collectElementsAnnotatedWith();
+        return elements;
     }
 
     private static class StatementSpec {

@@ -32,8 +32,8 @@ import org.brooth.jeta.apt.ProcessingException;
 import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.inject.*;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.ArrayList;
@@ -68,13 +68,16 @@ public class ModuleProcessor extends AbstractProcessor {
             throw new ProcessingException("Multiple modules defined");
 
         TypeElement moduleElement = (TypeElement) context.elements().iterator().next();
-        final Module annotation = moduleElement.getAnnotation(Module.class);
-        List<String> scopesStr = getScopesClasses(annotation);
+        List<?> scopeList = (List<?>) MetacodeUtils.getAnnotationValue(moduleElement, annotationElement, "scopes");
+        if(scopeList == null)
+            throw new ProcessingException("Failed to process " + moduleElement.toString() +
+                    ", check its source code for compilation errors");
 
-        List<TypeElement> scopes = Lists.transform(scopesStr, new Function<String, TypeElement>() {
+        List<TypeElement> scopes = Lists.transform(scopeList, new Function<Object, TypeElement>() {
             @Override
-            public TypeElement apply(String input) {
-                TypeElement scopeElement = processingContext.processingEnv().getElementUtils().getTypeElement(input);
+            public TypeElement apply(Object input) {
+                TypeElement scopeElement = processingContext.processingEnv().getElementUtils().
+                        getTypeElement(input.toString().replace(".class", ""));
                 Scope scopeAnnotation = scopeElement.getAnnotation(Scope.class);
                 if (scopeAnnotation == null)
                     throw new ProcessingException(input + " is not a scope class. Put @Scope on it");
@@ -92,9 +95,11 @@ public class ModuleProcessor extends AbstractProcessor {
             String scopeClassStr = scopeElement.getQualifiedName().toString();
             TypeElement metaScopeElement = processingContext.processingEnv().getElementUtils().getTypeElement(
                     MetacodeUtils.toMetacodeName(scopeClassStr));
-            ScopeConfig metaScopeConfigAnnotation = metaScopeElement != null ? metaScopeElement.getAnnotation(ScopeConfig.class) : null;
-            if (metaScopeConfigAnnotation != null) {
-                String scopeModuleStr = getModuleClass(metaScopeConfigAnnotation);
+            AnnotationMirror mirror = metaScopeElement == null ? null :
+                    MetacodeUtils.getAnnotation(metaScopeElement, ScopeConfig.class,
+                            processingContext.processingEnv().getElementUtils());
+            if(mirror != null) {
+                String scopeModuleStr = MetacodeUtils.getAnnotationValueAsString(mirror, "module");
                 if (!moduleElement.getQualifiedName().toString().equals(scopeModuleStr)) {
                     processingContext.logger().debug(scopeClassStr + " belongs to ext module " + scopeModuleStr);
                     scopeAnnotationBuilders.add(AnnotationSpec.builder(ModuleConfig.ScopeConfig.class)
@@ -110,15 +115,15 @@ public class ModuleProcessor extends AbstractProcessor {
                 @Override
                 public ClassName apply(Element input) {
                     try {
-                        final Producer producerAnnotation = input.getAnnotation(Producer.class);
-                        String ofTypeStr = getOfClass(producerAnnotation);
-                        if (isVoid(ofTypeStr))
+                        AnnotationMirror mirror = MetacodeUtils.getAnnotation(input, Producer.class,
+                                processingContext.processingEnv().getElementUtils());
+                        String ofTypeStr = MetacodeUtils.getAnnotationValueAsString(mirror, "of");
+                        if(ofTypeStr == null)
                             return ClassName.get((TypeElement) input);
-                        if (ofTypeStr.equals(getExtClass(producerAnnotation)))
+                        String extTypeStr = MetacodeUtils.getAnnotationValueAsString(mirror, "ext");
+                        if (ofTypeStr.equals(extTypeStr))
                             return ClassName.get(Void.class);
-
                         return ClassName.bestGuess(ofTypeStr);
-
                     } catch (Exception e) {
                         throw new ProcessingException("Failed to get meta entity info of element " + input.toString(), e);
                     }
@@ -141,74 +146,24 @@ public class ModuleProcessor extends AbstractProcessor {
         return false;
     }
 
-    @Nonnull
-    protected String getModuleClass(final ScopeConfig scopeConfig) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            @Override
-            public void run() {
-                scopeConfig.module();
-            }
-        });
-    }
-
-    @Nonnull
-    private String getOfClass(final Producer annotation) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            public void run() {
-                annotation.of();
-            }
-        });
-    }
-
-    @Nonnull
-    private String getExtClass(final Producer annotation) {
-        return MetacodeUtils.extractClassName(new Runnable() {
-            public void run() {
-                annotation.ext();
-            }
-        });
-    }
-
-    private List<String> getScopesClasses(final Module annotation) {
-        return MetacodeUtils.extractClassesNames(new Runnable() {
-            @Override
-            public void run() {
-                annotation.scopes();
-            }
-        });
-    }
-
     private Set<? extends Element> getScopeEntities(TypeElement scopeElement) {
         final String scopeClassStr = scopeElement.getQualifiedName().toString();
         final boolean isDefaultScope = defaultScopeStr != null && defaultScopeStr.equals(scopeClassStr);
 
         return Sets.filter(allProducers, new Predicate<Element>() {
             public boolean apply(Element input) {
-                final Producer producerAnnotation = input.getAnnotation(Producer.class);
-                String scope = MetacodeUtils.extractClassName(new Runnable() {
-                    public void run() {
-                        producerAnnotation.scope();
-                    }
-                });
-
-                if (scopeClassStr.equals(scope))
-                    return true;
-
-                if (isVoid(scope)) {
+                String scope = MetacodeUtils.getAnnotationValueAsString(input, Producer.class, "scope",
+                        processingContext.processingEnv().getElementUtils());
+                if (scope == null) {
                     if (defaultScopeStr == null)
                         throw new ProcessingException("Scope undefined for '" + input.getSimpleName().toString() + "'. " +
                                 "You need to set the scope via @Producer(scope) or define default one as 'inject.scope.default' property");
                     if (isDefaultScope)
                         return true;
                 }
-
-                return false;
+                return scopeClassStr.equals(scope);
             }
         });
-    }
-
-    private boolean isVoid(String str) {
-        return str.equals(Void.class.getCanonicalName());
     }
 
     @Override

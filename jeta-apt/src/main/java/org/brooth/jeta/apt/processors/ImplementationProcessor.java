@@ -21,10 +21,12 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.brooth.jeta.apt.MetacodeUtils;
+import org.brooth.jeta.apt.ProcessingException;
 import org.brooth.jeta.apt.RoundContext;
 import org.brooth.jeta.util.Implementation;
 import org.brooth.jeta.util.ImplementationMetacode;
 
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
@@ -37,21 +39,19 @@ public class ImplementationProcessor extends AbstractProcessor {
         super(Implementation.class);
     }
 
-	public boolean process(TypeSpec.Builder builder, RoundContext context) {
+    public boolean process(TypeSpec.Builder builder, RoundContext context) {
         Element element = context.elements().iterator().next();
-        final Implementation annotation = element.getAnnotation(Implementation.class);
-        String implOfClassStr = MetacodeUtils.extractClassName(new Runnable() {
-            public void run() {
-                annotation.value();
-            }
-        });
-        ClassName implOfClassName = ClassName.bestGuess(implOfClassStr);
+        final AnnotationMirror annotation = MetacodeUtils.getAnnotation(element, annotationElement);
+        Object value = MetacodeUtils.getAnnotationValue(annotation, "value");
+        if (value == null)
+            throw new ProcessingException("Failed to process " + element.toString() + ", check its source code for compilation errors");
+        ClassName implOfClassName = ClassName.bestGuess(value.toString());
 
         builder.addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(ImplementationMetacode.class), implOfClassName));
 
-        String initStr = annotation.staticConstructor();
-        if (initStr.isEmpty())
+        String initStr = (String) MetacodeUtils.getAnnotationValue(annotation, "staticConstructor");
+        if (initStr == null)
             initStr = "new $T()";
         else
             initStr = "$T." + initStr + "()";
@@ -75,7 +75,7 @@ public class ImplementationProcessor extends AbstractProcessor {
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(int.class)
-                .addStatement("return $L", annotation.priority())
+                .addStatement("return $L", element.getAnnotation(Implementation.class).priority())
                 .build());
 
         return false;

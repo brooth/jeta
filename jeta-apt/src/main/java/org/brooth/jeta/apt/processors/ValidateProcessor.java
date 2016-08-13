@@ -16,6 +16,8 @@
 
 package org.brooth.jeta.apt.processors;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.squareup.javapoet.*;
 import org.brooth.jeta.apt.MetacodeUtils;
 import org.brooth.jeta.apt.ProcessingContext;
@@ -41,7 +43,7 @@ import java.util.*;
  */
 public class ValidateProcessor extends AbstractProcessor {
 
-    private Map<Class<? extends Annotation>, String> aliases;
+    private Map<TypeElement, String> aliases;
 
     public ValidateProcessor() {
         super(Validate.class);
@@ -52,9 +54,9 @@ public class ValidateProcessor extends AbstractProcessor {
         super.init(processingContext);
 
         aliases = new HashMap<>();
-        aliases.put(NotBlank.class, "org.brooth.jeta.validate.NotBlank");
-        aliases.put(NotEmpty.class, "org.brooth.jeta.validate.NotEmpty");
-        aliases.put(NotNull.class, "org.brooth.jeta.validate.NotNull");
+        aliases.put(getTypeElement(NotBlank.class), "org.brooth.jeta.validate.NotBlank");
+        aliases.put(getTypeElement(NotEmpty.class), "org.brooth.jeta.validate.NotEmpty");
+        aliases.put(getTypeElement(NotNull.class), "org.brooth.jeta.validate.NotNull");
 
         for (String key : processingContext.processingProperties().stringPropertyNames()) {
             if (key.startsWith("validator.alias.")) {
@@ -64,11 +66,7 @@ public class ValidateProcessor extends AbstractProcessor {
                     Class<?> aliasClass = Class.forName(annStr);
                     if (aliasClass.isAssignableFrom(Annotation.class))
                         throw new IllegalArgumentException(annStr + " is not a annotation type.");
-
-                    @SuppressWarnings("unchecked")
-                    Class<? extends Annotation> aliasAnnotation = (Class<? extends Annotation>) aliasClass;
-                    aliases.put(aliasAnnotation, valStr);
-
+                    aliases.put(processingContext.processingEnv().getElementUtils().getTypeElement(annStr), valStr);
                 } catch (Exception e) {
                     throw new ProcessingException("Failed to load '" + annStr + "' validator alias.", e);
                 }
@@ -77,11 +75,15 @@ public class ValidateProcessor extends AbstractProcessor {
     }
 
     @Override
-    public Set<Class<? extends Annotation>> collectElementsAnnotatedWith() {
-        Set<Class<? extends Annotation>> result = new HashSet<>();
-        result.add(Validate.class);
+    public Set<TypeElement> collectElementsAnnotatedWith() {
+        Set<TypeElement> result = new HashSet<>();
+        result.add(getTypeElement(Validate.class));
         result.addAll(aliases.keySet());
         return result;
+    }
+
+    protected TypeElement getTypeElement(Class clazz) {
+        return processingContext.processingEnv().getElementUtils().getTypeElement(clazz.getCanonicalName());
     }
 
     public boolean process(TypeSpec.Builder builder, RoundContext context) {
@@ -103,22 +105,21 @@ public class ValidateProcessor extends AbstractProcessor {
         int i = 0;
         for (Element element : context.elements()) {
             String fieldNameStr = element.getSimpleName().toString();
-
-            final Validate annotation = element.getAnnotation(Validate.class);
+            List<?> validatorList = (List<?>) MetacodeUtils.getAnnotationValue(element, annotationElement, "value");
             List<String> validators;
-            if (annotation != null) {
-                validators = MetacodeUtils.extractClassesNames(new Runnable() {
-                    public void run() {
-                        annotation.value();
+            if (validatorList != null) {
+                validators = Lists.transform(validatorList, new Function<Object, String>() {
+                    @Override
+                    public String apply(Object input) {
+                        return input.toString().replace(".class", "");
                     }
                 });
-
             } else {
                 validators = new ArrayList<>();
             }
 
-            for (Class<? extends Annotation> alias : aliases.keySet()) {
-                if (element.getAnnotation(alias) != null)
+            for (TypeElement alias : aliases.keySet()) {
+                if (MetacodeUtils.getAnnotation(element, alias) != null)
                     validators.add(aliases.get(alias));
             }
 

@@ -33,19 +33,28 @@ import java.util.Set;
 public abstract class AbstractProcessor implements Processor {
 
     protected Class<? extends Annotation> annotation;
-    
+    protected TypeElement annotationElement;
+
     protected ProcessingContext processingContext;
 
     public AbstractProcessor(Class<? extends Annotation> annotation) {
         this.annotation = annotation;
     }
-    
-    public void init(ProcessingContext processingContext) {
-    	this.processingContext = processingContext;
+
+    public AbstractProcessor(TypeElement annotationElement) {
+        this.annotationElement = annotationElement;
     }
 
-    public Set<Class<? extends Annotation>> collectElementsAnnotatedWith() {
-        return Collections.<Class<? extends Annotation>>singleton(annotation);
+    public void init(ProcessingContext processingContext) {
+        this.processingContext = processingContext;
+        if (annotationElement == null && annotation != null)
+            this.annotationElement = processingContext.processingEnv().getElementUtils().
+                    getTypeElement(annotation.getCanonicalName());
+    }
+
+    public Set<TypeElement> collectElementsAnnotatedWith() {
+        TypeElement t = processingContext.processingEnv().getElementUtils().getTypeElement(annotation.getCanonicalName());
+        return Collections.singleton(t);
     }
 
     public Set<TypeElement> applicableMastersOfElement(Element element) {

@@ -22,5 +22,5 @@ include ':jeta'
 
 gradle.ext.GROUP_ID = 'org.brooth.jeta'
 gradle.ext.VERSION = '2.0'
-gradle.ext.VERSION_DES = '@Producer'
+gradle.ext.VERSION_DESC = '@Producer, apt Annotation as TypeElement'
 gradle.ext.VERSION_VCS_TAG = gradle.VERSION

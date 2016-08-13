@@ -91,35 +91,34 @@ public class SubscribeProcessor extends AbstractProcessor {
 
             // Filters
             String onEventMethodNameStr = element.getSimpleName().toString();
-            List<String> filters = MetacodeUtils.extractClassesNames(new Runnable() {
-                public void run() {
-                    annotation.filters();
-                }
-            });
-            for (String filter : filters) {
-                TypeElement filterTypeElement = elementUtils.getTypeElement(filter);
-                if (filterTypeElement.getKind() == ElementKind.CLASS) {
-                    onEventMethodBuilder
-                            .beginControlFlow("if(!(new $T().accepts(master, \"$L\", event)))",
-                                    ClassName.bestGuess(filter), onEventMethodNameStr)
-                            .addStatement("return")
-                            .endControlFlow();
+            List<?> filterList = (List<?>) MetacodeUtils.getAnnotationValue(element, annotationElement, "filters");
+            if (filterList != null) {
+                for (Object filterStr : filterList) {
+                    String filter = filterStr.toString().replace(".class", "");
+                    TypeElement filterTypeElement = elementUtils.getTypeElement(filter);
+                    if (filterTypeElement.getKind() == ElementKind.CLASS) {
+                        onEventMethodBuilder
+                                .beginControlFlow("if(!(new $T().accepts(master, \"$L\", event)))",
+                                        ClassName.bestGuess(filter), onEventMethodNameStr)
+                                .addStatement("return")
+                                .endControlFlow();
 
-                } else {
-                    MetaFilter metaFilter = filterTypeElement.getAnnotation(MetaFilter.class);
-                    if (metaFilter == null)
-                        throw new IllegalArgumentException("Not valid Filter usage. '" + filter
-                                + "' must be implementation of Filter"
-                                + " or interface annotated with MetaFilter");
+                    } else {
+                        MetaFilter metaFilter = filterTypeElement.getAnnotation(MetaFilter.class);
+                        if (metaFilter == null)
+                            throw new IllegalArgumentException("Not valid Filter usage. '" + filter
+                                    + "' must be implementation of Filter"
+                                    + " or interface annotated with MetaFilter");
 
-                    String expression = metaFilter.emitExpression()
-                            .replaceAll("\\$m", "master")
-                            .replaceAll("\\$e", "event");
+                        String expression = metaFilter.emitExpression()
+                                .replaceAll("\\$m", "master")
+                                .replaceAll("\\$e", "event");
 
-                    onEventMethodBuilder
-                            .beginControlFlow("if(!($L))", expression)
-                            .addStatement("return")
-                            .endControlFlow();
+                        onEventMethodBuilder
+                                .beginControlFlow("if(!($L))", expression)
+                                .addStatement("return")
+                                .endControlFlow();
+                    }
                 }
             }
 

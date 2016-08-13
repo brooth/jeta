@@ -18,7 +18,6 @@
 package org.brooth.jeta.inject;
 
 import org.brooth.jeta.MasterController;
-import org.brooth.jeta.metasitory.Criteria;
 import org.brooth.jeta.metasitory.Metasitory;
 
 /**
