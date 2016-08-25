@@ -67,7 +67,7 @@ public class MapMetasitory implements Metasitory {
         loadContainer(container);
     }
 
-    protected void loadContainer(MapMetasitoryContainer container) {
+    public void loadContainer(MapMetasitoryContainer container) {
         try {
             writeLock.lock();
 
