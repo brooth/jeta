@@ -30,6 +30,7 @@ import org.brooth.jeta.inject.StaticInjectController;
 import org.brooth.jeta.log.LogController;
 import org.brooth.jeta.log.NamedLoggerProvider;
 import org.brooth.jeta.metasitory.MapMetasitory;
+import org.brooth.jeta.metasitory.MapMetasitoryContainer;
 import org.brooth.jeta.metasitory.Metasitory;
 import org.brooth.jeta.observer.ObservableController;
 import org.brooth.jeta.observer.ObserverController;
@@ -43,6 +44,7 @@ import org.brooth.jeta.validate.ValidationException;
 import javax.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -61,12 +63,17 @@ public class MetaHelper {
 
     public static MetaHelper getInstance() {
         if (instance == null)
-            instance = new MetaHelper("org.brooth.jeta.tests");
+            instance = new MetaHelper();
         return instance;
     }
 
-    private MetaHelper(String metaPackage) {
-        metasitory = new MapMetasitory(metaPackage);
+    private MetaHelper() {
+        if(new Random().nextBoolean()) {
+            metasitory = new MapMetasitory(new org.brooth.jeta.tests.MetasitoryContainer());
+        } else {
+            metasitory = new MapMetasitory("org.brooth.jeta.tests");
+        }
+
         defaultScope = new MetaScopeController<DefaultScope>(metasitory, new DefaultScope()).get();
         bus = new BaseEventBus();
         loggerProvider = new NamedLoggerProvider<Logger>() {

@@ -42,6 +42,10 @@ public class MapMetasitory implements Metasitory {
         loadContainer(metaPackage);
     }
 
+    public MapMetasitory(MapMetasitoryContainer container) {
+        loadContainer(container);
+    }
+
     public void loadContainer(String metaPackage) {
         String className = metaPackage.isEmpty() ? "MetasitoryContainer" : metaPackage + ".MetasitoryContainer";
         Class<?> clazz;
@@ -60,6 +64,10 @@ public class MapMetasitory implements Metasitory {
             throw new IllegalArgumentException("Failed to initiate class " + clazz, e);
         }
 
+        loadContainer(container);
+    }
+
+    protected void loadContainer(MapMetasitoryContainer container) {
         try {
             writeLock.lock();
 

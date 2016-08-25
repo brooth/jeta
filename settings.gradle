@@ -21,6 +21,6 @@ include ':jeta-apt'
 include ':jeta'
 
 gradle.ext.GROUP_ID = 'org.brooth.jeta'
-gradle.ext.VERSION = '2.0'
-gradle.ext.VERSION_DESC = '@Producer, apt Annotation as TypeElement'
+gradle.ext.VERSION = '2.1'
+gradle.ext.VERSION_DESC = 'MapMetasitoryContainer constructor'
 gradle.ext.VERSION_VCS_TAG = gradle.VERSION

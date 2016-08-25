@@ -4,7 +4,7 @@ Jeta
 
 Tutorials:
 --------------
-Read the docs on [jeta.brooth.org](http://jeta.brooth.org).
+Read the docs on [jeta.brooth.org](http://jeta.brooth.org)
 
 Samples:
 -------
@@ -12,18 +12,28 @@ Samples:
 
 Installation (gradle):
 ----------------------
-
 ```groovy
 repositories {
     jcenter()
 }
+```
 
+Stable:
+```groovy
 dependencies {
-    apt 'org.brooth.jeta:jeta-apt:2.0'
-    compile 'org.brooth.jeta:jeta:2.0'
+    apt 'org.brooth.jeta:jeta-apt:1.4'
+    compile 'org.brooth.jeta:jeta:1.4'
 }
 ```
-[Here](https://plugins.gradle.org/search?term=apt) to can find `apt` plugins.
+
+Latest:
+```groovy
+dependencies {
+    apt 'org.brooth.jeta:jeta-apt:2.1'
+    compile 'org.brooth.jeta:jeta:2.1'
+}
+```
+[Here](https://plugins.gradle.org/search?term=apt) to can find available `apt` plugins.
 
 License
 -------

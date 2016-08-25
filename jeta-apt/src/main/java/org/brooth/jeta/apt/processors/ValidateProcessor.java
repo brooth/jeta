@@ -35,7 +35,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
