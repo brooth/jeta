@@ -29,8 +29,8 @@ dependencies {
 Latest:
 ```groovy
 dependencies {
-    apt 'org.brooth.jeta:jeta-apt:2.1'
-    compile 'org.brooth.jeta:jeta:2.1'
+    apt 'org.brooth.jeta:jeta-apt:2.0'
+    compile 'org.brooth.jeta:jeta:2.0'
 }
 ```
 [Here](https://plugins.gradle.org/search?term=apt) to can find available `apt` plugins.
