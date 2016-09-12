@@ -18,6 +18,7 @@ package org.brooth.jeta.metasitory;
 
 import org.brooth.jeta.Metacode;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -38,19 +39,37 @@ public class MapMetasitory implements Metasitory {
 
     private Map<Class<?>, MapMetasitoryContainer.Context> meta;
 
+    @Nullable
+    private ClassLoader $defaultClassLoader;
+
     public MapMetasitory(String metaPackage) {
         loadContainer(metaPackage);
+    }
+
+    public MapMetasitory(String metaPackage, ClassLoader loader) {
+        this.$defaultClassLoader = loader;
+        loadContainer(metaPackage, loader);
     }
 
     public MapMetasitory(MapMetasitoryContainer container) {
         loadContainer(container);
     }
 
+    private ClassLoader getDefaultClassLoader() {
+        if($defaultClassLoader == null)
+            return getClass().getClassLoader();
+        return $defaultClassLoader;
+    }
+
     public void loadContainer(String metaPackage) {
+        loadContainer(metaPackage, getDefaultClassLoader());
+    }
+
+    public void loadContainer(String metaPackage, ClassLoader loader) {
         String className = metaPackage.isEmpty() ? "MetasitoryContainer" : metaPackage + ".MetasitoryContainer";
         Class<?> clazz;
         try {
-            clazz = Class.forName(className);
+            clazz = loader.loadClass(className);
 
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException("Failed to load class " + className, e);
