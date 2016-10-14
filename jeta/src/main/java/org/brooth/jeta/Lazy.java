@@ -21,4 +21,8 @@ package org.brooth.jeta;
  */
 public interface Lazy<T> {
     T get();
+
+    boolean isPresent();
+
+    T release();
 }

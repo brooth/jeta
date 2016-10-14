@@ -69,7 +69,9 @@ public class MetaInjectTest extends BaseTest {
         assertEquals(holder.clazz, EntityOne.class);
 
         assertThat(holder.lazy, notNullValue());
+        assertFalse(holder.lazy.isPresent());
         assertThat(holder.lazy.get().value, is("one"));
+        assertTrue(holder.lazy.isPresent());
 
         assertThat(holder.provider, notNullValue());
         assertThat(holder.provider.get().value, is("one"));
@@ -80,6 +82,9 @@ public class MetaInjectTest extends BaseTest {
         assertFalse(holder.entity == holder.lazy.get());
         assertFalse(holder.entity == holder.provider.get());
         assertFalse(holder.lazy.get() == holder.provider.get());
+
+        assertTrue(holder.lazy.get() == holder.lazy.release());
+        assertFalse(holder.lazy.isPresent());
     }
 
     public static class StaticEntityHolder {
@@ -327,6 +332,24 @@ public class MetaInjectTest extends BaseTest {
 
             Provider<EntityFive> getProvider(String value);
         }
+
+        @Factory
+        public interface SuperSuperFactory {
+            EntityFive getSuperSuper(String val);
+        }
+
+        @Factory
+        public interface SuperFactory extends SuperSuperFactory {
+            EntityFive getSuper(String val);
+        }
+
+        @Factory
+        public interface ChildFactory extends SuperFactory {
+            EntityFive getChild(String val);
+        }
+
+        @Inject
+        ChildFactory childFactory;
     }
 
     @Test
@@ -347,6 +370,11 @@ public class MetaInjectTest extends BaseTest {
 
         assertThat(holder.factory.getProvider(null), notNullValue());
         assertThat(holder.factory.getProvider("fiveProvider").get().value, is("fiveProvider"));
+
+        assertThat(holder.childFactory, notNullValue());
+        assertThat(holder.childFactory.getSuperSuper(null), notNullValue());
+        assertThat(holder.childFactory.getSuper(null), notNullValue());
+        assertThat(holder.childFactory.getChild(null), notNullValue());
     }
 
     @Producer

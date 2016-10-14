@@ -21,6 +21,6 @@ include ':jeta-apt'
 include ':jeta'
 
 gradle.ext.GROUP_ID = 'org.brooth.jeta'
-gradle.ext.VERSION = '2.1'
-gradle.ext.VERSION_DESC = 'MapMetasitoryContainer constructor, ClassLoader'
+gradle.ext.VERSION = '2.3'
+gradle.ext.VERSION_DESC = 'Lazy.isPresent(), Lazy.release(), Factory inheritance'
 gradle.ext.VERSION_VCS_TAG = gradle.VERSION

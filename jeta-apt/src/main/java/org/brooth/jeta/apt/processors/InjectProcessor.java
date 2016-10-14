@@ -284,6 +284,25 @@ public class InjectProcessor extends AbstractLookupScopeProcessor {
                             .endControlFlow()
                             .addStatement("return instance")
                             .build())
+                    .addMethod(MethodSpec.methodBuilder("isPresent")
+                            .addAnnotation(Override.class)
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(boolean.class)
+                            .addStatement("return instance != null")
+                            .build())
+                    .addMethod(MethodSpec.methodBuilder("release")
+                            .addAnnotation(Override.class)
+                            .addModifiers(Modifier.PUBLIC)
+                            .returns(returnClassName)
+                            .beginControlFlow("synchronized (this)")
+                            .beginControlFlow("try")
+                            .addStatement("return instance")
+                            .endControlFlow()
+                            .beginControlFlow("finally")
+                            .addStatement("instance = null")
+                            .endControlFlow()
+                            .endControlFlow()
+                            .build())
                     .build();
             return new StatementSpec(scopeStr, statementPrefix + "$L", lazyTypeSpec);
         }
@@ -303,7 +322,7 @@ public class InjectProcessor extends AbstractLookupScopeProcessor {
         Factory factory = typeElement.getAnnotation(Factory.class);
         if (factory != null) {
             if (typeElement.getKind() != ElementKind.INTERFACE)
-                throw new IllegalStateException(returnTypeStr + " not allowed. Only interfaces can be used as a meta factory.");
+                throw new IllegalStateException(returnTypeStr + " not valid. Only interfaces can be used as a meta factory.");
             return getFactoryStatement(scopeElement, typeElement, statementPrefix);
         }
         String scopeStr = lookupEntityScope(module, scopeElement.getQualifiedName().toString(), returnTypeStr);
@@ -317,42 +336,58 @@ public class InjectProcessor extends AbstractLookupScopeProcessor {
                 elementTypeStr.replaceAll("\\.", "_"), ClassName.bestGuess(scopeStr).simpleName(), getInstanceStr);
     }
 
+
+    private List<TypeElement> collectFactoryInterfaces(TypeElement element, List<TypeElement> stack) {
+        stack.add(element);
+
+        List<? extends TypeMirror> interfaces = element.getInterfaces();
+        for(TypeMirror i : interfaces) {
+            Element e = processingContext.processingEnv().getTypeUtils().asElement(i);
+            if(e.getAnnotation(Factory.class) != null)
+                collectFactoryInterfaces((TypeElement) e, stack);
+        }
+        return stack;
+    }
+
     private StatementSpec getFactoryStatement(TypeElement scopeElement, TypeElement element, String statementPrefix) {
         TypeSpec.Builder factoryBuilder = TypeSpec.anonymousClassBuilder("")
                 .addSuperinterface(ClassName.bestGuess(element.getQualifiedName().toString()));
 
+        List<TypeElement> interfaces = collectFactoryInterfaces(element, new ArrayList<TypeElement>(1));
         String scope = null;
         List<SubStatementContext> subStatements = new ArrayList<>();
-        for (Element subElement : element.getEnclosedElements())
-            if (subElement.getKind() == ElementKind.METHOD) {
-                ExecutableElement method = (ExecutableElement) subElement;
-                String methodName = method.getSimpleName().toString();
+        for(TypeElement interface_ : interfaces) {
+            for (Element subElement : interface_.getEnclosedElements())
+                if (subElement.getKind() == ElementKind.METHOD) {
+                    ExecutableElement method = (ExecutableElement) subElement;
+                    String methodName = method.getSimpleName().toString();
 
-                // name -> type
-                List<String> paramNames = new ArrayList<>();
-                Map<String, TypeMirror> params = new LinkedHashMap<>();
-                for (VariableElement param : method.getParameters()) {
-                    String paramName = param.getSimpleName().toString();
-                    paramNames.add(paramName);
-                    params.put(paramName, param.asType());
+                    // name -> type
+                    List<String> paramNames = new ArrayList<>();
+                    Map<String, TypeMirror> params = new LinkedHashMap<>();
+                    for (VariableElement param : method.getParameters()) {
+                        String paramName = param.getSimpleName().toString();
+                        paramNames.add(paramName);
+                        params.put(paramName, param.asType());
+                    }
+
+                    TypeMirror methodReturnType = method.getReturnType();
+                    StatementSpec subStatement = getResultStatement(scopeElement, methodReturnType, "return ",
+                            "getInstance(" + Joiner.on(',').join(paramNames) + ")");
+                    if (subStatement == null) {
+                        subStatements.add(new SubStatementContext(new StatementSpec(null, "return null"),
+                                methodName, params, methodReturnType));
+                        continue;
+                    }
+
+                    if (scope == null)
+                        scope = subStatement.providerScopeStr;
+                    else if (!isAssignableScope(scope, subStatement.providerScopeStr))
+                        scope = subStatement.providerScopeStr;
+
+                    subStatements.add(new SubStatementContext(subStatement, methodName, params, methodReturnType));
                 }
-
-                TypeMirror methodReturnType = method.getReturnType();
-                StatementSpec subStatement = getResultStatement(scopeElement, methodReturnType, "return ",
-                        "getInstance(" + Joiner.on(',').join(paramNames) + ")");
-                if (subStatement == null) {
-                    subStatements.add(new SubStatementContext(new StatementSpec(null, "return null"),
-                            methodName, params, methodReturnType));
-                    continue;
-                }
-
-                if (scope == null)
-                    scope = subStatement.providerScopeStr;
-                else if (!isAssignableScope(scope, subStatement.providerScopeStr))
-                    scope = subStatement.providerScopeStr;
-
-                subStatements.add(new SubStatementContext(subStatement, methodName, params, methodReturnType));
-            }
+        }
 
         if (scope == null)
             return null;
