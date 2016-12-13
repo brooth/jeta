@@ -16,18 +16,7 @@ Installation (gradle):
 repositories {
     jcenter()
 }
-```
 
-Stable:
-```groovy
-dependencies {
-    apt 'org.brooth.jeta:jeta-apt:1.4'
-    compile 'org.brooth.jeta:jeta:1.4'
-}
-```
-
-Latest:
-```groovy
 dependencies {
     apt 'org.brooth.jeta:jeta-apt:2.3'
     compile 'org.brooth.jeta:jeta:2.3'
