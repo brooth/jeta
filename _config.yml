@@ -1,10 +1,10 @@
-appname: Your Project
-appslogan: 'catchphrase goes here'
-username: your-account
-reponame: your-repo
+appname: Jeta
+appslogan: Java source code generating framework
+username: brooth
+reponame: jeta
 accent: FF3333
 darkaccent: 134A8A
-description: 'JETAAA!'
+description: 'Jeta Pages'
 
 feature1title: 'feature one'
 feature2title: 'feature two'
