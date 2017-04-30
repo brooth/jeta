@@ -20,7 +20,7 @@ Even though *Jeta* is made to help *Java* developers to write source code genera
 ### @Log
 Whatever logging tool is used in your project, the loggers can be supplied into classes through `Log` annotation. By default the logger has a name of the host (master) class:
 
-    :::java
+    :::
     class LogSample {
         @Log
         Logger logger;
@@ -28,7 +28,7 @@ Whatever logging tool is used in your project, the loggers can be supplied into 
 
 instead of:
 
-    :::java
+    :::
     class LogSample {
         private final Logger logger = LoggerFactory.getLogger(LogSample.class);
     }
@@ -40,7 +40,7 @@ Of course, this is a straightforward sample, but it illustrates what *Jeta* is a
 Installation (gradle):
 ----------------------
 
-    :::groovy
+    :::
     repositories {
         jcenter()
     }
