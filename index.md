@@ -20,16 +20,20 @@ Even though *Jeta* is made to help *Java* developers to write source code genera
 ### @Log
 Whatever logging tool is used in your project, the loggers can be supplied into classes through `Log` annotation. By default the logger has a name of the host (master) class:
 
+```java
     class LogSample {
         @Log
         Logger logger;
     }
+```
 
 instead of:
 
+```java
     class LogSample {
         private final Logger logger = LoggerFactory.getLogger(LogSample.class);
     }
+```
 
 The second approach implies copy-paste. Programmers often forget to replace the class, so loggers have incorrect names. In the first code snippet, there's no need to copy the logger code - it's easy to write, but even if you do, the `logger` will have the correct name.
 
@@ -38,6 +42,7 @@ Of course, this is a straightforward sample, but it illustrates what *Jeta* is a
 Installation (gradle):
 ----------------------
 
+```gradle
     repositories {
         jcenter()
     }
@@ -46,6 +51,7 @@ Installation (gradle):
         apt 'org.brooth.jeta:jeta-apt:2.3'
         compile 'org.brooth.jeta:jeta:2.3'
     }
+```
 
 Click [this page](/guide/install.html) for complete installation guide.
 
