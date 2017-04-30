@@ -21,18 +21,18 @@ Even though *Jeta* is made to help *Java* developers to write source code genera
 Whatever logging tool is used in your project, the loggers can be supplied into classes through `Log` annotation. By default the logger has a name of the host (master) class:
 
 ```java
-    class LogSample {
-        @Log
-        Logger logger;
-    }
+class LogSample {
+    @Log
+    Logger logger;
+}
 ```
 
 instead of:
 
 ```java
-    class LogSample {
-        private final Logger logger = LoggerFactory.getLogger(LogSample.class);
-    }
+class LogSample {
+    private final Logger logger = LoggerFactory.getLogger(LogSample.class);
+}
 ```
 
 The second approach implies copy-paste. Programmers often forget to replace the class, so loggers have incorrect names. In the first code snippet, there's no need to copy the logger code - it's easy to write, but even if you do, the `logger` will have the correct name.
