@@ -1,0 +1,15 @@
+appname: Your Project
+appslogan: 'catchphrase goes here'
+username: your-account
+reponame: your-repo
+accent: FF3333
+darkaccent: 134A8A
+description: 'JETAAA!'
+
+feature1title: 'feature one'
+feature2title: 'feature two'
+feature3title: 'feature three'
+
+feature1desc: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed pellentesque vehicula mauris, ut molestie magna rutrum vitae.'
+feature2desc: 'Vestibulum vulputate mollis metus, at laoreet purus pharetra quis. Vivamus ut sem sit amet nisl pulvinar aliquet.'
+feature3desc: 'Vivamus eu enim eget turpis porttitor dictum. Integer id sapien a mauris cursus bibendum.'
