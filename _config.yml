@@ -1,3 +1,6 @@
 name: Jeta
-markdown: redcarpet
-pygments: true
+markdown: kramdown
+author :
+	  name : Khalidov Oleg
+	  email : brooth@gmail.com
+	  github : brooth
