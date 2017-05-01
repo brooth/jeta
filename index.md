@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Java metacode generating framework
+title: Jeta - Java metacode generating framework
 ---
 
 *Jeta* - is an Open Source framework, built on the top of `javax.annotation.processing`, that brings metaprogramming into *Java* Project. It aims to reduce boilerplate code and increase errors detection at compile-time.

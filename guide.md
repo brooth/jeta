@@ -1,6 +1,6 @@
 ---
 layout: default
-title: User's Guide
+title: Jeta - User's Guide
 ---
 
 ### How it works
