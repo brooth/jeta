@@ -56,9 +56,9 @@ protected void onSaveInstanceState(Bundle outState) {
 
 And this is it. Excited? Yeah, me too.
 
-###MetaHelper
+### MetaHelper
 
-Let's define these two methods:
+Let's define these helper methods:
 
 ```java
 public static void saveRetains(Activity activity, Bundle bundle) {

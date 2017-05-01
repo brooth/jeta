@@ -16,8 +16,8 @@ repositories {
 }
 
 dependencies {
-    apt 'org.brooth.jeta:jeta-apt:2.3'
-    compile 'org.brooth.jeta:jeta:2.3'
+    apt 'org.brooth.jeta:jeta-apt:{{ site.stable_version }}'
+    compile 'org.brooth.jeta:jeta:{{ site.stable_version }}'
 }
 ```
 
@@ -99,8 +99,8 @@ compileJava {
 }
 
 dependencies {
-    apt 'org.brooth.jeta:jeta-apt:2.3'
-    compile 'org.brooth.jeta:jeta:2.3'
+    apt 'org.brooth.jeta:jeta-apt:{{ site.stable_version }}'
+    compile 'org.brooth.jeta:jeta:{{ site.stable_version }}'
 }
 ```
 

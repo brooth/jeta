@@ -36,8 +36,8 @@ apt {
 }
 
 dependencies {
-    apt 'org.brooth.androjeta:androjeta-apt:2.3'
-    compile 'org.brooth.androjeta:androjeta:2.3'
+    apt 'org.brooth.androjeta:androjeta-apt:{{ site.stable_version }}'
+    compile 'org.brooth.androjeta:androjeta:{{ site.stable_version }}'
 }
 ```
 
