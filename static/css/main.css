@@ -21,7 +21,8 @@ div.page-header {
 
 pre {
     overflow-wrap: normal !important;
-    background-color: #fcf8e3;
+    background-color: #fcf8e3 !important;
+    font-size: 14px !important;
 }
 
 div.alert {
