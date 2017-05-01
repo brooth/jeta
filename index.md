@@ -10,12 +10,12 @@ Metaprogramming is achieved by code generating which makes programs fast and sta
 If you are dissatisfied with `Java Reflection`, welcome aboard :)
 
 <div class="alert alert-success" role="alert">
-For android developers, <a href="/guide/androjeta/overview.html">Androjeta</a> is the better way to go.
+For android developers, <a href="{{ site.baseurl }}/guide/androjeta/overview.html">Androjeta</a> is the better way to go.
 </div>
 
 At a glance:
 --------
-Even though *Jeta* is made to help *Java* developers to write source code generators, it also provides [a number](/guide.html) of features, built on the same foundation. Let's take a look on a simple example:
+Even though *Jeta* is made to help *Java* developers to write source code generators, it also provides [a number]({{ site.baseurl }}/guide.html) of features, built on the same foundation. Let's take a look on a simple example:
 
 ### @Log
 Whatever logging tool is used in your project, the loggers can be supplied into classes through `Log` annotation. By default the logger has a name of the host (master) class:
@@ -37,7 +37,7 @@ class LogSample {
 
 The second approach implies copy-paste. Programmers often forget to replace the class, so loggers have incorrect names. In the first code snippet, there's no need to copy the logger code - it's easy to write, but even if you do, the `logger` will have the correct name.
 
-Of course, this is a straightforward sample, but it illustrates what *Jeta* is all about - *less code, more stability*. Follow the [user's guide](/guide.html) to find more features and know how to create yours.
+Of course, this is a straightforward sample, but it illustrates what *Jeta* is all about - *less code, more stability*. Follow the [user's guide]({{ site.baseurl }}/guide.html) to find more features and know how to create yours.
 
 Installation (gradle):
 ----------------------
@@ -48,12 +48,12 @@ repositories {
 }
 
 dependencies {
-    apt 'org.brooth.jeta:jeta-apt:2.3'
-    compile 'org.brooth.jeta:jeta:2.3'
+    apt 'org.brooth.jeta:jeta-apt:{{ site.stable_version }}'
+    compile 'org.brooth.jeta:jeta:{{ site.stable_version }}'
 }
 ```
 
-Click [this page](/guide/install.html) for complete installation guide.
+Click [this page]({{ site.baseurl }}/guide/install.html) for complete installation guide.
 
 
 License
