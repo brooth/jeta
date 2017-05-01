@@ -1,0 +1,150 @@
+---
+layout: default
+title: Jeta - Donation
+---
+
+<div class="page-header">
+    <h2>Thank you for helping <i>Jeta</i> grow!</h2>
+</div>
+
+<center>
+<table class="donate_table">
+    <tr>
+        <td>
+            <span>Amount:</span>
+        </td>
+        <td width="160px">
+            <div class="input-group">
+                <input id="dnt_amount" type="text" class="form-control" placeholder="Amount" aria-label="Amount" value="25"/>
+                <span class="input-group-addon">$</span>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <span>Name:</span>
+        </td>
+        <td>
+            <div class="input-group">
+                <input id="dnt_name" type="text" class="form-control" placeholder="Incognito" aria-describedby="basic-addon1">
+            </div>
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<form id="paypal_form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+    <input type="hidden" name="cmd" value="_donations">
+    <input type="hidden" name="business" value="brooth@gmail.com">
+    <input type="hidden" name="lc" value="RU">
+    <input type="hidden" name="item_name" value="Jeta Donation">
+    <input id="paypal_number" type="hidden" name="item_number" value="">
+    <input id="paypal_amount" type="hidden" name="amount" value="25.00">
+    <input type="hidden" name="currency_code" value="USD">
+    <input type="hidden" name="no_note" value="0">
+    <input type="hidden" name="bn" value="PP-DonationsBF:btn_donateCC_LG.gif:NonHostedGuest">
+</form>
+
+<input id="paypal_button" type="image" onclick="paypal_donate()" src="https://www.paypalobjects.com/en_US/RU/i/btn/btn_donateCC_LG.gif" border="0" alt="PayPal - The safer, easier way to pay online!">
+
+
+<table class="donators_table">
+    <tr>
+        <td style="padding: 10px">
+            <table class="table table-striped">
+                <caption>Top donators</caption>
+                <thead>
+                    <tr>
+                        <td>#</td>
+                        <td>Name</td>
+                        <td>Amount</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td style="padding: 10px">
+            <table class="table table-striped">
+                <caption>Last donators</caption>
+                <thead>
+                    <tr>
+                        <td>#</td>
+                        <td>Name</td>
+                        <td>Amount</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+</table>
+<p> No one loves Jeta :(</p>
+</center>
+
+<script>
+function paypal_donate() {
+    var dnt_amount = document.getElementById('dnt_amount')
+    var amount = dnt_amount.value
+        if(!$.isNumeric(amount) || amount < 1) {
+            dnt_amount.value = "25"
+            dnt_amount.focus()
+            return
+        }
+    document.getElementById('paypal_amount').value = amount
+    document.getElementById('paypal_number').value = document.getElementById('dnt_name').value
+    document.getElementById('paypal_form').submit()
+};
+</script>
