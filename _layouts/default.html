@@ -23,9 +23,9 @@
             <div class="panel-heading">
                 <a href="/">
                     {% if request.path.include? "androjeta"  %}
-                        <img src="{% static 'images/jeta_short.png' %}" width="64"/>
+                        <img src="{{ site.baseurl }}/static/images/jeta_short.png" width="64"/>
                     {% else %}
-                        <img src="{% static 'images/androjeta.png' %}" height="37"/>
+                        <img src="{{ site.baseurl }}/static/images/androjeta.png" height="37"/>
                     {% endif %}
                 </a>
 
@@ -111,7 +111,7 @@
                 </tr>
             </table>
         </div>
-		
+
         {% if request.path.include? "androjeta"  %}
             <a id="forkme" href="https://github.com/brooth/jeta">
                 <img style="position: absolute; top: 0; right: 0; border: 0;"
