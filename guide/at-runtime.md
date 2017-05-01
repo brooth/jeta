@@ -6,7 +6,7 @@ title: Jeta - How it works - At Runtime
   <h2>How it works at Runtime</h2>
 </div>
 
-<img src="/static/images/at_runtime.png" width="700px"/>
+<img src="{{ site.baseurl }}/static/images/at_runtime.png" width="700px"/>
 
 ### Master and Metacode
 *Master* - is a Java type that uses an annotation and is processed by *Jeta*. For each master, *Jeta* generates a *Metacode* class. This class is located in the same package as its master and named as `<master name> + "_Metacode"`.
