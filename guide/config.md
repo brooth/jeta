@@ -30,7 +30,7 @@ apt {
 ### `jeta.properties`
 Let's go through the options available to controll code generating. As previously mentioned, the most required property is `metasitory.package`. It must be unique for any module, e.g. test module. You will need this package to provide to `MapMetasitory` constructor at runtime to use this metasitory. The other options are described below as comments:
 
-```properties
+```
 # Source directory path. Absolute or relative to `jeta.properties` path
 # to the source folder. Define it in case `jeta.properties` isn't in the root
 # of the source set. (`.` by default)
