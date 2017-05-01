@@ -1,3 +1,7 @@
+---
+title: Jeta - User's Guide - Dependency Injection
+---
+
 <div class="page-header">
     <h2>Dependency Injection</h2>
 </div>
@@ -7,61 +11,64 @@
 * Inject entities with parameters
 * Extend the entities
 
-###MetaHelper
+### MetaHelper
 
 Before we start, let's define a helper method we're going to inject with:
 
-    :::java
-    public static void inject(Object master) {
-        new InjectController(metasitory, master).inject(scope);
-    }
+```java
+public static void inject(Object master) {
+    new InjectController(metasitory, master).inject(scope);
+}
+```
 
-
-Please, read [this article](/guide/meta-helper.html) first, if you have questions about *MetaHelper*.
+Please, read [this article]({{ site.baseurl }}/guide/meta-helper.html) first, if you have questions about *MetaHelper*.
 
 <a name="Producer"></a>
 ### Producer
 
 Let's start with a straightforward example:
 
-    :::java
-    @Producer
-    class MyProducer {
-    }
+```java
+@Producer
+class MyProducer {
+}
 
-    class MyConsumer {
-        @Inject
-        MyProducer producer;
+class MyConsumer {
+    @Inject
+    MyProducer producer;
 
-        public MyConsumer() {
-            MetaHelper.inject(this);
-        }
+    public MyConsumer() {
+        MetaHelper.inject(this);
     }
+}
+```
 
 Well, the simplest way to inject an entity is to define this entity as `Producer`. Everytime  `inject()` method is invoked, new instance of *MyProducer* will be injected. If you need a single instance of an entity, set up `singleton` flag to `true`: `@Producer(singleton=true)`. <span class="label label-info">Note</span> It makes a singleton per `Scope`. Read below about the [scopes](#Scopes) .
 
 In the snippet above, the injector creates an instance of *MyProducer* through default constructor. It's allowed to create a static factory method and provide instances via it:
 
-    :::java
-    @Producer(staticConstructor = "newInstance")
-    class MyProducer {
-        public static MyProducer newInstance() {
-            return new MyProducer();
-        }
+```java
+@Producer(staticConstructor = "newInstance")
+class MyProducer {
+    public static MyProducer newInstance() {
+        return new MyProducer();
     }
+}
+```
 
 <span class="label label-info">Note</span> You shouldn't distrust this approach. In case of misspelling, it fails at compile-time.
 
 <br/>
 Besides straight injection, you can provide it using `Lazy`, `Provider` or inject its `class`:
 
-    :::java
-    @Inject
-    Provider<MyProducer> producerProvider;
-    @Inject
-    Lazy<MyProducer> lazyProducer;
-    @Inject
-    Class<? extends MyProducer> producerClass;
+```java
+@Inject
+Provider<MyProducer> producerProvider;
+@Inject
+Lazy<MyProducer> lazyProducer;
+@Inject
+Class<? extends MyProducer> producerClass;
+```
 
 <span class="label label-info">Note</span> *Lazy* class provides a single instance of an entity and initializes it on demand. *Provider* creates new instance each invocation.
 
@@ -69,26 +76,27 @@ Besides straight injection, you can provide it using `Lazy`, `Provider` or injec
 
 As previously written, *Jeta DI* allows you to inject entities with parameters:
 
-    :::java
-    @Producer
-    class MyProducer {
-        public MyProducer(String s, double d) {
-        }
+```java
+@Producer
+class MyProducer {
+    public MyProducer(String s, double d) {
+    }
+}
+
+class MyConsumer {
+    @Inject
+    MyFactory factory;
+    @Factory
+    interface MyFactory {
+        MyProducer getMyProducer(String s, double d);
     }
 
-    class MyConsumer {
-        @Inject
-        MyFactory factory;
-        @Factory
-        interface MyFactory {
-            MyProducer getMyProducer(String s, double d);
-        }
-
-        public MyConsumer() {
-            MetaHelper.inject(this);
-            MyProducer p = factory.getMyProducer("abc", 0.75);
-        }
+    public MyConsumer() {
+        MetaHelper.inject(this);
+        MyProducer p = factory.getMyProducer("abc", 0.75);
     }
+}
+```
 
 <span class="label label-info">Note</span> Once you defined a `Factory`, you can use it for the all dependencies of a master, including entities without parameters, provided via `Lazy`, `Provider` and `Class`.
 
@@ -101,25 +109,27 @@ Note that the injection expression must match the entity construction, i.e. you 
 ### Entity Provider
 In case you need a provider of an entity, e.g. to be able to inject thirdparty classes, you need to annotate this provider with `@Producer(of=MyProducer.class)`:
 
-    :::java
-    @Producer(of = MyProducer.class)
-    class MyProducerProvider {
-        @Constructor
-        public MyProducer get() {
-            return new MyProducer();
-        }
+```java
+@Producer(of = MyProducer.class)
+class MyProducerProvider {
+    @Constructor
+    public MyProducer get() {
+        return new MyProducer();
     }
+}
+```
 
 <span class="label label-info">Note</span> In case of entity provider you must explicitly define factory methods via `@Constructor` annotation. Also, `staticConstructor` is used to create the provider, not entities. If it's necessary to create entities via static factory method, put `@Constructor` annotation on it:
 
-    :::java
-    @Producer(of = MyProducer.class)
-    class MyProducerProvider {
-        @Constructor
-        public static MyProducer getMyProducer() {
-            return new MyProducer();
-        }
+```java
+@Producer(of = MyProducer.class)
+class MyProducerProvider {
+    @Constructor
+    public static MyProducer getMyProducer() {
+        return new MyProducer();
     }
+}
+```
 
 <a name="Scopes"></a>
 ### Scopes
@@ -128,71 +138,78 @@ You can define as many scopes as needed. However, there must be at least one *Sc
 
 In general, you must specify the scope when you're creating an entity:
 
-    :::java
-    @Producer(scope = MyScope.class)
-    class MyProducer {
-    }
+```java
+@Producer(scope = MyScope.class)
+class MyProducer {
+}
+```
 
 but it's allowed to define a default scope. In this case, you can leave `scope` argument empty. To set a scope as default, add this option in your `jeta.properties`:
 
-    :::properties
-    inject.scope.default = com.extample.MyScope
+```properties
+inject.scope.default = com.extample.MyScope
+```
 
-Refer to [configuration guide](/guide/config.html) if you have any questions about `jeta.properties`.
+Refer to [configuration guide]({{ site.baseurl }}/guide/config.html) if you have any questions about `jeta.properties`.
 
 Let's create a scope and go through its details.
 
-    :::java
-    @Scope
-    public class MyScope {
-    }
+```java
+@Scope
+public class MyScope {
+}
+```
 
 In fact, this class does nothing, but is used to create a `MetaScope`:
 
-    :::java
-    MetaScope<MyScope> myMetaScope =
-        new MetaScopeController<>(metasitory, new MyScope()).get();
+```java
+MetaScope<MyScope> myMetaScope =
+    new MetaScopeController<>(metasitory, new MyScope()).get();
+```
 
 <span class="label label-info">Note</span> *MetaScope* is the major class of *Jeta DI*. It holds the  information about providers and satisfies module's dependencies. You need to pass a *MetaScope* to `InjectController` in order to inject:
 
-    :::java
-    new InjectController(metasitory, master).inject(myMetaScope);
+```java
+new InjectController(metasitory, master).inject(myMetaScope);
+```
 
 <span class="label label-info">Note</span> Use `StaticInjectController` for static dependencies.
 
 Nevertheless, there's a little trick that makes scopes useful as well. You can use them to pass data to the providers. Let's say we need an object `Application` in our entities. In this case, the better way is to use a scope for:
 
-    :::java
-    public class MyScope {
-        private Application app;
+```java
+public class MyScope {
+    private Application app;
 
-        public MyScope(Application app) {
-            this.app = app;
-        }
-
-        public Application getApplication() {
-            return app;
-        }
+    public MyScope(Application app) {
+        this.app = app;
     }
+
+    public Application getApplication() {
+        return app;
+    }
+}
+```
 
 <span/>
 
-    :::java
-    MetaScope<MyScope> myMetaScope =
-        new MetaScopeController<>(metasitory, new MyScope(application)).get();
-
+```java
+MetaScope<MyScope> myMetaScope =
+    new MetaScopeController<>(metasitory, new MyScope(application)).get();
+```
 
 Now, you can access the `Application` instance inside an entity:
 
-    :::java
-    @Produce
-    class MyProducer {
-        private Application app;
+```java
+@Produce
+class MyProducer {
+    private Application app;
 
-        class MyProducer(MyScope __scope__) {
-            this.app = __scope__.getApplication();
-        }
+    class MyProducer(MyScope __scope__) {
+        this.app = __scope__.getApplication();
     }
+}
+```
 
 <span class="label label-warning">Pay attension</span> You must precisely name constructor parameter as `__scope__`.
 
@@ -201,10 +218,11 @@ Now, you can access the `Application` instance inside an entity:
 
 *Module* is the entry point to the *Jeta DI* configuration of your project. In the foreground it's just used to define the scopes, but in the background, it does more complex work.
 
-    :::java
-    @Module(scopes = { MyScope.class })
-    class MyModule {
-    }
+```java
+@Module(scopes = { MyScope.class })
+class MyModule {
+}
+```
 
 <span class="label label-warning">Important</span> You must define exact one `@Module` for a module in which you want to use *Jeta DI*. Otherwise you get compilation error.
 
@@ -214,62 +232,67 @@ Now, you can access the `Application` instance inside an entity:
 
 Let's say you want to use `javax.inject.Inject` to supply entities. To do so, append these lines in your `jeta.properties`:
 
-    :::properties
-    inject.alias = javax.inject.Inject
-    # provider as well
-    inject.alias.provider = javax.inject.Provider
+```properties
+inject.alias = javax.inject.Inject
+# provider as well
+inject.alias.provider = javax.inject.Provider
+```
 
 <span class="label label-warning">Pay attention</span> To let *InjectController (StaticInjectController)* know about `javax.inject.Inject` you also have to pass this annotation to the constructors, otherwise the controllers won't find the masters that use those annotations.
 
-    :::java
-    new InjectController(metasitory, master, javax.inject.Inject.class)
-        .inject(myMetaScope);
+```java
+new InjectController(metasitory, master, javax.inject.Inject.class)
+    .inject(myMetaScope);
+```
 
 ### Hello, World!
 
-For the demonstration let's change the [Hello, World!](/guide/code-generating.html#HelloWorldSample) example. Instead of providing *Hello, World!* via `@SayHello` annotation, we'll inject it.
+For the demonstration let's change the [Hello, World!]({{ site.baseurl }}/guide/code-generating.html#HelloWorldSample) example. Instead of providing *Hello, World!* via `@SayHello` annotation, we'll inject it.
 
 First, we need to create *Module* and *Scope*:
 
-    :::java
-    @Scope
-    public class HelloWorldScope {}
+```java
+@Scope
+public class HelloWorldScope {}
 
-    @Module(scopes = HelloWorldScope.class)
-    interface HelloWorldModule {}
+@Module(scopes = HelloWorldScope.class)
+interface HelloWorldModule {}
+```
 
 Next, create a `String` provider:
 
-    :::java
-    @Producer(of = String.class, scope = HelloWorldScope.class)
-    public class StringProvider {
-        @Constructor
-        public static String get() {
-            return "Hello, World!";
-        }
+```java
+@Producer(of = String.class, scope = HelloWorldScope.class)
+public class StringProvider {
+    @Constructor
+    public static String get() {
+        return "Hello, World!";
     }
+}
+```
 
 And the helper method:
 
-    :::java
-    public static void inject(Object master) {
-        MetaScope<HelloWorldScope> metaScope =
-            new MetaScopeController<>(metasitory, new HelloWorldScope()).get();
-        new InjectController(metasitory, master).inject(metaScope);
-    }
+```java
+public static void inject(Object master) {
+    MetaScope<HelloWorldScope> metaScope =
+        new MetaScopeController<>(metasitory, new HelloWorldScope()).get();
+    new InjectController(metasitory, master).inject(metaScope);
+}
+```
 
 Finally, modify the sample:
 
-    :::java
-    public class HelloWorldSample {
-        @Inject
-        String str;
+```java
+public class HelloWorldSample {
+    @Inject
+    String str;
 
-        public HelloWorldSample() {
-            MetaHelper.inject(this);
-        }
+    public HelloWorldSample() {
+        MetaHelper.inject(this);
     }
-
+}
+```
 
 <a name="Extending"></a>
 ### Extending
@@ -278,27 +301,29 @@ As noticed above, *Jeta DI* lets you extend entities easily. For example, we'll 
 
 First, we need to define new scope and provider:
 
-    :::java
-    @Scope(ext = HelloWorldScope.class)
-    public class HelloUniverseScope extends HelloWorldScope {
-    }
+```java
+@Scope(ext = HelloWorldScope.class)
+public class HelloUniverseScope extends HelloWorldScope {
+}
 
-    @Producer(of = String.class, scope = HelloUniverseScope.class)
-    public class StringProviderExt {
-        @Constructor
-        public static String get() {
-            return "Hello, Universe!";
-        }
+@Producer(of = String.class, scope = HelloUniverseScope.class)
+public class StringProviderExt {
+    @Constructor
+    public static String get() {
+        return "Hello, Universe!";
     }
+}
+```
 
 Also, change the scope from `HelloWorldScope` to `HelloUniverseScope` in the helper:
 
-    :::java
-    public static void inject(Object master) {
-        MetaScope<HelloWorldScope> metaScope =
-            new MetaScopeController<>(metasitory, new HelloUniverseScope()).get();
-        new InjectController(metasitory, master).inject(metaScope);
-    }
+```java
+public static void inject(Object master) {
+    MetaScope<HelloWorldScope> metaScope =
+        new MetaScopeController<>(metasitory, new HelloUniverseScope()).get();
+    new InjectController(metasitory, master).inject(metaScope);
+}
+```
 
 At this point, *Jeta DI* will inject *"Hello, Universe!"* into `str` as you expect. But, let's clarify what's happening in these listings.
 
@@ -306,23 +331,24 @@ At this point, *Jeta DI* will inject *"Hello, Universe!"* into `str` as you expe
 
 Apart from direct extending, it's allowed to substitude the super entities as well. To illustrate that, let's extend our [`MyProducer`](#Producer) entity:
 
-    :::java
-    @Producer(ext = MyProducer.class)
-    public class MyTestProducer extends MyProducer {
-    }
+```java
+@Producer(ext = MyProducer.class)
+public class MyTestProducer extends MyProducer {
+}
+```
 
 Now, in addition to being able to inject `MyTestProducer`, you can also satisfy `MyProducer` dependencies.
 
 <span class="label label-warning">Important</span> The scope of the extender entity must extend the scope of the extending entity as well. This means that for our `MyTestProducer` we must create a scope that extends [`MyScope`](#Scopes):
 
-    :::java
-    @Scope(ext = MyScope.class)
-    public class MyTestScope {
-    }
+```java
+@Scope(ext = MyScope.class)
+public class MyTestScope {
+}
 
-    @Producer(ext = MyProducer.class, scope = MyTestScope.class)
-    public class MyTestProducer extends MyProducer {
-    }
+@Producer(ext = MyProducer.class, scope = MyTestScope.class)
+public class MyTestProducer extends MyProducer {
+}
+```
 
-Besides this article, it's recommended to go through [multi-modules projects](/guide/multi-modules.html) guide. It describes how to share the metacode between modules.
-
+Besides this article, it's recommended to go through [multi-modules projects]({{ site.baseurl }}/guide/multi-modules.html) guide. It describes how to share the metacode between modules.
