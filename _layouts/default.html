@@ -22,14 +22,12 @@
 	<div class="content panel panel-default">
             <div class="panel-heading">
                 <a href="{{ site.baseurl }}/">
-                    {% if !(page.is_androjeta)  %}
+                    {% if !page.key?("is_androjeta")  %}
                         <img src="{{ site.baseurl }}/static/images/jeta_short.png" width="64"/>
                     {% else %}
                         <img src="{{ site.baseurl }}/static/images/androjeta.png" height="37"/>
                     {% endif %}
                 </a>
-		    {{ page.is_androjeta }},
-		    {{ page }},
 		    
                 <span style="float:right">
                     <a href="{{ site.baseurl }}/guide.html" type="button" class="btn btn-link">USER'S GUIDE</a>
