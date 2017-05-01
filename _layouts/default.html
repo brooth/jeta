@@ -29,8 +29,7 @@
                     {% endif %}
                 </a>
 		    {{ page.is_androjeta }},
-		    {{ page.is_androjeta == "" }},
-		    {{ page.is_androjeta != "" && page.is_androjeta }},
+		    {{ page.has_attribute?('is_androjeta') }},
 		    
                 <span style="float:right">
                     <a href="{{ site.baseurl }}/guide.html" type="button" class="btn btn-link">USER'S GUIDE</a>
