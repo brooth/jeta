@@ -29,6 +29,10 @@
                     {% endif %}
                 </a>
 		    
+		    {{ page.is_androjeta  }},
+		    {{ page.key?("content")  }},
+		    {{ page.key?("is_androjeta")  }},
+		    
                 <span style="float:right">
                     <a href="{{ site.baseurl }}/guide.html" type="button" class="btn btn-link">USER'S GUIDE</a>
                     {% if !page.is_androjeta.present || !page.is_androjeta  %}
