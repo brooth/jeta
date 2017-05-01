@@ -2,6 +2,6 @@
 
 --
 
-[Tutorials](http://jeta.brooth.org)
+[Tutorials](http://brooth.github.io/jeta/)
 
 [Samples](https://github.com/brooth/jeta-samples)
