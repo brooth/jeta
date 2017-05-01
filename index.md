@@ -42,7 +42,7 @@ Of course, this is a straightforward sample, but it illustrates what *Jeta* is a
 Installation (gradle):
 ----------------------
 
-```gradle
+```groovy
 repositories {
     jcenter()
 }

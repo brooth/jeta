@@ -7,7 +7,7 @@ is_androjeta: true
     <h2>Androjeta</h2>
 </div>
 
-In addition to [a number](/guide.html) of *Jeta* features, that are available on Android platform as well, *Androjeta* adds some extra. And of course, *Androjeta* follows the *Jeta* concepts - no reflection, compile-time validation and boilerplate-code elimination.
+In addition to [a number]({{ site.baseurl }}/guide.html) of *Jeta* features, that are available on Android platform as well, *Androjeta* adds some extra. And of course, *Androjeta* follows the *Jeta* concepts - no reflection, compile-time validation and boilerplate-code elimination.
 
 ### `Java reflection` as a bad manner
 
@@ -18,27 +18,29 @@ Despite the fact that mobile phones might give odds to personal computers, it's 
 
 Every Android developer is probably familiar with `onSaveInstanceState` callback and knows about what the nightmare it might be to keep an activity in a state. You can read details on [developer.android.com](http://developer.android.com/training/basics/activity-lifecycle/recreating.html). Even though this approach requires a lot of boilerplate code, until now there wasn't a tool that could give you some help. Now *Androjeta* can:
 
-    :::java
-    @Retain
-    String myVolatileString;
+```java
+@Retain
+String myVolatileString;
+```
 
-Go to [*Retain* guide](/guide/androjeta/retain.html) to find out how to make your life easier.
+Go to [*Retain* guide]({{ site.baseurl }}/guide/androjeta/retain.html) to find out how to make your life easier.
 
 ### FindView
 
 *Androjeta* comes with an annotation that's going to be your favorite:
 
-    :::java
-    @FindView
-    Button saveButton;
+```java
+@FindView
+Button saveButton;
+```
 
-This feature eliminates `findViewById` usage. How is that possible? It's explained in [this article](/guide/androjeta/findviews.html).
+This feature eliminates `findViewById` usage. How is that possible? It's explained in [this article]({{ site.baseurl }}/guide/androjeta/findviews.html).
 
 
 ### Jeta collectors vs scan packages
 
-You aren't allowed to scan packages on Android if you need to search for some classes. Nevertheless, `Jeta Collectors` do that job much faster, even if it was possible on Android. Please, follow [this link](/guide/collector.html) to be aware of `Jeta Collectors` if you aren't yet.
+You aren't allowed to scan packages on Android if you need to search for some classes. Nevertheless, `Jeta Collectors` do that job much faster, even if it was possible on Android. Please, follow [this link]({{ site.baseurl }}/guide/collector.html) to be aware of `Jeta Collectors` if you aren't yet.
 
 
-###P.S.
-In fact, *Jeta* was born as the result of all these issues, Android developers face to every day. Follow [this page](/guide.html) to be able to create stable Android apps and enjoy the process.
+### P.S.
+In fact, *Jeta* was born as the result of all these issues, Android developers face to every day. Follow [this page]({{ site.baseurl }}/guide.html) to be able to create stable Android apps and enjoy the process.

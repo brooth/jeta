@@ -6,7 +6,7 @@ title: Jeta - User's Guide - Singleton and Multiton
     <h2>Singleton and Multiton</h2>
 </div>
 
-###Singleton
+### Singleton
 
 *Singleton* is the less useful feature of *Jeta*. You can use it if you feel too lazy and, for example, in tests when you need a thread-safe singleton.
 
