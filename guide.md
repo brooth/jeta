@@ -1,5 +1,5 @@
 ---
-layout: guide
+layout: default
 title: User's Guide
 ---
 
