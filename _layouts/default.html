@@ -22,25 +22,21 @@
 	<div class="content panel panel-default">
             <div class="panel-heading">
                 <a href="{{ site.baseurl }}/">
-                    {% if !page.key?("is_androjeta")  %}
-                        <img src="{{ site.baseurl }}/static/images/jeta_short.png" width="64"/>
-                    {% else %}
+                    {% if page.is_androjeta  %}
                         <img src="{{ site.baseurl }}/static/images/androjeta.png" height="37"/>
+                    {% else %}
+                        <img src="{{ site.baseurl }}/static/images/jeta_short.png" width="64"/>
                     {% endif %}
                 </a>
-		    
-		    {{ page.is_androjeta  }},
-		    {{ page.key?("content")  }},
-		    {{ page.key?("is_androjeta")  }},
-		    
+		 		    
                 <span style="float:right">
                     <a href="{{ site.baseurl }}/guide.html" type="button" class="btn btn-link">USER'S GUIDE</a>
-                    {% if !page.is_androjeta.present || !page.is_androjeta  %}
-                        <a href="https://github.com/brooth/jeta" type="button" class="btn btn-link">SOURCE CODE</a>
-                        <a href="https://github.com/brooth/jeta-samples" type="button" class="btn btn-link">SAMPLES</a>
-                    {% else %}
+                    {% if page.is_androjeta  %}
                         <a href="https://github.com/brooth/androjeta" type="button" class="btn btn-link">SOURCE CODE</a>
                         <a href="https://github.com/brooth/androjeta-samples" type="button" class="btn btn-link">SAMPLES</a>
+                    {% else %}
+			<a href="https://github.com/brooth/jeta" type="button" class="btn btn-link">SOURCE CODE</a>
+                        <a href="https://github.com/brooth/jeta-samples" type="button" class="btn btn-link">SAMPLES</a>
                     {% endif %}
                     <a href="{{ site.baseurl }}/contact.html" type="button" class="btn btn-link">CONTACT</a>
                     <a href="{{ site.baseurl }}/donate.html" type="button" class="btn btn-primary">
@@ -116,19 +112,19 @@
             </table>
         </div>
 
-        {% if !page.is_androjeta.present || !page.is_androjeta  %}
-            <a id="forkme" href="https://github.com/brooth/jeta">
-                <img style="position: absolute; top: 0; right: 0; border: 0;"
-                    src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67"
-                    alt="Fork me on GitHub"
-                    data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png">
-            </a>
-        {% else %}
+        {% if page.is_androjeta  %}
             <a id="forkme" href="https://github.com/brooth/androjeta">
                 <img style="position: absolute; top: 0; right: 0; border: 0;"
                     src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67"
                     alt="Fork me on GitHub"
                     data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png">
+            </a>    
+        {% else %}
+            <a id="forkme" href="https://github.com/brooth/jeta">
+                <img style="position: absolute; top: 0; right: 0; border: 0;"
+                    src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67"
+                    alt="Fork me on GitHub"
+                    data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png">
             </a>
         {% endif %}
 </body>
