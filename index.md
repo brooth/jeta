@@ -43,14 +43,14 @@ Installation (gradle):
 ----------------------
 
 ```gradle
-    repositories {
-        jcenter()
-    }
+repositories {
+    jcenter()
+}
 
-    dependencies {
-        apt 'org.brooth.jeta:jeta-apt:2.3'
-        compile 'org.brooth.jeta:jeta:2.3'
-    }
+dependencies {
+    apt 'org.brooth.jeta:jeta-apt:2.3'
+    compile 'org.brooth.jeta:jeta:2.3'
+}
 ```
 
 Click [this page](/guide/install.html) for complete installation guide.
@@ -72,4 +72,3 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-

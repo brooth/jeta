@@ -19,10 +19,113 @@
 </head>
 
 <body>
-	<div id="container">
-		{{content}}
-	</div>
-	<div style="clear:both">&nbsp;</div>
-</body>
+	<div class="content panel panel-default">
+            <div class="panel-heading">
+                <a href="/">
+                    {% if request.path.include? "androjeta"  %}
+                        <img src="{% static 'images/jeta_short.png' %}" width="64"/>
+                    {% else %}
+                        <img src="{% static 'images/androjeta.png' %}" height="37"/>
+                    {% endif %}
+                </a>
 
+                <span style="float:right">
+                    <a href="/guide.html" type="button" class="btn btn-link">USER'S GUIDE</a>
+                    {% if request.path.include? "androjeta"  %}
+                        <a href="https://github.com/brooth/jeta" type="button" class="btn btn-link">SOURCE CODE</a>
+                        <a href="https://github.com/brooth/jeta-samples" type="button" class="btn btn-link">SAMPLES</a>
+                    {% else %}
+                        <a href="https://github.com/brooth/androjeta" type="button" class="btn btn-link">SOURCE CODE</a>
+                        <a href="https://github.com/brooth/androjeta-samples" type="button" class="btn btn-link">SAMPLES</a>
+                    {% endif %}
+                    <a href="/contact.html" type="button" class="btn btn-link">CONTACT</a>
+                    <a href="/donate.html" type="button" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> DONATE
+                    </a>
+                </span>
+            </div>
+
+            <table width="100%">
+                <tr valign="top">
+                    <td>
+                        <div class="panel-body">
+                            {{content}}
+                        </div>
+                    </td>
+                    <td width="1px" bgcolor="#ddd"/>
+                    <td width="230px" style="padding: 16px">
+                        <h4>How it works:</h4>
+                        <ul style="font-size:11pt; padding-left: 20px;">
+                            <li><a href="/guide/code-generating.html">Code Generating</a></li>
+                            <li><a href="/guide/at-runtime.html">At Runtime</a></li>
+                            <li><a href="/guide/meta-helper.html">Meta Helper</a></li>
+                        </ul>
+                        <h4>User's Guide:</h4>
+                        <ul style="font-size:11pt; padding-left: 20px;">
+                            <li><a href="/guide/install.html">Installation</a></li>
+                            <li><a href="/guide/config.html">Configuration</a></li>
+                            <li><a href="/guide/logger.html">Logger Provider</a></li>
+                            <li><a href="/guide/inject.html">Dependecy Injection</a></li>
+                            <li><a href="/guide/observer.html">Observer</a></li>
+                            <li><a href="/guide/event-bus.html">Event Bus</a></li>
+                            <li><a href="/guide/collector.html">Collectors</a></li>
+                            <li><a href="/guide/implementation.html">Implementation</a></li>
+                            <li><a href="/guide/validator.html">Validators</a></li>
+                            <li><a href="/guide/proxy.html">Proxy</a></li>
+                            <li><a href="/guide/singleton.html">Singleton and Multiton</a></li>
+                        </ul>
+                        <h4>Androjeta</h4>
+                        <ul style="font-size:11pt; padding-left: 20px;">
+                            <li><a href="/guide/androjeta/overview.html">Overview</a></li>
+                            <li><a href="/guide/androjeta/install.html">Installation</a></li>
+                            <li><a href="/guide/androjeta/config.html">Configuration</a></li>
+                            <li><a href="/guide/androjeta/findviews.html">Find Views</a></li>
+                            <li><a href="/guide/androjeta/retain.html">Retain</a></li>
+                            <li><a href="/guide/androjeta/clicks.html">On Clicks</a></li>
+                        </ul>
+                        <h4>Advanced</h4>
+                        <ul style="font-size:11pt; padding-left: 20px;">
+                            <li><a href="/guide/multi-modules.html">Mutli-Module Projects</a></li>
+                            <li><a href="/guide/custom-processor.html">Custom Processor</a></li>
+                            <li><a href="/guide/custom-metasitory.html">Custom Metasitory</a></li>
+                        </ul>
+
+                        <table style="margin-top: 20px;">
+                            <tr>
+                                <td style="padding: 3px;">
+                                    <span class="label label-success">Stable version: 2.3</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 3px;">
+                                    <span class="label label-info">Available on Java 1.7+</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 3px;">
+                                    <span class="label label-info">Android Compatible</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+		
+        {% if request.path.include? "androjeta"  %}
+            <a id="forkme" href="https://github.com/brooth/jeta">
+                <img style="position: absolute; top: 0; right: 0; border: 0;"
+                    src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67"
+                    alt="Fork me on GitHub"
+                    data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png">
+            </a>
+        {% else %}
+            <a id="forkme" href="https://github.com/brooth/androjeta">
+                <img style="position: absolute; top: 0; right: 0; border: 0;"
+                    src="https://camo.githubusercontent.com/e7bbb0521b397edbd5fe43e7f760759336b5e05f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677265656e5f3030373230302e706e67"
+                    alt="Fork me on GitHub"
+                    data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png">
+            </a>
+        {% endif %}
+</body>
 </html>
