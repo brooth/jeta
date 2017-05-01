@@ -1,3 +1,7 @@
+---
+title: Jeta - How it works - Metacode generating
+---
+
 <div class="page-header">
   <h2>Code generating</h2>
 </div>
@@ -19,25 +23,27 @@ There's a bit of information on the Internet, but `javac` allows us to generate 
 ### Hello, World!<a name="HelloWorldSample"></a>
 Let's take a look at the example, in which `@SayHello` annotation sets *"Hello, World!"* into the field.
 
-    :::java
-    public @interface SayHello {
-    }
+```java
+public @interface SayHello {
+}
 
-    public class HelloWorldSample {
-        @SayHello
-        String str;
-    }
+public class HelloWorldSample {
+    @SayHello
+    String str;
+}
+```
 
 If *Jeta* had a processor for this example, the metacode would be:
 
-    :::java
-    public class HelloWorldSample_Metacode implements HelloWorldMetacode<HelloWorldSample> {
-        @Override
-        public void setHelloWorld(HelloWorldSample master) {
-            master.str = "Hello, World!";
-        }
+```java
+public class HelloWorldSample_Metacode implements HelloWorldMetacode<HelloWorldSample> {
+    @Override
+    public void setHelloWorld(HelloWorldSample master) {
+        master.str = "Hello, World!";
     }
+}
+```
 
-You can find sample code of such processor on [this page](/guide/custom-processor.html). Also, there's a similar example on [GitHub](https://github.com/brooth/jeta-samples).
+You can find sample code of such processor on [this page]({{ site.baseurl }}/guide/custom-processor.html). Also, there's a similar example on [GitHub](https://github.com/brooth/jeta-samples).
 
-How `HelloWorldSample_Metacode` is applied to `HelloWorldSample` is explained in the [next article](/guide/at-runtime.html).
+How `HelloWorldSample_Metacode` is applied to `HelloWorldSample` is explained in the [next article]({{ site.baseurl }}/guide/at-runtime.html).
